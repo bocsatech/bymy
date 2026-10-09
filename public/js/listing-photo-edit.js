@@ -1,5 +1,6 @@
 /**
  * Willhaben-szerű képszerkesztő: forgatás + zoom/pan a keretben.
+ * A keret pontosan mutatja, mi fér bele; a kereten kívüli rész elsötétül.
  * Kimenet: JPEG File (a meglévő feltöltő pipeline-hoz).
  */
 
@@ -127,10 +128,16 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
           <button type="button" class="lpe-close" data-lpe-close aria-label="Bezárás">×</button>
         </header>
         <div class="lpe-stage">
-          <div class="lpe-frame" data-lpe-frame>
+          <div class="lpe-viewport" data-lpe-viewport>
             <canvas class="lpe-canvas" data-lpe-canvas></canvas>
+            <div class="lpe-crop" data-lpe-frame aria-hidden="true">
+              <span class="lpe-crop-corner lpe-crop-corner--tl"></span>
+              <span class="lpe-crop-corner lpe-crop-corner--tr"></span>
+              <span class="lpe-crop-corner lpe-crop-corner--bl"></span>
+              <span class="lpe-crop-corner lpe-crop-corner--br"></span>
+            </div>
           </div>
-          <div class="lpe-hint">Csippentsd / görgesd a nagyításhoz · húzd az igazításhoz</div>
+          <div class="lpe-hint">A világos keret = ami befér. Csippentsd / görgesd a nagyításhoz · húzd az igazításhoz</div>
           <div class="lpe-rotates">
             <button type="button" class="lpe-rotate" data-lpe-rot="-90" aria-label="Forgatás balra">↺</button>
             <button type="button" class="lpe-rotate" data-lpe-rot="90" aria-label="Forgatás jobbra">↻</button>
@@ -145,6 +152,7 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
     document.body.appendChild(root);
     document.body.classList.add("lpe-open");
 
+    const viewport = root.querySelector("[data-lpe-viewport]");
     const frame = root.querySelector("[data-lpe-frame]");
     const canvas = root.querySelector("[data-lpe-canvas]");
     const ctx = canvas.getContext("2d");
@@ -161,23 +169,34 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
     let pinchStartDist = 0;
     let pinchStartScale = 1;
 
-    function frameSize() {
-      const rect = frame.getBoundingClientRect();
-      return { fw: Math.max(1, rect.width), fh: Math.max(1, rect.height) };
+    /** Keret mérete és középpontja a viewportban (CSS px). */
+    function cropGeom() {
+      const v = viewport.getBoundingClientRect();
+      const f = frame.getBoundingClientRect();
+      const fw = Math.max(1, f.width);
+      const fh = Math.max(1, f.height);
+      return {
+        vw: Math.max(1, v.width),
+        vh: Math.max(1, v.height),
+        fw,
+        fh,
+        cx: f.left - v.left + fw / 2,
+        cy: f.top - v.top + fh / 2,
+      };
     }
 
     function syncCanvasPixelSize() {
-      const { fw, fh } = frameSize();
+      const { vw, vh } = cropGeom();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(fw * dpr);
-      canvas.height = Math.round(fh * dpr);
-      canvas.style.width = `${fw}px`;
-      canvas.style.height = `${fh}px`;
+      canvas.width = Math.round(vw * dpr);
+      canvas.height = Math.round(vh * dpr);
+      canvas.style.width = `${vw}px`;
+      canvas.style.height = `${vh}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function clampOffset() {
-      const { fw, fh } = frameSize();
+      const { fw, fh } = cropGeom();
       const { w, h } = rotatedSize(srcW, srcH, rotation);
       const dw = w * scale;
       const dh = h * scale;
@@ -188,15 +207,15 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
     }
 
     function paint() {
-      const { fw, fh } = frameSize();
+      const { vw, vh, cx, cy } = cropGeom();
       ctx.save();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const dpr = canvas.width / fw;
+      const dpr = canvas.width / vw;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = "#eef0f3";
-      ctx.fillRect(0, 0, fw, fh);
-      ctx.translate(fw / 2 + tx, fh / 2 + ty);
+      ctx.fillStyle = "#1a1d23";
+      ctx.fillRect(0, 0, vw, vh);
+      ctx.translate(cx + tx, cy + ty);
       ctx.rotate((rotation * Math.PI) / 180);
       ctx.scale(scale, scale);
       ctx.drawImage(loaded.image, -srcW / 2, -srcH / 2, srcW, srcH);
@@ -204,7 +223,7 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
     }
 
     function resetToCover() {
-      const { fw, fh } = frameSize();
+      const { fw, fh } = cropGeom();
       const { w, h } = rotatedSize(srcW, srcH, rotation);
       minScale = coverScale(fw, fh, w, h);
       scale = minScale;
@@ -215,7 +234,7 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
 
     function onResize() {
       syncCanvasPixelSize();
-      const { fw, fh } = frameSize();
+      const { fw, fh } = cropGeom();
       const { w, h } = rotatedSize(srcW, srcH, rotation);
       minScale = coverScale(fw, fh, w, h);
       scale = Math.max(scale, minScale);
@@ -230,8 +249,15 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
       loaded.close?.();
     }
 
-    syncCanvasPixelSize();
-    resetToCover();
+    // Layout után méret — különben a keret 0×0 lehet
+    requestAnimationFrame(() => {
+      syncCanvasPixelSize();
+      resetToCover();
+      requestAnimationFrame(() => {
+        syncCanvasPixelSize();
+        resetToCover();
+      });
+    });
     window.addEventListener("resize", onResize);
 
     root.querySelectorAll("[data-lpe-close]").forEach((btn) => {
@@ -246,7 +272,7 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
       });
     });
 
-    frame.addEventListener(
+    viewport.addEventListener(
       "wheel",
       (event) => {
         event.preventDefault();
@@ -258,8 +284,8 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
       { passive: false }
     );
 
-    frame.addEventListener("pointerdown", (event) => {
-      frame.setPointerCapture(event.pointerId);
+    viewport.addEventListener("pointerdown", (event) => {
+      viewport.setPointerCapture(event.pointerId);
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       if (pointers.size === 1) {
         dragging = true;
@@ -273,7 +299,7 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
       }
     });
 
-    frame.addEventListener("pointermove", (event) => {
+    viewport.addEventListener("pointermove", (event) => {
       if (!pointers.has(event.pointerId)) return;
       pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       if (pointers.size === 2) {
@@ -307,8 +333,8 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
         lastY = only.y;
       }
     };
-    frame.addEventListener("pointerup", endPointer);
-    frame.addEventListener("pointercancel", endPointer);
+    viewport.addEventListener("pointerup", endPointer);
+    viewport.addEventListener("pointercancel", endPointer);
 
     root.querySelector("[data-lpe-done]").addEventListener("click", async () => {
       const doneBtn = root.querySelector("[data-lpe-done]");
@@ -328,7 +354,7 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
         const octx = out.getContext("2d");
         if (!octx) throw new Error("A kép rajzolása sikertelen.");
 
-        const { fw, fh } = frameSize();
+        const { fw, fh } = cropGeom();
         const sx = canvasW / fw;
         const sy = canvasH / fh;
 

@@ -1250,7 +1250,8 @@ initHomeUnifiedScroll();
 async function ensureAllListingsLoadedForMap() {
   if (!searchResultsCommitted && isVehicleSearchPage()) return;
   let guard = 0;
-  while (listingsHasMore && guard < 80) {
+  /* Háttérben tölti a többi oldalt a térképhez — ne legyen 80× soros várakozás. */
+  while (listingsHasMore && guard < 12) {
     guard += 1;
     const before = allItems.length;
     await loadMoreListings({ silent: true });
@@ -1263,7 +1264,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=657935ae2f")
+      mapModulePromise = import("./search-results-map.js?v=42a9ff24be")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1325,6 +1326,18 @@ if (PAGE === "auto" || PAGE === "teherauto") {
     if (mapModulePromise) updateSearchMapButtonLabels(useList);
     else setMapButtonLabelsLocal(useList);
   });
+
+  /* Idle prefetch: térképmodul + Leaflet + településindex — gyorsabb első megnyitás. */
+  const prefetchMap = () => {
+    void ensureMapModule()
+      ?.then((mod) => mod.prefetchSearchMapAssets?.())
+      .catch(() => {});
+  };
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(prefetchMap, { timeout: 4000 });
+  } else {
+    window.setTimeout(prefetchMap, 1800);
+  }
 }
 
 if ("scrollRestoration" in history) {

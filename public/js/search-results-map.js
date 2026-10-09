@@ -37,6 +37,18 @@ const LABEL_FILTERED = "Találatok a térképen";
 /** Böngésző térkép: lakhely körüli sugar (km), csoportosítva. */
 const MAP_BROWSE_RADIUS_KM = 10;
 const MAP_BROWSE_MAX_PAGES = 25;
+/** OSM.org csempék gyakran lassúak / limitáltak — Carto CDN gyorsabb HU-ban is. */
+const MAP_TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+const MAP_TILE_OPTS = {
+  maxZoom: 18,
+  subdomains: "abcd",
+  attribution:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+};
+
+function addMapTiles(L, map) {
+  return L.tileLayer(MAP_TILE_URL, MAP_TILE_OPTS).addTo(map);
+}
 
 let cityIndexPromise = null;
 let postalIndexPromise = null;
@@ -105,7 +117,8 @@ function getPostalIndex() {
 async function fetchAllVerticalListings(vertical) {
   const out = [];
   let offset = 0;
-  for (let pageNo = 0; pageNo < 40; pageNo += 1) {
+  /* Max ~8 oldal — a teljes katalógus szekvenciális letöltése túl lassú a térképhez. */
+  for (let pageNo = 0; pageNo < 8; pageNo += 1) {
     const page = await fetchListingsPage({
       limit: 100,
       offset,
@@ -177,6 +190,13 @@ export function updateSearchMapButtonLabels(hasFilters) {
     btn.textContent = label;
     btn.dataset.mapMode = hasFilters ? "filtered" : "browse";
   });
+}
+
+/** Idle prefetch: Leaflet + településlista (első kattintás gyorsabb). */
+export function prefetchSearchMapAssets() {
+  void loadLeaflet().catch(() => {});
+  void getCityIndex().catch(() => {});
+  void getPostalIndex().catch(() => {});
 }
 
 function loadLeaflet() {
@@ -1124,10 +1144,7 @@ function paintMap(L, pins, side) {
     zoomControl: true,
   }).setView(HU_CENTER, HU_ZOOM);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(mapInstance);
+  addMapTiles(L, mapInstance);
 
   L.Icon.Default.imagePath = "/vendor/leaflet/images/";
   markersLayer = L.layerGroup().addTo(mapInstance);
@@ -1208,10 +1225,7 @@ async function ensureBaseMap(L) {
     scrollWheelZoom: true,
     zoomControl: true,
   }).setView(HU_CENTER, HU_ZOOM);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(mapInstance);
+  addMapTiles(L, mapInstance);
   L.Icon.Default.imagePath = "/vendor/leaflet/images/";
   markersLayer = L.layerGroup().addTo(mapInstance);
   bindMapViewportRefresh();
@@ -1278,8 +1292,14 @@ export async function openSearchResultsMap(
   const homeZoom = preferHomeZoom || mapMode === "browse" ? BROWSE_OPEN_ZOOM : 10;
 
   try {
-    const [L, cityIndex, postalIndex] = await Promise.all([
-      loadLeaflet(),
+    const L = await loadLeaflet();
+    if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
+    /* Üres listánál azonnal rajzoljuk a vásznat — indexek mehetnek párhuzamosan. */
+    if (!list.length) {
+      await ensureBaseMap(L);
+      if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
+    }
+    const [cityIndex, postalIndex] = await Promise.all([
       getCityIndex(),
       getPostalIndex().catch(() => null),
     ]);
@@ -1304,7 +1324,6 @@ export async function openSearchResultsMap(
 
     if (!list.length) {
       setMapStats({ empty: true, homeLabel: homeOrigin?.label || "" });
-      await ensureBaseMap(L);
       if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
       placeHomeMarker(L);
       const focus = browseFocus || homeOrigin;
@@ -1432,14 +1451,19 @@ export async function openBrowseMapOverview({ vertical = null, getVertical = nul
   }
 
   try {
-    const [L, cityIndex, postalIndex, cities] = await Promise.all([
-      loadLeaflet(),
+    /* Először a térképvászon — ne várjunk a ~150–300 KB indexekre / város-API-ra. */
+    const L = await loadLeaflet();
+    await ensureBaseMap(L);
+    if (side) side.innerHTML = `<p class="search-map-modal__hint">Települések betöltése…</p>`;
+
+    const [cityIndex, postalIndex, cities] = await Promise.all([
       getCityIndex(),
       getPostalIndex().catch(() => null),
       fetchMapCityCounts(vert),
     ]);
     homeOrigin = await resolveHomeOrigin(cityIndex, postalIndex).catch(() => null);
     syncCitySearchValue(root);
+    placeHomeMarker(L);
 
     const groups = [];
     let skipped = 0;
@@ -1464,8 +1488,6 @@ export async function openBrowseMapOverview({ vertical = null, getVertical = nul
       homeLabel: homeOrigin?.label || "",
     });
 
-    await ensureBaseMap(L);
-    placeHomeMarker(L);
     if (groups.length) {
       const bounds = groups.map((g) => [g.lat, g.lon]);
       if (homeOrigin) bounds.push([homeOrigin.lat, homeOrigin.lon]);
@@ -1616,13 +1638,7 @@ async function openSearchMapForButton(btn, {
     const fromList = shouldUseListResults({ useListResults, hasActiveFilters, btn });
     if (fromList) {
       btn.textContent = "Térkép betöltése…";
-      if (typeof ensureAllListingsLoaded === "function") {
-        try {
-          await ensureAllListingsLoaded();
-        } catch (error) {
-          console.warn("Térkép lista betöltés:", error);
-        }
-      }
+      /* Először a már betöltött találatok — ne várjunk 80 oldalnyi további fetch-re. */
       let items = await resolveMapItems(getItems);
       if (!items.length) {
         const vertical = typeof getVertical === "function" ? getVertical() : null;
@@ -1633,6 +1649,18 @@ async function openSearchMapForButton(btn, {
         }
       }
       await openSearchResultsMap(items, { mode: "filtered" });
+      if (typeof ensureAllListingsLoaded === "function") {
+        void Promise.resolve()
+          .then(() => ensureAllListingsLoaded())
+          .then(async () => {
+            const more = await resolveMapItems(getItems);
+            if (!more.length) return;
+            const rootEl = document.getElementById("search-map-modal");
+            if (!rootEl || rootEl.hidden) return;
+            await refreshOpenSearchResultsMap(more, { mode: "filtered" });
+          })
+          .catch((error) => console.warn("Térkép lista háttérbetöltés:", error));
+      }
     } else {
       const vertical = typeof getVertical === "function" ? getVertical() : null;
       lastBrowseVertical = vertical || null;

@@ -1277,6 +1277,42 @@ async function handleListingsApi(req, res, pathname) {
     return;
   }
 
+  /** Térkép: település → darabszám (hirdetés nélkül). */
+  if (pathname === "/api/listings/map-cities" && req.method === "GET") {
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const vertical = url.searchParams.get("vertical");
+    try {
+      const { listMapCityCounts } = await import("./lib/listing-map-cities.mjs");
+      const cities = await listMapCityCounts({ vertical, status: "feladott" });
+      sendJson(res, 200, { cities });
+    } catch (error) {
+      console.warn("map-cities:", error?.message || error);
+      sendJson(res, 500, { error: error?.message || "Település-összesítő hiba." });
+    }
+    return;
+  }
+
+  /** Térkép: egy település tile-hirdetései (csak fő adatok). */
+  if (pathname === "/api/listings/map-city" && req.method === "GET") {
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const city = String(url.searchParams.get("city") || "").trim();
+    const vertical = url.searchParams.get("vertical");
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 80), 1), 120);
+    if (!city) {
+      sendJson(res, 400, { error: "Hiányzó település." });
+      return;
+    }
+    try {
+      const { listMapCityListings } = await import("./lib/listing-map-cities.mjs");
+      const listings = await listMapCityListings({ city, vertical, limit, status: "feladott" });
+      sendJson(res, 200, { listings, city });
+    } catch (error) {
+      console.warn("map-city:", error?.message || error);
+      sendJson(res, 500, { error: error?.message || "Település-hirdetések hiba." });
+    }
+    return;
+  }
+
   const mineRequested =
     (pathname === "/api/listings/mine" && req.method === "GET") ||
     (listMatch && req.method === "GET" && new URL(req.url ?? "", `http://${HOST}`).searchParams.get("mine") === "1");

@@ -176,6 +176,21 @@
   border-color: #b8bec8;
 }
 
+.search-map-modal__cities-back {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1565c0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .search-map-modal__head,
 .search-map-modal__title,
 .search-map-modal__stats,

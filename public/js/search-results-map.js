@@ -56,6 +56,10 @@ let moveRefreshBound = false;
 /** Aktív böngésző középpont (lakhely vagy keresett település). */
 let browseFocus = null;
 let lastBrowseVertical = null;
+/** Országos település-összesítők (darabszám) — hirdetés nélkül. */
+let browseCityGroups = [];
+/** Kiválasztott település — csak ekkor töltünk tile-hirdetéseket. */
+let selectedBrowseCity = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -365,11 +369,19 @@ function bindMapPanelNav(root) {
     }
     const cityPick = event.target?.closest?.("[data-search-map-city-pick]");
     if (cityPick) {
+      const city = String(cityPick.getAttribute("data-city") || "").trim();
       const lat = Number(cityPick.getAttribute("data-lat"));
       const lon = Number(cityPick.getAttribute("data-lon"));
-      if (Number.isFinite(lat) && Number.isFinite(lon) && mapInstance) {
-        mapInstance.setView([lat, lon], Math.max(CLUSTER_ZOOM, mapInstance.getZoom() + 2));
+      if (city) {
+        void selectBrowseCity(city, {
+          lat: Number.isFinite(lat) ? lat : null,
+          lon: Number.isFinite(lon) ? lon : null,
+        });
       }
+      return;
+    }
+    if (event.target?.closest?.("[data-search-map-cities-back]")) {
+      void openBrowseMapOverview({ vertical: lastBrowseVertical });
       return;
     }
     const pick = event.target?.closest?.("[data-search-map-pick]");
@@ -675,44 +687,27 @@ function refreshVisibleMarkers() {
   placeHomeMarker(L);
 
   const bounds = mapInstance.getBounds().pad(0.05);
-  const zoom = mapInstance.getZoom();
-  const useClusters = mapMode === "browse" && zoom < CLUSTER_ZOOM;
 
-  if (useClusters) {
-    const groups = groupPinsByCity(lastPins).filter((g) => bounds.contains([g.lat, g.lon]));
+  /* Országos áttekintés: csak település-összesítők (nincs hirdetéspin). */
+  if (mapMode === "browse" && !selectedBrowseCity) {
+    const groups = (browseCityGroups || []).filter((g) => bounds.contains([g.lat, g.lon]));
     for (const group of groups) {
       const marker = L.marker([group.lat, group.lon], {
-        title: `${group.city} · ${group.pins.length} autó`,
-        icon: getCityClusterIcon(L, group.city, group.pins.length),
+        title: `${group.city} · ${group.count} autó`,
+        icon: getCityClusterIcon(L, group.city, group.count),
         zIndexOffset: 200,
       });
-      marker.bindTooltip(`${group.city} · ${group.pins.length} autó`, {
+      marker.bindTooltip(`${group.city} · ${group.count} autó`, {
         direction: "top",
         offset: [0, -8],
       });
       marker.on("click", () => {
-        mapInstance.setView([group.lat, group.lon], Math.max(CLUSTER_ZOOM, zoom + 2));
+        void selectBrowseCity(group.city, { lat: group.lat, lon: group.lon });
       });
       marker.addTo(markersLayer);
     }
     if (side && selectedPinId == null) {
-      const focusLabel = browseFocus?.city || browseFocus?.label || homeOrigin?.label || "";
-      const list = groups
-        .slice()
-        .sort((a, b) => b.pins.length - a.pins.length || a.city.localeCompare(b.city, "hu"))
-        .map(
-          (g) =>
-            `<button type="button" class="search-map-modal__city-row" data-search-map-city-pick data-lat="${g.lat}" data-lon="${g.lon}">
-              <strong>${escapeHtml(g.city)}</strong>
-              <em>${g.pins.length}</em>
-            </button>`
-        )
-        .join("");
-      side.innerHTML = `<div class="search-map-modal__side-pin">
-        ${focusLabel ? `<p class="search-map-modal__route-note">Középpont: ${escapeHtml(focusLabel)} · településenként</p>` : ""}
-        <p class="search-map-modal__hint">Település-csoportok. Kattints egy sorra vagy a térképen a pinre — kibontja az autókat. Más települést a fenti keresővel válthatsz.</p>
-        ${list ? `<div class="search-map-modal__city-list">${list}</div>` : ""}
-      </div>`;
+      renderBrowseCitiesSide(side, groups.length ? groups : browseCityGroups);
     }
     return;
   }
@@ -733,11 +728,45 @@ function refreshVisibleMarkers() {
     });
     marker.addTo(markersLayer);
   }
-  if (side && selectedPinId == null && mapMode === "browse") {
-    side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">Látható autók: ${visiblePins.length}. Kattints egy pinre a részletekhez.</p></div>`;
+  if (side && selectedPinId == null && mapMode === "browse" && selectedBrowseCity) {
+    renderBrowseCityListingsSide(side, lastPins);
   } else if (side && selectedPinId == null && mapMode === "filtered") {
     renderSideAll(side, lastPins);
   }
+}
+
+function renderBrowseCityListingsSide(side, pins) {
+  if (!side) return;
+  const cards = (pins || [])
+    .map((pin) => pickCardHtml(pin, { selected: false, asLink: true }))
+    .join("");
+  side.innerHTML = `<div class="search-map-modal__side-pin">
+    <button type="button" class="search-map-modal__cities-back" data-search-map-cities-back>← Települések</button>
+    <p class="search-map-modal__route-note">${escapeHtml(selectedBrowseCity || "")} · ${pins?.length || 0} autó</p>
+    <p class="search-map-modal__hint">Csak a fő adatok — kattints a kártyára a részletekhez.</p>
+  </div>
+  <div class="search-map-modal__side-scroll">${cards || `<p class="search-map-modal__hint">Nincs hirdetés ezen a településen.</p>`}</div>`;
+}
+
+function renderBrowseCitiesSide(side, groups) {
+  if (!side) return;
+  const list = (groups || [])
+    .slice()
+    .sort((a, b) => (b.count || 0) - (a.count || 0) || String(a.city).localeCompare(String(b.city), "hu"))
+    .map(
+      (g) =>
+        `<button type="button" class="search-map-modal__city-row" data-search-map-city-pick data-city="${escapeHtml(g.city)}" data-lat="${g.lat}" data-lon="${g.lon}">
+          <strong>${escapeHtml(g.city)}</strong>
+          <em>${Number(g.count) || 0}</em>
+        </button>`
+    )
+    .join("");
+  const total = (browseCityGroups || []).reduce((n, g) => n + (Number(g.count) || 0), 0);
+  side.innerHTML = `<div class="search-map-modal__side-pin">
+    <p class="search-map-modal__route-note">${browseCityGroups.length} település · ${total} autó</p>
+    <p class="search-map-modal__hint">Kattints egy összesítőre a térképen vagy a listában — csak akkor töltjük be az adott település hirdetéseit.</p>
+    ${list ? `<div class="search-map-modal__city-list">${list}</div>` : `<p class="search-map-modal__hint">Nincs megjeleníthető település.</p>`}
+  </div>`;
 }
 
 function getCarIcon(L, selected = false) {
@@ -1000,6 +1029,11 @@ function showAllResults() {
   selectedPinId = null;
   clearRoute();
   routeRequestId += 1;
+  if (mapMode === "browse" && selectedBrowseCity) {
+    refreshVisibleMarkers();
+    requestAnimationFrame(() => mapInstance?.invalidateSize());
+    return;
+  }
   refreshVisibleMarkers();
   if (mapMode === "filtered") fitAllPins();
   requestAnimationFrame(() => mapInstance?.invalidateSize());
@@ -1191,6 +1225,9 @@ export function closeSearchResultsMap() {
   clearRoute();
   routeRequestId += 1;
   selectedPinId = null;
+  selectedBrowseCity = null;
+  browseCityGroups = [];
+  lastPins = [];
   mapSideEl = null;
 }
 
@@ -1337,7 +1374,201 @@ function shouldUseListResults({ useListResults, hasActiveFilters, btn } = {}) {
   return typeof hasActiveFilters === "function" ? Boolean(hasActiveFilters()) : false;
 }
 
-/** Település körüli böngészés — csoportosítva, más település kereshető. */
+async function fetchMapCityCounts(vertical) {
+  const params = new URLSearchParams();
+  if (vertical) params.set("vertical", String(vertical));
+  const res = await fetch(`/api/listings/map-cities?${params}`, { credentials: "same-origin" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Település-összesítő hiba.");
+  return Array.isArray(data.cities) ? data.cities : [];
+}
+
+async function fetchMapCityListings(city, vertical) {
+  const params = new URLSearchParams({ city: String(city || "").trim() });
+  if (vertical) params.set("vertical", String(vertical));
+  params.set("limit", "80");
+  const res = await fetch(`/api/listings/map-city?${params}`, { credentials: "same-origin" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Település-hirdetések hiba.");
+  return Array.isArray(data.listings) ? data.listings : [];
+}
+
+/** Országos áttekintés: csak település + darabszám, hirdetés nélkül. */
+export async function openBrowseMapOverview({ vertical = null, getVertical = null } = {}) {
+  const vert =
+    vertical != null
+      ? vertical
+      : typeof getVertical === "function"
+        ? getVertical()
+        : lastBrowseVertical;
+  lastBrowseVertical = vert || null;
+  selectedBrowseCity = null;
+  lastPins = [];
+  selectedPinId = null;
+  browseCityGroups = [];
+  mapMode = "browse";
+  lastPreferHomeZoom = false;
+
+  const root = ensureMapPanel();
+  const side = root.querySelector("[data-search-map-side]");
+  mapSideEl = side;
+  root.hidden = false;
+  document.body.classList.add("search-map-open");
+  document.querySelectorAll("[data-search-map-open]").forEach((btn) => {
+    btn.setAttribute("aria-expanded", "true");
+  });
+  if (side) side.innerHTML = `<p class="search-map-modal__hint">Települések betöltése…</p>`;
+  setMapStats({ empty: true });
+  try {
+    root.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  } catch {
+  }
+
+  try {
+    const [L, cityIndex, postalIndex, cities] = await Promise.all([
+      loadLeaflet(),
+      getCityIndex(),
+      getPostalIndex().catch(() => null),
+      fetchMapCityCounts(vert),
+    ]);
+    homeOrigin = await resolveHomeOrigin(cityIndex, postalIndex).catch(() => null);
+    syncCitySearchValue(root);
+
+    const groups = [];
+    let skipped = 0;
+    for (const row of cities) {
+      const hit = resolveCityCoords(row.city, cityIndex);
+      if (!hit) {
+        skipped += 1;
+        continue;
+      }
+      groups.push({
+        city: hit.city || row.city,
+        count: Number(row.count) || 0,
+        lat: hit.lat,
+        lon: hit.lon,
+      });
+    }
+    browseCityGroups = groups;
+    const total = groups.reduce((n, g) => n + g.count, 0);
+    setMapStats({
+      pins: total,
+      skipped,
+      homeLabel: homeOrigin?.label || "",
+    });
+
+    await ensureBaseMap(L);
+    placeHomeMarker(L);
+    if (groups.length) {
+      const bounds = groups.map((g) => [g.lat, g.lon]);
+      if (homeOrigin) bounds.push([homeOrigin.lat, homeOrigin.lon]);
+      if (bounds.length === 1) mapInstance.setView(bounds[0], BROWSE_OPEN_ZOOM);
+      else mapInstance.fitBounds(bounds, { padding: [36, 36], maxZoom: BROWSE_OPEN_ZOOM });
+    } else if (homeOrigin) {
+      mapInstance.setView([homeOrigin.lat, homeOrigin.lon], BROWSE_OPEN_ZOOM);
+    } else {
+      mapInstance.setView(HU_CENTER, HU_ZOOM);
+    }
+    refreshVisibleMarkers();
+    requestAnimationFrame(() => {
+      mapInstance?.invalidateSize();
+      refreshVisibleMarkers();
+    });
+    return { pins: total, skipped, cities: groups.length };
+  } catch (error) {
+    setMapStats({ error: error?.message || "Térkép betöltési hiba." });
+    if (side) {
+      side.innerHTML = `<p class="search-map-modal__hint">${escapeHtml(error?.message || "Térkép betöltési hiba.")}</p>`;
+    }
+    return { pins: 0, skipped: 0, error: error?.message };
+  }
+}
+
+/** Település kiválasztása → csak ekkor töltünk tile-hirdetéseket. */
+export async function selectBrowseCity(cityName, { lat = null, lon = null } = {}) {
+  const city = String(cityName || "").trim();
+  if (!city) return { pins: 0, skipped: 0 };
+  const root = ensureMapPanel();
+  const side = root.querySelector("[data-search-map-side]");
+  mapSideEl = side;
+  if (side) {
+    side.innerHTML = `<p class="search-map-modal__hint">${escapeHtml(city)} hirdetéseinek betöltése…</p>`;
+  }
+  selectedBrowseCity = city;
+  selectedPinId = null;
+  clearRoute();
+  mapMode = "browse";
+  try {
+    localStorage.setItem(STORAGE_CITY, city);
+  } catch {
+  }
+
+  try {
+    const [L, cityIndex, postalIndex, items] = await Promise.all([
+      loadLeaflet(),
+      getCityIndex(),
+      getPostalIndex().catch(() => null),
+      fetchMapCityListings(city, lastBrowseVertical),
+    ]);
+    if (!homeOrigin) {
+      homeOrigin = await resolveHomeOrigin(cityIndex, postalIndex).catch(() => null);
+    }
+    const hit = resolveCityCoords(city, cityIndex);
+    browseFocus = hit
+      ? { lat: hit.lat, lon: hit.lon, city: hit.city, label: hit.city, postal: "" }
+      : lat != null && lon != null
+        ? { lat, lon, city, label: city, postal: "" }
+        : browseFocus;
+
+    const input = root.querySelector("[data-search-map-city]");
+    if (input) input.value = hit?.city || city;
+
+    if (!items.length) {
+      lastPins = [];
+      setMapStats({ empty: true, homeLabel: homeOrigin?.label || "" });
+      if (!mapInstance) await ensureBaseMap(L);
+      markersLayer?.clearLayers();
+      placeHomeMarker(L);
+      if (browseFocus) mapInstance?.setView([browseFocus.lat, browseFocus.lon], CLUSTER_ZOOM);
+      if (side) {
+        side.innerHTML = `<div class="search-map-modal__side-pin">
+          <button type="button" class="search-map-modal__cities-back" data-search-map-cities-back>← Települések</button>
+          <p class="search-map-modal__hint">Nincs autó ${escapeHtml(city)} településen.</p>
+        </div>`;
+      }
+      return { pins: 0, skipped: 0 };
+    }
+
+    const { pins, skipped } = placeListings(items, cityIndex, postalIndex);
+    lastPins = pins;
+    lastLeaflet = L;
+    setMapStats({ pins: pins.length, skipped, homeLabel: homeOrigin?.label || "" });
+    if (!mapInstance) await ensureBaseMap(L);
+    markersLayer?.clearLayers();
+    placeHomeMarker(L);
+    if (browseFocus) mapInstance?.setView([browseFocus.lat, browseFocus.lon], CLUSTER_ZOOM);
+    else if (pins.length) {
+      const bounds = pins.map((p) => [p.lat, p.lon]);
+      mapInstance?.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+    }
+    refreshVisibleMarkers();
+    requestAnimationFrame(() => {
+      mapInstance?.invalidateSize();
+      refreshVisibleMarkers();
+    });
+    return { pins: pins.length, skipped };
+  } catch (error) {
+    if (side) {
+      side.innerHTML = `<div class="search-map-modal__side-pin">
+        <button type="button" class="search-map-modal__cities-back" data-search-map-cities-back>← Települések</button>
+        <p class="search-map-modal__hint">${escapeHtml(error?.message || "Betöltési hiba.")}</p>
+      </div>`;
+    }
+    return { pins: 0, skipped: 0, error: error?.message };
+  }
+}
+
+/** Településkereső: kiválasztja a helységet és betölti a tile-hirdetéseket. */
 export async function openBrowseMapAroundCity(cityName, { vertical = null, getVertical = null } = {}) {
   const city = String(cityName || "").trim();
   if (!city) return { pins: 0, skipped: 0 };
@@ -1348,53 +1579,10 @@ export async function openBrowseMapAroundCity(cityName, { vertical = null, getVe
         ? getVertical()
         : lastBrowseVertical;
   lastBrowseVertical = vert || null;
-  const radiusKm = MAP_BROWSE_RADIUS_KM;
-  const cityIndex = await getCityIndex();
-  const hit = resolveCityCoords(city, cityIndex);
-  if (!hit) {
-    return openSearchResultsMap([], {
-      mode: "browse",
-      preferHomeZoom: true,
-      emptyHint: `Ismeretlen település: ${city}. Próbálj másik nevet.`,
-      radiusKm,
-      focusCity: null,
-    });
+  if (!browseCityGroups.length) {
+    await openBrowseMapOverview({ vertical: vert });
   }
-  const focus = {
-    lat: hit.lat,
-    lon: hit.lon,
-    city: hit.city,
-    label: hit.city,
-    postal: "",
-  };
-  try {
-    localStorage.setItem(STORAGE_CITY, hit.city);
-  } catch {
-  }
-  const nearby = await fetchVerticalListingsInRadius(vert, {
-    city: hit.city,
-    postal: "",
-    radiusKm,
-  });
-  if (nearby.error) {
-    return openSearchResultsMap([], {
-      mode: "browse",
-      preferHomeZoom: true,
-      emptyHint: nearby.error,
-      radiusKm,
-      focusCity: focus,
-    });
-  }
-  const items = nearby.items || [];
-  return openSearchResultsMap(items, {
-    mode: "browse",
-    preferHomeZoom: true,
-    radiusKm,
-    focusCity: focus,
-    emptyHint: items.length
-      ? ""
-      : `Nincs autó ${radiusKm} km-es körzetben (${hit.city}). Keress másik települést.`,
-  });
+  return selectBrowseCity(city);
 }
 
 async function openSearchMapForButton(btn, {
@@ -1419,7 +1607,6 @@ async function openSearchMapForButton(btn, {
   try {
     syncLabel();
     const fromList = shouldUseListResults({ useListResults, hasActiveFilters, btn });
-    let items;
     if (fromList) {
       btn.textContent = "Térkép betöltése…";
       if (typeof ensureAllListingsLoaded === "function") {
@@ -1429,7 +1616,7 @@ async function openSearchMapForButton(btn, {
           console.warn("Térkép lista betöltés:", error);
         }
       }
-      items = await resolveMapItems(getItems);
+      let items = await resolveMapItems(getItems);
       if (!items.length) {
         const vertical = typeof getVertical === "function" ? getVertical() : null;
         try {
@@ -1443,35 +1630,7 @@ async function openSearchMapForButton(btn, {
       const vertical = typeof getVertical === "function" ? getVertical() : null;
       lastBrowseVertical = vertical || null;
       btn.textContent = "Térkép betöltése…";
-      const [cityIndex] = await Promise.all([getCityIndex()]);
-      const home = await resolveHomeOrigin(cityIndex, null);
-      const radiusKm = MAP_BROWSE_RADIUS_KM;
-      if (!home?.city) {
-        // Nincs település: ne üres térkép — mutasd a listát / összes autót.
-        items = await resolveMapItems(getItems);
-        if (!items.length) {
-          try {
-            items = await fetchAllVerticalListings(vertical);
-          } catch (error) {
-            console.warn("Térkép API lista:", error);
-          }
-        }
-        if (items.length) {
-          await openSearchResultsMap(items, { mode: "filtered" });
-        } else {
-          await openSearchResultsMap([], {
-            mode: "browse",
-            emptyHint:
-              "Nincs lakhely a profilban. Írd be a települést fent, vagy állíts be címet a Beállításokban.",
-            radiusKm,
-          });
-        }
-      } else {
-        await openBrowseMapAroundCity(home.city || home.label, {
-          vertical,
-          getVertical,
-        });
-      }
+      await openBrowseMapOverview({ vertical, getVertical });
     }
     syncLabel();
   } finally {

@@ -15,15 +15,15 @@
   z-index: 1;
   width: 100%;
   max-height: none;
-  height: min(58vh, 620px);
-  min-height: 360px;
+  height: auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background: transparent;
   border: 0 !important;
   border-radius: 0;
   outline: none;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: none !important;
 }
 
@@ -135,8 +135,8 @@
   flex-direction: column;
   gap: 4px;
   margin-top: 8px;
-  max-height: 220px;
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .search-map-modal__city-row {
@@ -203,13 +203,19 @@
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.85fr);
-  height: 100%;
+  /* Térkép felül, településlista / találatok alatta. */
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(260px, 46vh) auto;
+  height: auto;
+  gap: 0.65rem;
 }
 
 .search-map-modal__canvas {
-  min-height: 220px;
+  min-height: 260px;
   height: 100%;
+  min-width: 0;
+  border-radius: 12px;
+  overflow: hidden;
   background: #e8eef5;
 }
 
@@ -224,16 +230,17 @@
 
 .search-map-modal__side-pin {
   flex: 0 0 auto;
-  padding: 0.75rem 0.85rem 0.5rem;
+  padding: 0.35rem 0 0.5rem;
   border: 0;
   border-bottom: 0;
 }
 
 .search-map-modal__side-scroll {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
-  overflow: auto;
-  padding: 0.65rem 0.85rem 0.9rem;
+  max-height: none;
+  overflow: visible;
+  padding: 0.65rem 0 0.9rem;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -562,15 +569,9 @@ body.search-map-open {
 }
 
 @media (max-width: 820px) {
-  .search-map-inline .search-map-modal__panel {
-    height: auto;
-    min-height: 0;
-    max-height: none;
-  }
-
   .search-map-modal__body {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(240px, 42vh) minmax(180px, 38vh);
+    grid-template-rows: minmax(220px, 40vh) auto;
+    gap: 0.5rem;
   }
 
   .search-map-modal__side {
@@ -578,6 +579,6 @@ body.search-map-open {
   }
 
   .search-map-modal__canvas {
-    min-height: 240px;
+    min-height: 220px;
   }
 }

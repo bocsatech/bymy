@@ -73,7 +73,7 @@ struct LoginScreen: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 labeledField("Email vagy felhasználónév", text: $email, placeholder: "pelda@email.hu", secure: false)
-                labeledField("Jelszó", text: $password, placeholder: "", secure: true)
+                labeledField(mode == .register ? "Jelszó (8–12 karakter)" : "Jelszó", text: $password, placeholder: "", secure: true)
                 if mode == .register {
                     labeledField("Jelszó újra", text: $passwordConfirm, placeholder: "", secure: true)
                 }
@@ -201,6 +201,10 @@ struct LoginScreen: View {
                     password: password
                 )
             } else {
+                if password.count < 8 || password.count > 12 {
+                    errorText = "A jelszó 8–12 karakter legyen."
+                    return
+                }
                 result = try await AuthAPI.register(
                     email: email.trimmingCharacters(in: .whitespacesAndNewlines),
                     password: password,

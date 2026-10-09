@@ -816,7 +816,7 @@
         <section class="mm-panel" data-mm-panel="jelszo" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Jelszó módosítása</h2>
-            <p class="mm-panel-lead">Új jelszó beállítása a fiókodhoz.</p>
+            <p class="mm-panel-lead">Új jelszó beállítása a fiókodhoz (8–12 karakter).</p>
           </header>
           <form id="settings-password-form" class="settings-form">
             <label class="login-field">
@@ -824,12 +824,12 @@
               <input type="password" name="current_password" autocomplete="current-password" placeholder="Jelenlegi jelszó" required />
             </label>
             <label class="login-field">
-              <span class="login-label">Új jelszó</span>
-              <input type="password" name="new_password" autocomplete="new-password" placeholder="Új jelszó" required minlength="12" />
+              <span class="login-label">Új jelszó (8–12 karakter)</span>
+              <input type="password" name="new_password" autocomplete="new-password" placeholder="Új jelszó" required minlength="8" maxlength="12" />
             </label>
             <label class="login-field">
               <span class="login-label">Új jelszó mégegyszer</span>
-              <input type="password" name="new_password_confirm" autocomplete="new-password" placeholder="Új jelszó mégegyszer" required minlength="12" />
+              <input type="password" name="new_password_confirm" autocomplete="new-password" placeholder="Új jelszó mégegyszer" required minlength="8" maxlength="12" />
             </label>
             <p id="settings-password-flash" class="settings-flash" role="status" hidden></p>
             <button type="submit" class="settings-btn-primary">Jelszó mentése</button>
@@ -894,7 +894,7 @@
     </script>
     <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
     <script src="/js/ha-import-app.js?v=31d5662628" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=8316c13763" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=0c9c229976" type="module"></script>
     <script>
       
       setTimeout(function () {

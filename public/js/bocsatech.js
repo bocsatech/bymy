@@ -2645,11 +2645,11 @@ function usersView(kind = "private") {
   const createForm = `
     <form class="users-create" data-act="createUser">
       <h3 class="users-create__title">Új ${emptyLabel} fiók (teszt)</h3>
-      <p class="users-create__hint">Azonnal aktív. Ha csak nevet adsz (pl. <code>teszt01</code>), email: <code>teszt01@test.bymy.hu</code>. Jelszó min. 12 karakter. Település megadásával feladott teszt-hirdetés is készül (térkép).</p>
+      <p class="users-create__hint">Azonnal aktív. Ha csak nevet adsz (pl. <code>teszt01</code>), email: <code>teszt01@test.bymy.hu</code>. Jelszó 8–12 karakter. Település megadásával feladott teszt-hirdetés is készül (térkép).</p>
       <div class="users-create__grid">
         <label>Felhasználónév / email<input name="email" required placeholder="teszt01 vagy teszt01@test.bymy.hu" autocomplete="off" /></label>
         <label>Megjelenített név<input name="displayName" placeholder="Teszt Elek" maxlength="40" /></label>
-        <label>Jelszó (min. 12)<input name="password" type="password" required minlength="12" placeholder="tesztjelszo12" autocomplete="new-password" /></label>
+        <label>Jelszó (8–12)<input name="password" type="password" required minlength="8" maxlength="12" placeholder="tesztjelszo" autocomplete="new-password" /></label>
         <label>Hirdetés címe<input name="listingTitle" placeholder="BMW 320d teszt" /></label>
         <label>Település (térkép)<input name="listingTelepules" placeholder="Budapest" /></label>
         <label>Gyártmány<input name="listingGyartmany" placeholder="BMW" /></label>

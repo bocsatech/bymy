@@ -72,12 +72,12 @@
             <input type="email" name="email" autocomplete="username" required placeholder="pelda@email.hu" />
           </label>
           <label class="login-field">
-            <span class="login-label">Jelszó</span>
-            <input type="password" name="password" autocomplete="new-password" required minlength="12" />
+            <span class="login-label">Jelszó (8–12 karakter)</span>
+            <input type="password" name="password" autocomplete="new-password" required minlength="8" maxlength="12" />
           </label>
           <label class="login-field">
             <span class="login-label">Jelszó megerősítése</span>
-            <input type="password" name="password_confirm" autocomplete="new-password" required minlength="12" />
+            <input type="password" name="password_confirm" autocomplete="new-password" required minlength="8" maxlength="12" />
           </label>
           <div class="auth-security-box" id="auth-security-box" hidden>
             <div id="auth-turnstile" class="auth-turnstile"></div>

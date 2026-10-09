@@ -26,17 +26,17 @@
       <section class="auth-gate-card login-card" aria-labelledby="reset-title">
         <img class="auth-gate-logo" src="/images/bymy-logo.png?v=08e46e9d97" alt="Bymy.hu" width="160" height="40" decoding="async" />
         <h1 class="auth-gate-title login-title" id="reset-title">Új jelszó</h1>
-        <p class="auth-gate-lead login-lead">Adj meg egy új jelszót (legalább 12 karakter).</p>
+        <p class="auth-gate-lead login-lead">Adj meg egy új jelszót (8–12 karakter).</p>
         <p id="reset-status" class="login-lead" role="status" hidden></p>
         <p id="reset-error" class="login-error" role="alert" hidden></p>
         <form id="reset-form" class="login-form">
           <label class="login-field">
-            <span class="login-label">Új jelszó</span>
-            <input type="password" name="password" autocomplete="new-password" required minlength="12" />
+            <span class="login-label">Új jelszó (8–12 karakter)</span>
+            <input type="password" name="password" autocomplete="new-password" required minlength="8" maxlength="12" />
           </label>
           <label class="login-field">
             <span class="login-label">Új jelszó még egyszer</span>
-            <input type="password" name="password_confirm" autocomplete="new-password" required minlength="12" />
+            <input type="password" name="password_confirm" autocomplete="new-password" required minlength="8" maxlength="12" />
           </label>
           <button type="submit" class="site-header-btn site-header-btn--primary login-submit">Jelszó mentése</button>
         </form>

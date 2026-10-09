@@ -1720,6 +1720,10 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
     border-bottom: 1px solid #e4e7ec;
   }
 
+  body.home-page.search-map-open:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar {
+    display: none !important;
+  }
+
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar {
     border-bottom-color: #2a313c;
   }

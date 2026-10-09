@@ -202,18 +202,19 @@
 .search-map-modal__body {
   flex: 1 1 auto;
   min-height: 0;
-  display: grid;
-  /* Térkép felül, településlista / találatok alatta. */
-  grid-template-columns: 1fr;
-  grid-template-rows: minmax(260px, 46vh) auto;
-  height: auto;
+  display: grid !important;
+  /* Minden kijelző: térkép felül, településlista / találatok alatta. */
+  grid-template-columns: 1fr !important;
+  grid-template-rows: minmax(240px, 42vh) auto !important;
+  height: auto !important;
   gap: 0.65rem;
 }
 
 .search-map-modal__canvas {
-  min-height: 260px;
+  min-height: 240px;
   height: 100%;
   min-width: 0;
+  width: 100%;
   border-radius: 12px;
   overflow: hidden;
   background: #e8eef5;
@@ -564,11 +565,15 @@ body.search-map-open {
   /* Inline map sits in the listings panel; keep normal page/app scroll. */
 }
 
-/* Térképnézet: találatszám / rendezés / nézetváltó és a Település kereső felesleges. */
-body.search-map-open .auto-desk-results-bar {
+/* Térképnézet: találatszám / rendezés / nézetváltó és a Település kereső — minden breakpoint. */
+body.search-map-open .auto-desk-results-bar,
+body.home-page.search-map-open:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar,
+body.home-page.search-map-open:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main .auto-desk-results-bar {
   display: none !important;
 }
 
+.search-map-modal__toolbar,
+.search-map-inline .search-map-modal__toolbar,
 body.search-map-open .search-map-modal__toolbar {
   display: none !important;
 }
@@ -579,7 +584,8 @@ body.search-map-open .search-map-modal__toolbar {
 
 @media (max-width: 820px) {
   .search-map-modal__body {
-    grid-template-rows: minmax(220px, 40vh) auto;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(200px, 38vh) auto !important;
     gap: 0.5rem;
   }
 
@@ -588,6 +594,28 @@ body.search-map-open .search-map-modal__toolbar {
   }
 
   .search-map-modal__canvas {
-    min-height: 220px;
+    min-height: 200px;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1199px) {
+  .search-map-modal__body {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(300px, 48vh) auto !important;
+  }
+
+  .search-map-modal__canvas {
+    min-height: 300px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .search-map-modal__body {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(360px, 52vh) auto !important;
+  }
+
+  .search-map-modal__canvas {
+    min-height: 360px;
   }
 }

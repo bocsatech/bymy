@@ -349,11 +349,9 @@ function mapPanelMarkup() {
         </label>
         <button type="button" class="search-map-city__go" data-search-map-city-go>Keresés</button>
       </div>
-      <div class="search-map-modal__body">
+      <div class="search-map-modal__body search-map-modal__body--map-only">
         <div id="search-map-canvas" class="search-map-modal__canvas" aria-label="Térkép"></div>
-        <aside class="search-map-modal__side" data-search-map-side>
-          <p class="search-map-modal__hint">Településenként csoportosítva — kattints egy településre.</p>
-        </aside>
+        <aside class="search-map-modal__side" data-search-map-side hidden></aside>
       </div>
     </div>
   `;
@@ -735,38 +733,32 @@ function refreshVisibleMarkers() {
   }
 }
 
+function setMapSideVisible(side, visible) {
+  if (!side) return;
+  side.hidden = !visible;
+  const body = side.closest(".search-map-modal__body");
+  body?.classList.toggle("search-map-modal__body--map-only", !visible);
+}
+
 function renderBrowseCityListingsSide(side, pins) {
   if (!side) return;
+  setMapSideVisible(side, true);
   const cards = (pins || [])
     .map((pin) => pickCardHtml(pin, { selected: false, asLink: true }))
     .join("");
   side.innerHTML = `<div class="search-map-modal__side-pin">
-    <button type="button" class="search-map-modal__cities-back" data-search-map-cities-back>← Települések</button>
+    <button type="button" class="search-map-modal__cities-back" data-search-map-cities-back>← Térkép</button>
     <p class="search-map-modal__route-note">${escapeHtml(selectedBrowseCity || "")} · ${pins?.length || 0} autó</p>
     <p class="search-map-modal__hint">Csak a fő adatok — kattints a kártyára a részletekhez.</p>
   </div>
   <div class="search-map-modal__side-scroll">${cards || `<p class="search-map-modal__hint">Nincs hirdetés ezen a településen.</p>`}</div>`;
 }
 
-function renderBrowseCitiesSide(side, groups) {
+function renderBrowseCitiesSide(side, _groups) {
   if (!side) return;
-  const list = (groups || [])
-    .slice()
-    .sort((a, b) => (b.count || 0) - (a.count || 0) || String(a.city).localeCompare(String(b.city), "hu"))
-    .map(
-      (g) =>
-        `<button type="button" class="search-map-modal__city-row" data-search-map-city-pick data-city="${escapeHtml(g.city)}" data-lat="${g.lat}" data-lon="${g.lon}">
-          <strong>${escapeHtml(g.city)}</strong>
-          <em>${Number(g.count) || 0}</em>
-        </button>`
-    )
-    .join("");
-  const total = (browseCityGroups || []).reduce((n, g) => n + (Number(g.count) || 0), 0);
-  side.innerHTML = `<div class="search-map-modal__side-pin">
-    <p class="search-map-modal__route-note">${browseCityGroups.length} település · ${total} autó</p>
-    <p class="search-map-modal__hint">Kattints egy összesítőre a térképen vagy a listában — csak akkor töltjük be az adott település hirdetéseit.</p>
-    ${list ? `<div class="search-map-modal__city-list">${list}</div>` : `<p class="search-map-modal__hint">Nincs megjeleníthető település.</p>`}
-  </div>`;
+  /* Településlista (asztali + mobil) nem kell — csak a térképen kattintható összesítők. */
+  side.innerHTML = "";
+  setMapSideVisible(side, false);
 }
 
 function getCarIcon(L, selected = false) {
@@ -919,6 +911,7 @@ function googleDirectionsUrl(from, to, toLabel) {
 
 function renderSideAll(side, pins) {
   if (!side) return;
+  setMapSideVisible(side, true);
   const homeHint = homeOrigin
     ? `${escapeHtml(homeOrigin.label)} → kattints egy autóra a térképen`
     : `Állíts be települést a <a href="/beallitasok.html">Beállítások</a>ban.`;
@@ -1006,6 +999,7 @@ function renderSideListing(side, pin, routeInfo = null) {
     return;
   }
 
+  setMapSideVisible(side, true);
   side.innerHTML = `
     <div class="search-map-modal__side-pin">
       <button type="button" class="search-map-modal__back" data-search-map-back>‹ Kiválasztás törlése</button>

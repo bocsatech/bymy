@@ -1264,7 +1264,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=68700eb6aa")
+      mapModulePromise = import("./search-results-map.js?v=12c16311c4")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

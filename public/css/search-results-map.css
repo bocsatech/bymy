@@ -203,11 +203,27 @@
   flex: 1 1 auto;
   min-height: 0;
   display: grid !important;
-  /* Minden kijelző: térkép felül, településlista / találatok alatta. */
+  /* Minden kijelző: térkép felül, találatok (ha vannak) alatta. */
   grid-template-columns: 1fr !important;
   grid-template-rows: minmax(240px, 42vh) auto !important;
   height: auto !important;
   gap: 0.65rem;
+}
+
+/* Településlista nélkül: csak a térkép (asztali + mobil). */
+.search-map-modal__body--map-only {
+  grid-template-rows: minmax(280px, 62vh) !important;
+  gap: 0;
+}
+
+.search-map-modal__body--map-only .search-map-modal__side,
+.search-map-modal__side[hidden] {
+  display: none !important;
+}
+
+.search-map-modal__city-list,
+.search-map-modal__city-row {
+  display: none !important;
 }
 
 .search-map-modal__canvas {
@@ -589,6 +605,10 @@ body.search-map-open .search-map-modal__toolbar {
     gap: 0.5rem;
   }
 
+  .search-map-modal__body--map-only {
+    grid-template-rows: minmax(260px, 58vh) !important;
+  }
+
   .search-map-modal__side {
     border: 0;
   }
@@ -604,6 +624,10 @@ body.search-map-open .search-map-modal__toolbar {
     grid-template-rows: minmax(300px, 48vh) auto !important;
   }
 
+  .search-map-modal__body--map-only {
+    grid-template-rows: minmax(360px, 64vh) !important;
+  }
+
   .search-map-modal__canvas {
     min-height: 300px;
   }
@@ -613,6 +637,10 @@ body.search-map-open .search-map-modal__toolbar {
   .search-map-modal__body {
     grid-template-columns: 1fr !important;
     grid-template-rows: minmax(360px, 52vh) auto !important;
+  }
+
+  .search-map-modal__body--map-only {
+    grid-template-rows: minmax(420px, 68vh) !important;
   }
 
   .search-map-modal__canvas {

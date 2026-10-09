@@ -348,10 +348,21 @@ async function reload() {
     const c = counts();
     const rows = sorted(filtered());
     const selectedCount = selectedIds.size;
+    const profileListingId = items.find((row) => Number(row?.id) > 0)?.id;
+    const profileHref = profileListingId
+      ? `/auto.html?hirdeto=${encodeURIComponent(String(profileListingId))}`
+      : "";
     root.innerHTML = `
       <div class="myads-shell">
         <div class="myads-topbar">
-          <h2 class="myads-page-title">Saját hirdetések</h2>
+          <div class="myads-title-row">
+            <h2 class="myads-page-title">Saját hirdetések</h2>
+            ${
+              profileHref
+                ? `<a class="myads-new-btn myads-profile-btn" href="${escapeHtml(profileHref)}">profil oldal</a>`
+                : `<span class="myads-new-btn myads-profile-btn is-disabled" aria-disabled="true" title="Ehhez legalább egy hirdetés kell">profil oldal</span>`
+            }
+          </div>
           <div class="myads-topbar-actions">
             <button type="button" class="myads-bulk-delete" data-bulk-delete ${selectedCount ? "" : "disabled"}>
               ${ICON_TRASH}<span>Kijelöltek törlése${selectedCount ? ` (${selectedCount})` : ""}</span>

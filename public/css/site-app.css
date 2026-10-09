@@ -4532,6 +4532,14 @@ body.site-app .myads-card.is-selected {
   box-shadow: 0 0 0 1px #111 inset, 0 2px 10px rgba(15, 23, 42, 0.06);
 }
 
+body.site-app .myads-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+  min-width: 0;
+}
+
 body.site-app .myads-page-title {
   margin: 0;
   font-size: 1.45rem;
@@ -4557,6 +4565,13 @@ body.site-app .myads-new-btn {
 
 body.site-app .myads-new-btn:hover {
   background: #e6b422;
+}
+
+body.site-app .myads-profile-btn.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 body.site-app .myads-new-caret {

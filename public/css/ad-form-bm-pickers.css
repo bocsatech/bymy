@@ -491,6 +491,19 @@ body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsl
   overflow: visible !important;
 }
 
+/* Remount után üres év/hó héjak: Chrome tartja a min-height-et → nagy fehér rés az Alapadatokban */
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field > .inline-2:empty,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .md-outlined > .inline-2:empty,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item > .inline-2:empty {
+  display: none !important;
+  min-height: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+}
+
 body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field .auto-bm-trigger {
   appearance: none;
   display: flex;

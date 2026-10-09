@@ -2252,6 +2252,7 @@ function unmountAdSplitYmDrums(form) {
     }
     block.replaceWith(inline);
     field?.classList.remove("ad-form-bm-anchor");
+    field?.querySelectorAll(":scope > .inline-2:empty").forEach((el) => el.remove());
   });
 }
 
@@ -3016,9 +3017,20 @@ async function mountAdSplitYmDrum({
   stashNativeSelect(honap, block);
   field.classList.add("ad-form-bm-anchor");
 
-  const inline = field.querySelector(".inline-2");
-  if (inline) inline.replaceWith(block);
-  else field.appendChild(block);
+  /* Remount után üres .inline-2 héjak maradhatnak (Chrome: min-height 44px → „elcsúszás”). */
+  const leftoverInlines = [...field.querySelectorAll(":scope > .inline-2")];
+  const inlineWithSelects = leftoverInlines.find((el) => el.querySelector("select, input"));
+  if (inlineWithSelects) {
+    inlineWithSelects.replaceWith(block);
+  } else {
+    field.appendChild(block);
+  }
+  leftoverInlines.forEach((el) => {
+    if (el.isConnected && el !== block && !el.querySelector("select, input, button")) {
+      el.remove();
+    }
+  });
+  field.querySelectorAll(":scope > .inline-2:empty").forEach((el) => el.remove());
 
   ev.dataset.adSplitYm = "1";
   honap.dataset.adSplitYm = "1";

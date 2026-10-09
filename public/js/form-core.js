@@ -26,7 +26,7 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=1a522e09d6";
 import { openListingPhotoEditor } from "./listing-photo-edit.js?v=985755542f";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=5decf174bd";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=4b95bfb0e8";
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=1c11003682";
 import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=dc720507fb";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=30e4feeab0";

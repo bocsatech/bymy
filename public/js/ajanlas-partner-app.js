@@ -123,9 +123,8 @@ function servicesFromAccount(profile) {
   return [...new Set(out)];
 }
 
-function ajanlasIslandHtml(serviceIds, { canEdit = false } = {}) {
-  const ids = (Array.isArray(serviceIds) ? serviceIds : []).map(String).filter(Boolean);
-  const tiles = ids
+function ajanlasTilesHtml(ids) {
+  return ids
     .map((id) => {
       const cat = categoryMeta(id);
       if (!cat) return "";
@@ -138,13 +137,21 @@ function ajanlasIslandHtml(serviceIds, { canEdit = false } = {}) {
     })
     .filter(Boolean)
     .join("");
+}
 
-  if (!tiles && !canEdit) return "";
-
+function ajanlasVerticalIslandHtml({
+  vertical,
+  title,
+  ids,
+  canEdit = false,
+  showEmpty = false,
+}) {
+  const tiles = ajanlasTilesHtml(ids);
+  if (!tiles && !showEmpty) return "";
   return `
-    <section class="ap-band ap-band--ajanlas" id="ap-ajanlasok">
+    <section class="ap-band ap-band--ajanlas" id="ap-ajanlasok-${esc(vertical)}">
       <div class="ap-band-head">
-        <h2>Kiválasztott ajánlások ${ids.length ? `<span class="ap-count">${ids.length}</span>` : ""}</h2>
+        <h2>${esc(title)} ${ids.length ? `<span class="ap-count">${ids.length}</span>` : ""}</h2>
         ${
           canEdit
             ? `<a class="ap-all" href="/beallitasok.html?szekcio=partner-profil">Szerkesztés</a>`
@@ -154,10 +161,41 @@ function ajanlasIslandHtml(serviceIds, { canEdit = false } = {}) {
       ${
         tiles
           ? `<div class="ap-ajanlas-rail">${tiles}</div>`
-          : `<p class="ap-empty">Még nincs kiválasztott ajánlás. A Beállításokban kapcsold be a céges ajánlásokat.</p>`
+          : `<p class="ap-empty">Még nincs kiválasztott ${esc(title.toLowerCase())}. A Beállításokban kapcsold be.</p>`
       }
     </section>
   `;
+}
+
+function ajanlasIslandHtml(serviceIds, { canEdit = false } = {}) {
+  const ids = (Array.isArray(serviceIds) ? serviceIds : []).map(String).filter(Boolean);
+  const autoIds = [];
+  const immoIds = [];
+  for (const id of ids) {
+    const cat = categoryMeta(id);
+    if (!cat) continue;
+    if (cat.vertical === "ingatlan") immoIds.push(id);
+    else autoIds.push(id);
+  }
+
+  const showEmptyOwner = canEdit && !autoIds.length && !immoIds.length;
+  const autoHtml = ajanlasVerticalIslandHtml({
+    vertical: "auto",
+    title: "Autó ajánlások",
+    ids: autoIds,
+    canEdit,
+    showEmpty: showEmptyOwner,
+  });
+  const immoHtml = ajanlasVerticalIslandHtml({
+    vertical: "ingatlan",
+    title: "Ingatlan ajánlások",
+    ids: immoIds,
+    canEdit,
+    showEmpty: showEmptyOwner,
+  });
+
+  if (!autoHtml && !immoHtml) return "";
+  return `${autoHtml}${immoHtml}`;
 }
 
 function initial(name) {

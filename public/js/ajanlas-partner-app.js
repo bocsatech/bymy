@@ -162,6 +162,7 @@ function renderProfile(root, partner, opts = {}) {
   } = opts;
   const name = partner.name || partner.display_name || "Partner";
   const phone = String(partner.phone || "").trim();
+  const email = String(partner.email || "").trim();
   const call = telHref(phone);
   const placeForMaps = formatPlaceMeta(partner) || String(partner.service_areas || partner.address || "").trim();
   const maps =

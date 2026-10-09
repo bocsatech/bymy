@@ -417,6 +417,20 @@ body.partner-manage-page.mm-page {
   justify-self: start;
 }
 
+.partner-media-preview.is-logo {
+  width: 112px;
+  height: 112px;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  justify-self: start;
+}
+
+/* Ugyanaz az arány, mint a publikus profil hero borítója (~15:4) */
+.partner-media-preview.is-cover {
+  aspect-ratio: 15 / 4;
+  border-radius: 12px;
+}
+
 .partner-media-preview img {
   width: 100%;
   height: 100%;

@@ -12,7 +12,7 @@ import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36
 import { categoriesForVertical } from "./partner-categories-data.js?v=b826a00c74";
 import { fetchMyListings } from "./db-client.js?v=6c1aeac308";
 import { uploadImage } from "./upload-image.js?v=3b023aae7a";
-import { openListingPhotoEditor } from "./listing-photo-edit.js?v=6d19665b36";
+import { openListingPhotoEditor } from "./listing-photo-edit.js?v=2820caff5d";
 
 const pageRoot = () => document.getElementById("partner-root");
 
@@ -208,12 +208,28 @@ function readCompanyAjanlasPayload(form, ajanlasState) {
   };
 }
 
+/** Profil hero borító ≈ 980×250 → ~3.75; logo/avatar 1:1. */
+const PARTNER_MEDIA_ASPECT = {
+  logoUrl: 1,
+  companyLogoUrl: 1,
+  coverUrl: 15 / 4,
+};
+
 function mediaFieldHtml({ name, label, value, round = false }) {
   const url = String(value || "").trim();
+  const aspect = PARTNER_MEDIA_ASPECT[name] ?? 4 / 3;
+  const previewClass = [
+    "partner-media-preview",
+    round ? "is-round" : "",
+    name === "coverUrl" ? "is-cover" : "",
+    name === "companyLogoUrl" ? "is-logo" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   return `
-    <div class="partner-media-field" data-partner-media-field>
+    <div class="partner-media-field" data-partner-media-field data-partner-media-aspect="${esc(String(aspect))}">
       <span class="partner-media-label">${esc(label)}</span>
-      <div class="partner-media-preview${round ? " is-round" : ""}" data-partner-media-preview>
+      <div class="${previewClass}" data-partner-media-preview>
         ${
           url
             ? `<img src="${esc(url)}" alt="" data-partner-media-img />`
@@ -301,7 +317,8 @@ function wirePartnerMediaUploads(root) {
     }
 
     async function editAndUpload(source, fileName = "photo.jpg") {
-      const edited = await openListingPhotoEditor({ source, fileName });
+      const aspect = Number(field.getAttribute("data-partner-media-aspect")) || 4 / 3;
+      const edited = await openListingPhotoEditor({ source, fileName, aspect });
       if (!edited) return;
       if (pickBtn) {
         pickBtn.disabled = true;

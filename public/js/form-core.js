@@ -25,7 +25,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=1a522e09d6";
-import { openListingPhotoEditor } from "./listing-photo-edit.js?v=f2ba1acc91";
+import { openListingPhotoEditor } from "./listing-photo-edit.js?v=2820caff5d";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=5decf174bd";
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=1c11003682";
 import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=dc720507fb";

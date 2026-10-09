@@ -4,9 +4,15 @@
  * Kimenet: JPEG File (a meglévő feltöltő pipeline-hoz).
  */
 
-const ASPECT = 4 / 3;
+const DEFAULT_ASPECT = 4 / 3;
 const OUT_MAX_SIDE = 1600;
 const MAX_ZOOM_FACTOR = 4;
+
+function normalizeAspect(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0.25 || n > 8) return DEFAULT_ASPECT;
+  return n;
+}
 
 function clamp(n, a, b) {
   return Math.min(b, Math.max(a, n));
@@ -87,11 +93,17 @@ function canvasToJpegFile(canvas, fileName) {
 }
 
 /**
- * @param {{ source: Blob|string, fileName?: string, onSave?: (file: File) => void|Promise<void> }} opts
+ * @param {{ source: Blob|string, fileName?: string, aspect?: number, onSave?: (file: File) => void|Promise<void> }} opts
  * @returns {Promise<File|null>} null = cancelled
  */
-export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave } = {}) {
+export function openListingPhotoEditor({
+  source,
+  fileName = "photo.jpg",
+  aspect: aspectInput,
+  onSave,
+} = {}) {
   return new Promise(async (resolve, reject) => {
+    const ASPECT = normalizeAspect(aspectInput);
     let settled = false;
     let loaded;
 
@@ -156,6 +168,19 @@ export function openListingPhotoEditor({ source, fileName = "photo.jpg", onSave 
     const frame = root.querySelector("[data-lpe-frame]");
     const canvas = root.querySelector("[data-lpe-canvas]");
     const ctx = canvas.getContext("2d");
+
+    // Keret aránya = a tényleges megjelenés (pl. borító széles, logo négyzet)
+    frame.style.aspectRatio = String(ASPECT);
+    if (ASPECT >= 1.35) {
+      viewport.classList.add("lpe-viewport--wide");
+      viewport.style.aspectRatio = String(ASPECT);
+    } else if (ASPECT <= 0.85) {
+      viewport.classList.add("lpe-viewport--tall");
+      viewport.style.aspectRatio = "3 / 4";
+    } else {
+      viewport.classList.add("lpe-viewport--square");
+      viewport.style.aspectRatio = "1";
+    }
 
     let rotation = 0;
     let scale = 1;

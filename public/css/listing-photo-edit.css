@@ -77,6 +77,16 @@ body.lpe-open {
   border-radius: 4px;
 }
 
+.lpe-viewport--wide {
+  max-width: 100%;
+  max-height: min(42dvh, 280px);
+}
+
+.lpe-viewport--square {
+  max-width: 320px;
+  max-height: min(52dvh, 320px);
+}
+
 .lpe-viewport:active {
   cursor: grabbing;
 }
@@ -96,13 +106,22 @@ body.lpe-open {
   left: 50%;
   top: 50%;
   width: min(92%, 340px);
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 3; /* JS felülírja a tényleges mezőarányra */
   transform: translate(-50%, -50%);
   border: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: 2px;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.58);
   pointer-events: none;
   z-index: 2;
+}
+
+.lpe-viewport--wide .lpe-crop {
+  width: 94%;
+  max-width: none;
+}
+
+.lpe-viewport--square .lpe-crop {
+  width: min(88%, 280px);
 }
 
 .lpe-crop-corner {

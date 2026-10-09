@@ -163,6 +163,10 @@
     border: 1px solid var(--ad-line);
   }
 
+  body.home-page.search-map-open:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs {
+    display: none !important;
+  }
+
   body.home-page[data-site-page="teherauto"] .home-main.auto-desk-main > .auto-search-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }

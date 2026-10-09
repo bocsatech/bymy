@@ -588,10 +588,16 @@ body.search-map-open {
   /* Inline map sits in the listings panel; keep normal page/app scroll. */
 }
 
-/* Térképnézet: találatszám / rendezés / nézetváltó és a Település kereső — minden breakpoint. */
+/* Térképnézet: találatszám / rendezés / nézetváltó, kategória sáv és a Település kereső — minden breakpoint. */
 body.search-map-open .auto-desk-results-bar,
 body.home-page.search-map-open:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar,
 body.home-page.search-map-open:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main .auto-desk-results-bar {
+  display: none !important;
+}
+
+body.search-map-open .auto-search-tabs,
+body.home-page.search-map-open:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs,
+body.home-page.search-map-open:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tabs {
   display: none !important;
 }
 

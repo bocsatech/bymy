@@ -12,6 +12,7 @@ import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36
 import { categoriesForVertical } from "./partner-categories-data.js?v=b826a00c74";
 import { fetchMyListings } from "./db-client.js?v=6c1aeac308";
 import { uploadImage } from "./upload-image.js?v=3b023aae7a";
+import { openListingPhotoEditor } from "./listing-photo-edit.js?v=6d19665b36";
 
 const pageRoot = () => document.getElementById("partner-root");
 
@@ -224,11 +225,13 @@ function mediaFieldHtml({ name, label, value, round = false }) {
         <button type="button" class="partner-media-upload" data-partner-media-pick>Kép feltöltése</button>
         ${
           url
-            ? `<button type="button" class="partner-media-clear" data-partner-media-clear>Törlés</button>`
+            ? `<button type="button" class="partner-media-edit" data-partner-media-edit>Szerkesztés</button>
+               <button type="button" class="partner-media-clear" data-partner-media-clear>Törlés</button>`
             : ""
         }
       </div>
       <input type="file" accept="image/*" hidden data-partner-media-file />
+      <p class="partner-media-hint">Max. 1 kép · ugyanaz a szerkesztő, mint a hirdetésfeladásnál</p>
     </div>
   `;
 }
@@ -239,7 +242,40 @@ function wirePartnerMediaUploads(root) {
     const hidden = field.querySelector("[data-partner-media-url]");
     const preview = field.querySelector("[data-partner-media-preview]");
     const pickBtn = field.querySelector("[data-partner-media-pick]");
+    const actions = field.querySelector(".partner-media-actions");
     if (!(fileInput instanceof HTMLInputElement) || !(hidden instanceof HTMLInputElement)) return;
+
+    // Egy mező = egy kép (ne legyen multiple).
+    fileInput.removeAttribute("multiple");
+
+    function syncActionButtons(hasUrl) {
+      if (!actions) return;
+      let editBtn = actions.querySelector("[data-partner-media-edit]");
+      let clearBtn = actions.querySelector("[data-partner-media-clear]");
+      if (hasUrl) {
+        if (!editBtn) {
+          editBtn = document.createElement("button");
+          editBtn.type = "button";
+          editBtn.className = "partner-media-edit";
+          editBtn.setAttribute("data-partner-media-edit", "");
+          editBtn.textContent = "Szerkesztés";
+          editBtn.addEventListener("click", () => void editCurrent());
+          actions.appendChild(editBtn);
+        }
+        if (!clearBtn) {
+          clearBtn = document.createElement("button");
+          clearBtn.type = "button";
+          clearBtn.className = "partner-media-clear";
+          clearBtn.setAttribute("data-partner-media-clear", "");
+          clearBtn.textContent = "Törlés";
+          clearBtn.addEventListener("click", () => setUrl(""));
+          actions.appendChild(clearBtn);
+        }
+      } else {
+        editBtn?.remove();
+        clearBtn?.remove();
+      }
+    }
 
     function setUrl(nextUrl) {
       const url = String(nextUrl || "").trim();
@@ -249,48 +285,62 @@ function wirePartnerMediaUploads(root) {
           ? `<img src="${esc(url)}" alt="" data-partner-media-img />`
           : `<span class="partner-media-empty">Nincs kép</span>`;
       }
-      const clearBtn = field.querySelector("[data-partner-media-clear]");
-      if (url && !clearBtn) {
-        const actions = field.querySelector(".partner-media-actions");
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "partner-media-clear";
-        btn.setAttribute("data-partner-media-clear", "");
-        btn.textContent = "Törlés";
-        btn.addEventListener("click", () => setUrl(""));
-        actions?.appendChild(btn);
-      } else if (!url && clearBtn) {
-        clearBtn.remove();
-      }
+      syncActionButtons(Boolean(url));
     }
 
-    pickBtn?.addEventListener("click", () => fileInput.click());
-    field.querySelector("[data-partner-media-clear]")?.addEventListener("click", () => setUrl(""));
-    fileInput.addEventListener("change", async () => {
-      const file = fileInput.files?.[0];
-      fileInput.value = "";
-      if (!file) return;
-      const prev = pickBtn?.textContent || "Kép feltöltése";
+    async function uploadEditedFile(file) {
+      const uploaded = await uploadImage({
+        file,
+        kind: "profile",
+        entityType: "profile",
+        folder: "partner-profile",
+      });
+      const url = String(uploaded.url || uploaded.publicUrl || uploaded.href || "").trim();
+      if (!url) throw new Error("Nincs kép URL a feltöltés után.");
+      setUrl(url);
+    }
+
+    async function editAndUpload(source, fileName = "photo.jpg") {
+      const edited = await openListingPhotoEditor({ source, fileName });
+      if (!edited) return;
       if (pickBtn) {
         pickBtn.disabled = true;
         pickBtn.textContent = "Feltöltés…";
       }
       try {
-        const uploaded = await uploadImage({
-          file,
-          kind: "profile",
-          entityType: "profile",
-          folder: "partner-profile",
-        });
-        const url = String(uploaded.url || uploaded.publicUrl || uploaded.href || "").trim();
-        if (!url) throw new Error("Nincs kép URL a feltöltés után.");
-        setUrl(url);
-      } catch (error) {
-        window.alert(error?.message || "A feltöltés sikertelen.");
+        await uploadEditedFile(edited);
       } finally {
         if (pickBtn) {
           pickBtn.disabled = false;
-          pickBtn.textContent = prev;
+          pickBtn.textContent = "Kép feltöltése";
+        }
+      }
+    }
+
+    async function editCurrent() {
+      const url = String(hidden.value || "").trim();
+      if (!url) return;
+      try {
+        await editAndUpload(url, "partner-photo.jpg");
+      } catch (error) {
+        window.alert(error?.message || "A szerkesztés sikertelen.");
+      }
+    }
+
+    pickBtn?.addEventListener("click", () => fileInput.click());
+    field.querySelector("[data-partner-media-edit]")?.addEventListener("click", () => void editCurrent());
+    field.querySelector("[data-partner-media-clear]")?.addEventListener("click", () => setUrl(""));
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files?.[0];
+      fileInput.value = "";
+      if (!file) return;
+      try {
+        await editAndUpload(file, file.name || "photo.jpg");
+      } catch (error) {
+        window.alert(error?.message || "A feltöltés sikertelen.");
+        if (pickBtn) {
+          pickBtn.disabled = false;
+          pickBtn.textContent = "Kép feltöltése";
         }
       }
     });

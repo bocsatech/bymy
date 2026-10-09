@@ -441,6 +441,7 @@ body.partner-manage-page.mm-page {
 }
 
 .partner-media-upload,
+.partner-media-edit,
 .partner-media-clear {
   border: 1px solid #c5d0d6;
   border-radius: 8px;
@@ -463,8 +464,17 @@ body.partner-manage-page.mm-page {
   cursor: wait;
 }
 
+.partner-media-edit,
 .partner-media-clear {
   color: #5c6b7a;
+}
+
+.partner-media-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #7a8794;
+  line-height: 1.35;
 }
 
 .partner-manage-head > div > p:last-child {

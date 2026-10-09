@@ -1,4 +1,4 @@
-import { fetchListing } from "./db-client.js?v=855f1f7e76";
+import { fetchListing } from "./db-client.js?v=6c1aeac308";
 import { getAuthUser, getProfile, requireAuthForPage } from "./site-auth.js?v=4588fd60ff";
 import { emptyPerson, isBusinessProfile, personFromProfile, vehicleFromListing } from "./adasveteli-data.js?v=4cf411f416";
 import {

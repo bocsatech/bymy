@@ -7,7 +7,7 @@ import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=191
 import {
   TILE_PAGE_INITIAL,
   TILE_PAGE_MORE,
-} from "./listing-tile-pager.js?v=535f30dba9";
+} from "./listing-tile-pager.js?v=248671f94e";
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 

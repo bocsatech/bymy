@@ -239,7 +239,11 @@ export async function fetchSellerContact(listingId) {
     credentials: "same-origin",
   });
   const data = await parseJson(response);
-  return data.contact ?? null;
+  const contact = data.contact ?? null;
+  if (contact && data.rating && typeof data.rating === "object") {
+    contact.rating = data.rating;
+  }
+  return contact;
 }
 
 export async function fetchSellerRating(listingId) {

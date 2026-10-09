@@ -6,7 +6,7 @@ import {
   saveListingPhotosOrder,
   uploadListingPhotoDataUrl,
   deleteListingFromDb,
-} from "./db-client.js?v=855f1f7e76";
+} from "./db-client.js?v=6c1aeac308";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   detectBymyPhotoOverlay,

@@ -1,6 +1,6 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=855f1f7e76";
+import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=6c1aeac308";
 import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
 import { getAuthUser } from "./site-auth.js?v=4588fd60ff";
 import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=d8693c3af4";

@@ -6,7 +6,7 @@ import {
   revealListingContact,
   recordListingView,
   deleteListingFromDb,
-} from "./db-client.js?v=855f1f7e76";
+} from "./db-client.js?v=6c1aeac308";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=4588fd60ff";
 import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
 import { startConversation } from "./messages-api.js?v=5cf6493dc9";

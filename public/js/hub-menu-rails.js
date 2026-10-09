@@ -9,7 +9,7 @@ import {
 } from "./partner-categories-data.js?v=b826a00c74";
 import {
   fetchTilePagesUntil,
-} from "./listing-tile-pager.js?v=535f30dba9";
+} from "./listing-tile-pager.js?v=248671f94e";
 
 const IMG_V = "menuRails1";
 const INITIAL_COUNT = 5;

@@ -13,7 +13,7 @@ import {
   fetchSellerContact,
   fetchSellerRating,
   fetchRelatedListingsPage,
-} from "./db-client.js?v=855f1f7e76";
+} from "./db-client.js?v=6c1aeac308";
 
 const CACHE_KEY = "bymy-ajanlas-partner-v1";
 
@@ -44,16 +44,24 @@ function safeUrl(value) {
   }
 }
 
-function formatRatingMeta(average, count) {
-  if (average == null || average === "") return "";
-  const n = Number(average);
-  if (!Number.isFinite(n) || n <= 0) return "";
-  // Seller rating 1–10; a fejléc demó 1–5 skálát mutat
-  const stars = n > 5 ? n / 2 : n;
-  const label = stars.toFixed(1).replace(".", ",");
-  const c = Number(count);
-  if (Number.isFinite(c) && c > 0) return `${label} (${c} ajánlás)`;
-  return label;
+/** Kereskedő értékelés (1–10) → fejléc: 5 csillag + szöveg. */
+function ratingMetaHtml(average, count) {
+  const avg = average != null && average !== "" ? Number(average) : null;
+  const c = Number(count) || 0;
+  const has = avg != null && Number.isFinite(avg) && c > 0;
+  const filled = has ? Math.max(0, Math.min(5, Math.round((avg / 10) * 5))) : 0;
+  const stars = Array.from({ length: 5 }, (_, i) => {
+    const on = i < filled;
+    return `<span class="ap-star${on ? " is-on" : ""}" aria-hidden="true">★</span>`;
+  }).join("");
+  let label = "Még nincs értékelés";
+  if (has) {
+    // Demó: 4,9 skála — 1–10 → felezve
+    const show = (avg > 5 ? avg / 2 : avg).toFixed(1).replace(".", ",");
+    label = `${show} (${c} ajánlás)`;
+  }
+  const title = has ? `${String(avg).replace(".", ",")} / 10` : "Még nincs értékelés";
+  return `<span class="ap-meta-item ap-meta-item--star" title="${esc(title)}"><span class="ap-stars" role="img" aria-label="${esc(title)}">${stars}</span><strong>${esc(label)}</strong></span>`;
 }
 
 function formatPlaceMeta(partner) {
@@ -167,7 +175,7 @@ function renderProfile(root, partner, opts = {}) {
   const companyLogo = safeUrl(partner.company_logo_url);
   const cover = safeUrl(partner.cover_url);
   const services = partner.services || [];
-  const ratingText = formatRatingMeta(partner.google_rating, partner.google_review_count);
+  const ratingHtml = ratingMetaHtml(partner.google_rating, partner.google_review_count);
   const place = formatPlaceMeta(partner);
   const hours = partner.opening_hours || "";
   const role = services.length
@@ -227,12 +235,8 @@ function renderProfile(root, partner, opts = {}) {
             <h1>${esc(name)}</h1>
             <p class="ap-role">${esc(role)}</p>
             <p class="ap-meta">
-              ${
-                ratingText
-                  ? `<span class="ap-meta-item ap-meta-item--star">${iconStar()}<strong>${esc(ratingText)}</strong></span>`
-                  : ""
-              }
-              ${ratingText && place ? `<span class="ap-meta-sep" aria-hidden="true"></span>` : ""}
+              ${ratingHtml}
+              ${place ? `<span class="ap-meta-sep" aria-hidden="true"></span>` : ""}
               ${
                 place
                   ? `<span class="ap-meta-item">${iconPin()}<span>${esc(place)}</span></span>`
@@ -596,8 +600,9 @@ function partnerFromSellerContact(contact, rating) {
       city = locParts[0];
     }
   }
-  const avg = rating?.average != null ? Number(rating.average) : null;
-  const count = rating?.count != null ? Number(rating.count) : null;
+  const ratingSrc = rating || contact?.rating || null;
+  const avg = ratingSrc?.average != null ? Number(ratingSrc.average) : null;
+  const count = ratingSrc?.count != null ? Number(ratingSrc.count) : null;
   return {
     id: contact?.sellerId || 0,
     name: contact?.sellerName || "Hirdető",
@@ -625,9 +630,8 @@ function partnerFromSellerContact(contact, rating) {
 }
 
 async function loadListingSellerPage(listingId) {
-  const [contact, rating, page] = await Promise.all([
+  const [contact, page] = await Promise.all([
     fetchSellerContact(listingId),
-    fetchSellerRating(listingId).catch(() => null),
     fetchRelatedListingsPage(listingId, {
       limit: 60,
       offset: 0,
@@ -636,6 +640,10 @@ async function loadListingSellerPage(listingId) {
     }),
   ]);
   if (!contact) throw new Error("Nincs megjeleníthető kereskedés / partner.");
+  let rating = contact.rating || null;
+  if (!rating || rating.average == null) {
+    rating = await fetchSellerRating(listingId).catch(() => rating);
+  }
   const listings = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
   return {
     partner: partnerFromSellerContact(contact, rating),

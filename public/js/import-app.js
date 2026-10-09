@@ -10,7 +10,7 @@ import {
   fetchListing,
   fetchDbStats,
   deleteAllListingsFromDb,
-} from "./db-client.js?v=855f1f7e76";
+} from "./db-client.js?v=6c1aeac308";
 
 const EMBEDDED_VERSION = document.querySelector('meta[name="bymy-version"]')?.content ?? "";
 const SERVER_RESTART_MSG =

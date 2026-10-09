@@ -234,12 +234,30 @@
 }
 
 .ap-meta-item--star {
-  color: #f0c52c;
+  color: #fff;
+  gap: 0.45rem;
 }
 
 .ap-meta-item--star strong {
   color: #fff;
   font-weight: 800;
+}
+
+.ap-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.ap-star {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.ap-star.is-on {
+  color: #f0c52c;
 }
 
 .ap-meta-sep {

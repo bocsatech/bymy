@@ -18,7 +18,7 @@ import {
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=0633cb6729";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=d8f49b6d02";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=4588fd60ff";
-import { fetchListingsPage } from "./db-client.js?v=855f1f7e76";
+import { fetchListingsPage } from "./db-client.js?v=6c1aeac308";
 import {
   buildNearbyFilter,
   readNearbyPrefs,

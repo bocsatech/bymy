@@ -1615,7 +1615,20 @@ async function handleListingsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Nincs megjeleníthető kapcsolat." });
       return;
     }
-    sendJson(res, 200, { contact: publicSellerInventoryContact(contact) });
+    const viewer = await requestUser(req);
+    let rating = null;
+    try {
+      rating = await getSellerRatingSummary({
+        sellerUserId: meta.user_id,
+        viewerUserId: viewer?.id ?? null,
+      });
+    } catch {
+      rating = null;
+    }
+    sendJson(res, 200, {
+      contact: publicSellerInventoryContact(contact),
+      rating,
+    });
     return;
   }
 

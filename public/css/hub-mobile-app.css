@@ -28,6 +28,14 @@
     touch-action: pan-y;
   }
 
+  /* Autó/teher: ugyanaz a lapgörgetés, mint a kezdőlap feed — ne pan-y + nested trap. */
+  body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"], [data-site-page="ingatlan"]) {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    touch-action: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   body.site-app:not(.hub-page--feed) .home-main,
   body.site-app:not(.hub-page--feed) main {
     max-width: 100%;

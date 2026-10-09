@@ -1,10 +1,10 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { kivitelMatches } from "./kivitel-options.js?v=be03aefc2e";
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=c53ecfbf64";
-import { kivitelListMatches } from "./auto-kivitel-picker.js?v=64c7a6bff8";
-import { allapotValueMatches } from "./auto-allapot-picker.js?v=a169137f49";
-import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=a00379cf01";
-import { okmanyListMatches } from "./auto-okmany-picker.js?v=d0e07dec4e";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=fda9d0620c";
+import { kivitelListMatches } from "./auto-kivitel-picker.js?v=e608d655e0";
+import { allapotValueMatches } from "./auto-allapot-picker.js?v=7820bdd9d4";
+import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=3024e9a41b";
+import { okmanyListMatches } from "./auto-okmany-picker.js?v=d1a95b707f";
 import { toltoListMatches } from "./auto-tolto-picker.js?v=3cc657260b";
 
 const FUEL_QUICK_FILTERS = [

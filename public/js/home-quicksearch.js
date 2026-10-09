@@ -1,18 +1,18 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=bb243f3133";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=511614ff6a";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=cfe6aa6715";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=0783eaae3d";
+} from "./auto-detailed-search.js?v=a83d45c833";
 import { readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=7d706ccb11";
-import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=c53ecfbf64";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=64c7a6bff8";
-import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=a169137f49";
-import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=a00379cf01";
-import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=d0e07dec4e";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=cbf18853ed";
+import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fda9d0620c";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=e608d655e0";
+import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=7820bdd9d4";
+import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=3024e9a41b";
+import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=d1a95b707f";
 import { readToltoFilterValues, mountAutoToltoPickers } from "./auto-tolto-picker.js?v=3cc657260b";
 import {
   initAutoDeskSearch,
@@ -476,7 +476,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     });
 
   async function applySavedFilters(filters) {
-    const { applySavedSearchFilters } = await import("./saved-search.js?v=f419ca25af");
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=851f436a3b");
     await applySavedSearchFilters(form, filters || {});
     updateAutoDeskAccSummaries(form);
     // A mentett payload a forrás — ne a form újraolvasása (picker race miatt üres lehet).
@@ -490,4 +490,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   };
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=0783eaae3d";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=a83d45c833";

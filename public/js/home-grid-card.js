@@ -164,17 +164,34 @@ function cardSubtitle(preview, form) {
   return [fuel, gear].filter(Boolean).join(", ");
 }
 
-function buildPhotoMarkup(urls) {
+function isMobileCardViewport() {
+  try {
+    return window.matchMedia("(max-width: 900px)").matches;
+  } catch {
+    return false;
+  }
+}
+
+/** Egy kép — mint a kezdőlap hf-card (nincs horizontal scrollport → Android lapgörgetés OK). */
+function buildSinglePhotoMarkup(url) {
   const fb = listingImgFallbackAttr();
+  if (!url) return `<div class="home-grid-card-photo" aria-hidden="true"></div>`;
+  const sizes = "(max-width: 768px) 100vw, 640px";
+  const src = listCardImageUrl(url) || url;
+  const ss = listingImgSrcsetAttrs(url, { sizes });
+  return `<div class="home-grid-card-photo" aria-hidden="true"><img class="home-grid-card-photo-img" src="${escapeHtml(src)}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${ss} ${fb} /></div>`;
+}
+
+function buildPhotoMarkup(urls, { singleOnly = false } = {}) {
   if (!urls.length) {
     return `<div class="home-grid-card-photo" aria-hidden="true"></div>`;
   }
-  const sizes = "(max-width: 768px) 100vw, 640px";
-  if (urls.length === 1) {
-    const src = listCardImageUrl(urls[0]) || urls[0];
-    const ss = listingImgSrcsetAttrs(urls[0], { sizes });
-    return `<div class="home-grid-card-photo" aria-hidden="true"><img class="home-grid-card-photo-img" src="${escapeHtml(src)}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${ss} ${fb} /></div>`;
+  /* Mobil / single: kezdőlap-stílus — ne legyen overflow-x sáv a csempén. */
+  if (urls.length === 1 || singleOnly) {
+    return buildSinglePhotoMarkup(urls[0]);
   }
+  const sizes = "(max-width: 768px) 100vw, 640px";
+  const fb = listingImgFallbackAttr();
   const slides = urls
     .map((url) => {
       const src = listCardImageUrl(url) || url;
@@ -198,7 +215,9 @@ export function createHomeGridCard(item, { featured = false, topOffer = false, c
   const price = listingTilePrice(item);
   const meta = listingTileMeta(item);
   const photoUrls = collectPhotoUrls(item);
-  const multi = photoUrls.length > 1;
+  /* Mobilon = kezdőlap: egy kép, nincs carousel (Android scroll trap). */
+  const mobileSingle = isMobileCardViewport();
+  const multi = !mobileSingle && photoUrls.length > 1;
   const detailHref = listingDetailHref(item.id);
   const page = document.body?.getAttribute("data-site-page");
   const desk = page === "auto" || page === "teherauto";
@@ -233,7 +252,7 @@ export function createHomeGridCard(item, { featured = false, topOffer = false, c
 
   card.innerHTML = `
     <div class="home-grid-card-media">
-      ${buildPhotoMarkup(photoUrls)}
+      ${buildPhotoMarkup(photoUrls, { singleOnly: mobileSingle })}
       ${
         multi
           ? `<span class="home-grid-card-photo-count" aria-live="polite">${ICON_CAMERA}<span>1/${photoUrls.length}</span></span>

@@ -1217,7 +1217,8 @@ function forceAndroidPageScrollable() {
   body.style.setProperty("height", "auto", "important");
   body.style.setProperty("max-height", "none", "important");
   body.style.setProperty("position", "static", "important");
-  body.style.setProperty("touch-action", "pan-y", "important");
+  /* auto — mint a kezdőlap; pan-y + nested carousel Androidon beragadhat. */
+  body.style.setProperty("touch-action", "auto", "important");
 }
 
 function lockSheetPageAxes() {

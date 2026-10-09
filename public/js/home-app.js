@@ -1,5 +1,5 @@
 import { fetchListings, fetchListingsPage, fetchRelatedListingsPage } from "./db-client.js?v=855f1f7e76";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=96cea3827d";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=dd58b2fd8a";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import {
   emptyFilters,
@@ -7,18 +7,18 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=fe259f7264";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=d1cde86de2";
-import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=f419ca25af";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=0783eaae3d";
+} from "./home-search-filter.js?v=bce8d4ecfc";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=9935040161";
+import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=851f436a3b";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=a83d45c833";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=f99edb6978";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=0217863718";
+} from "./ingatlan-search.js?v=bb96f67cf9";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=3a43e30b61";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=f0846a17a8";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=b19d2ba7a1";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
@@ -400,13 +400,13 @@ async function syncCategoryToSearchMenu(categoryId) {
   if (!form) return;
   try {
     if (quickSearchApi?.whenReady) await quickSearchApi.whenReady;
-    const { mountAutoFuelPicker } = await import("./auto-fuel-picker.js?v=c53ecfbf64");
+    const { mountAutoFuelPicker } = await import("./auto-fuel-picker.js?v=fda9d0620c");
     if (window.matchMedia("(min-width: 901px)").matches) {
       await mountAutoFuelPicker(form);
     }
-    const { applySavedSearchFilters } = await import("./saved-search.js?v=f419ca25af");
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=851f436a3b");
     await applySavedSearchFilters(form, filters);
-    const { applyDrumSavedSearchFilters } = await import("./auto-search-drums.js?v=511614ff6a");
+    const { applyDrumSavedSearchFilters } = await import("./auto-search-drums.js?v=cfe6aa6715");
     applyDrumSavedSearchFilters(form, filters);
     updateAutoDeskAccSummaries(form);
     quickSearchFilters = { ...emptyFilters(), ...filters };

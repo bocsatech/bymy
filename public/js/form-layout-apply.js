@@ -1,5 +1,5 @@
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=cce3b15c4e";
-import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=f2852b7320";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=18a867359e";
+import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=5decf174bd";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=1c11003682";
 import { markImmoPostViewReady } from "./category-picker.js?v=5d45536b6e";

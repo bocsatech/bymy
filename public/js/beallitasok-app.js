@@ -28,7 +28,7 @@ import {
   removeSavedSearch,
   toggleSavedSearchNotify,
 } from "./fok-data.js?v=289f64e75c";
-import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=f419ca25af";
+import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=851f436a3b";
 import { initMessagesUi } from "./messages-ui.js?v=4212c717fc";
 import { listConversations } from "./messages-api.js?v=5cf6493dc9";
 import { initMyAdsPanel } from "./my-ads.js?v=8a33a9a6fc";
@@ -572,7 +572,7 @@ function setSection(section) {
     void ensurePartnerProfilPanel();
   }
   if (next === "ertekbecslo") {
-    void import("./ertekbecslo-app.js?v=503fc7a6d2")
+    void import("./ertekbecslo-app.js?v=0fc6a04fde")
       .then((mod) => mod.initErtekbecsloPanel?.())
       .catch((err) => console.error("[beallitasok] ertekbecslo load failed", err));
   }

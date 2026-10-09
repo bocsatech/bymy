@@ -356,11 +356,11 @@
         <section class="step-panel" data-step="4">
           <div class="card">
             <div class="card-body">
-              <div class="upload-zone" id="upload-zone">
+              <label class="upload-zone" id="upload-zone" for="photo-input">
                 <strong>Húzd ide a képeket, vagy kattints a tallózáshoz</strong>
                 <span>Legfeljebb 12 kép · JPG / PNG — a telefon fotóit automatikusan kicsinyítjük</span>
-                <input id="photo-input" type="file" accept="image/*" multiple hidden />
-              </div>
+                <input id="photo-input" class="ad-photo-file-input" type="file" accept="image/*" multiple tabindex="-1" />
+              </label>
               <div class="photo-grid" id="photo-grid"></div>
               <div class="photo-upload-bar" id="photo-upload-bar">
                 <button type="button" class="btn primary" id="photo-upload-btn">Feltöltés</button>

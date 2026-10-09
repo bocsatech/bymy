@@ -605,6 +605,8 @@ textarea {
 }
 
 .upload-zone {
+  position: relative;
+  display: block;
   border: 2px dashed var(--border);
   border-radius: var(--radius-lg);
   padding: 48px 24px;
@@ -612,6 +614,22 @@ textarea {
   background: var(--surface-container-low);
   color: var(--muted);
   transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+}
+
+/* Chrome: [hidden]/display:none file input gyakran nem nyitja a tallózót programozott clickre */
+.ad-photo-file-input,
+input#photo-input.ad-photo-file-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  opacity: 0 !important;
 }
 
 .upload-zone strong {

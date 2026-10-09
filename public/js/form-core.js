@@ -59,6 +59,40 @@ export function createAdForm(options = {}) {
   const uploadZoneEl = () => document.getElementById("upload-zone");
   const photoInputEl = () => document.getElementById("photo-input");
 
+  /**
+   * Chrome: [hidden]/display:none file input + programozott .click() gyakran nem nyitja a tallózót
+   * (különösen cancel után). Friss input + vizuális elrejtés, sync click a user gesture-ben.
+   */
+  function preparePhotoInputForPicker() {
+    const prev = photoInputEl();
+    const zone = uploadZoneEl();
+    const host = zone || prev?.parentElement || form;
+    if (!host) return null;
+    const next = document.createElement("input");
+    next.id = "photo-input";
+    next.type = "file";
+    next.accept = prev?.accept || "image/*";
+    next.multiple = true;
+    next.className = "ad-photo-file-input";
+    next.tabIndex = -1;
+    next.removeAttribute("hidden");
+    if (prev?.isConnected) prev.replaceWith(next);
+    else host.appendChild(next);
+    if (zone?.tagName === "LABEL") zone.htmlFor = "photo-input";
+    return next;
+  }
+
+  function openPhotoPicker() {
+    const input = preparePhotoInputForPicker();
+    if (!input) return;
+    try {
+      input.value = "";
+    } catch {
+      /* ignore */
+    }
+    input.click();
+  }
+
   function photoPreviewGrids() {
     const main = photoGridEl();
     if (main) return [main];
@@ -2000,8 +2034,12 @@ if (mode === "wizard") {
 }
 
 form.addEventListener("click", (event) => {
-  if (!event.target.closest("#upload-zone")) return;
-  photoInputEl()?.click();
+  const zone = event.target.closest("#upload-zone");
+  if (!zone) return;
+  /* Label + natív aktiválás helyett egy kontrollált megnyitás — elkerüli a Chrome
+     double-open (megnyílik majd azonnal bezár) és a [hidden] ignore-t. */
+  event.preventDefault();
+  openPhotoPicker();
 });
 form.addEventListener("dragover", (event) => {
   const zone = event.target.closest("#upload-zone");
@@ -2023,9 +2061,13 @@ form.addEventListener("drop", (event) => {
 });
 form.addEventListener("change", (event) => {
   if (event.target?.id !== "photo-input") return;
-  const input = photoInputEl();
+  const input = event.target;
   if (input?.files) addPhotoFiles(input.files);
-  if (input) input.value = "";
+  try {
+    input.value = "";
+  } catch {
+    /* ignore */
+  }
 });
 photoUploadBtn?.addEventListener("click", () => {
   uploadPendingPhotos();

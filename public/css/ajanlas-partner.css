@@ -34,8 +34,17 @@
   margin-bottom: 0.4rem;
 }
 
+.ap-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
 .ap-crumb {
-  margin: 0 0 0.75rem;
+  margin: 0;
   font-size: 0.78rem;
   color: #5c6b7a;
 }
@@ -46,65 +55,110 @@
   text-decoration: none;
 }
 
+.ap-edit-toggle {
+  border: 1px solid #c5d0d6;
+  border-radius: 999px;
+  background: #fff;
+  color: #14202b;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+}
+
+.ap-edit-toggle.is-on {
+  background: #14202b;
+  border-color: #14202b;
+  color: #fff;
+}
+
 .ap-hero {
   position: relative;
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
-  min-height: 160px;
-  background: linear-gradient(120deg, #1a2330, #2c3e50 55%, #4a6fa5);
+  min-height: 210px;
+  background: #121820;
   margin-bottom: 0;
+  isolation: isolate;
 }
 
 .ap-hero-cover {
   position: absolute;
   inset: 0;
+  background-image: var(--ap-cover);
   background-size: cover;
   background-position: center;
-  opacity: 0.95;
+  transform: scale(1.02);
+}
+
+.ap-hero-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(105deg, rgba(10, 14, 20, 0.88) 0%, rgba(10, 14, 20, 0.55) 42%, rgba(10, 14, 20, 0.28) 72%, rgba(10, 14, 20, 0.45) 100%),
+    linear-gradient(0deg, rgba(8, 12, 18, 0.55) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.ap-hero.is-editing .ap-hero-cover {
+  cursor: pointer;
 }
 
 .ap-hero-inner {
   position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 22px 22px 18px;
+  color: #fff;
+  min-height: 210px;
+}
+
+.ap-hero-left {
   display: flex;
   gap: 16px;
   align-items: flex-end;
-  padding: 20px 18px 16px;
-  color: #fff;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .ap-photos {
   display: flex;
   align-items: flex-end;
-  gap: 0.55rem;
+  gap: 0.7rem;
   flex-shrink: 0;
 }
 
 .ap-photo-person,
 .ap-photo-logo {
+  position: relative;
   display: grid;
   place-items: center;
   background: #fff;
   color: #111;
   font-weight: 800;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
   overflow: hidden;
 }
 
 .ap-photo-person {
-  width: 88px;
-  height: 88px;
-  border-radius: 16px;
-  border: 3px solid #fff;
-  font-size: 1.6rem;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  font-size: 1.7rem;
 }
 
 .ap-photo-logo {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  border: 2px solid #fff;
-  font-size: 0.95rem;
-  margin-bottom: 0.2rem;
+  width: 78px;
+  height: 78px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  font-size: 1rem;
+  margin-bottom: 0.15rem;
 }
 
 .ap-photo-person img,
@@ -117,55 +171,149 @@
 
 .ap-photo-logo img {
   object-fit: contain;
-  padding: 4px;
+  padding: 6px;
+  background: #fff;
+}
+
+.ap-media-edit {
+  position: absolute;
+  inset: auto 6px 6px auto;
+  z-index: 3;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 20, 30, 0.78);
+  color: #fff;
+  font: inherit;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.28rem 0.55rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.ap-hero > .ap-media-edit[data-ap-media="cover"] {
+  top: 12px;
+  right: 12px;
+  inset: auto 12px auto auto;
+}
+
+.ap-hero-copy {
+  min-width: 0;
+  padding-bottom: 2px;
 }
 
 .ap-hero-copy h1 {
-  margin: 0 0 0.25rem;
-  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+  margin: 0 0 0.2rem;
+  font-size: clamp(1.35rem, 2.8vw, 1.85rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
 }
 
 .ap-role {
-  margin: 0 0 0.35rem;
-  font-size: 0.88rem;
+  margin: 0 0 0.45rem;
+  font-size: 0.95rem;
   font-weight: 600;
   opacity: 0.95;
 }
 
-.ap-facts {
+.ap-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.7rem;
   margin: 0;
-  font-size: 0.8rem;
-  line-height: 1.4;
-  opacity: 0.9;
+  font-size: 0.86rem;
+  font-weight: 600;
 }
 
-.ap-cta {
+.ap-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ap-meta-item--star {
+  color: #f0c52c;
+}
+
+.ap-meta-item--star strong {
+  color: #fff;
+  font-weight: 800;
+}
+
+.ap-meta-sep {
+  width: 1px;
+  height: 0.95rem;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.ap-ico {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.ap-hero-cta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0 0;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 0 1 auto;
+  max-width: 100%;
+  padding-bottom: 2px;
 }
 
 .ap-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0.9rem;
+  gap: 0.4rem;
+  padding: 0.55rem 0.95rem;
   border-radius: 10px;
   font: inherit;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 800;
   text-decoration: none;
   border: 1px solid #d2d0cc;
   background: #fff;
   color: #111;
+  white-space: nowrap;
 }
 
 .ap-btn--primary {
   background: #f0c52c;
   border-color: #e0b420;
+  color: #111;
+  box-shadow: 0 4px 14px rgba(240, 197, 44, 0.35);
+}
+
+.ap-btn--ghost {
+  background: rgba(10, 14, 20, 0.42);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+
+.ap-btn--ghost .ap-ico {
+  color: #fff;
+}
+
+.ap-edit-hint {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 22px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ap-hours {
+  margin-top: 0.65rem !important;
+  color: #5c6b7a;
+  font-size: 0.84rem !important;
 }
 
 .ap-all {
@@ -340,18 +488,39 @@
     grid-template-columns: 1fr;
   }
 
+  .ap-hero {
+    min-height: 0;
+  }
+
   .ap-hero-inner {
     flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .ap-hero-left {
+    flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
 
   .ap-photo-person {
-    width: 72px;
-    height: 72px;
+    width: 78px;
+    height: 78px;
   }
 
   .ap-photo-logo {
-    width: 48px;
-    height: 48px;
+    width: 58px;
+    height: 58px;
+  }
+
+  .ap-hero-cta {
+    justify-content: flex-start;
+  }
+
+  .ap-hero-cta .ap-btn {
+    flex: 1 1 auto;
   }
 }

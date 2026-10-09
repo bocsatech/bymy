@@ -338,26 +338,32 @@ export async function renderPartnerManage(mountRoot) {
       `
       }
 
+      ${
+        isCompany
+          ? ""
+          : `
       <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>${isCompany ? "4" : "2"}. Publikus partnerprofil</h2></div></div>
+        <div class="partner-form-title"><div><h2>2. Publikus partnerprofil</h2></div></div>
         <div class="partner-form-grid">
-          <label>Publikus profilcím${isCompany ? "" : " *"}<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" ${isCompany ? "" : "required"} /></span></label>
-          <label>Jutalék${isCompany ? "" : " *"} (csak ingatlan kereskedők)<input name="commission" value="${esc(profile.commission)}" maxlength="80" ${isCompany ? "" : "required"} placeholder="pl. bruttó 2–4%" /></label>
+          <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
+          <label>Jutalék * (csak ingatlan kereskedők)<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
           <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
           <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
           <label>Céglogó URL<input name="companyLogoUrl" type="url" value="${esc(profile.company_logo_url)}" placeholder="https://…" /></label>
           <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
-          <label class="partner-form-wide">Kerület / értékesítési területek${isCompany ? "" : " *"}<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI., Budaörs, Érd" maxlength="1000" ${isCompany ? "" : "required"} /></label>
+          <label class="partner-form-wide">Kerület / értékesítési területek *<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI., Budaörs, Érd" maxlength="1000" required /></label>
           <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát és a szakterületedet.">${esc(profile.description)}</textarea></label>
           <label class="partner-check partner-form-wide"><input type="checkbox" name="isPublic" ${profile.is_public !== false ? "checked" : ""} /><span>A jóváhagyás után legyen nyilvános a profilom</span></label>
         </div>
       </section>
+      `
+      }
 
       ${
         isCompany
           ? `
       <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>5. Szerződéses adatok</h2></div></div>
+        <div class="partner-form-title"><div><h2>4. Szerződéses adatok</h2></div></div>
         ${
           native
             ? ""
@@ -376,7 +382,11 @@ export async function renderPartnerManage(mountRoot) {
 
       <div class="partner-form-actions">
         <button type="submit">Mentés</button>
-        ${profile.application_status === "approved" && profile.slug ? `<a href="/partner/${encodeURIComponent(profile.slug)}" target="_blank" rel="noopener">Publikus profil megnyitása</a>` : ""}
+        ${
+          !isCompany && profile.application_status === "approved" && profile.slug
+            ? `<a href="/partner/${encodeURIComponent(profile.slug)}" target="_blank" rel="noopener">Publikus profil megnyitása</a>`
+            : ""
+        }
         <p data-status role="status"></p>
       </div>
     </form>`;
@@ -403,30 +413,19 @@ export async function renderPartnerManage(mountRoot) {
     const phones = syncPartnerPhoneRows(form);
     const raw = Object.fromEntries(new FormData(form).entries());
     const activityIds = [...form.querySelectorAll('input[name="companyActivity"]:checked')].map((el) => el.value);
-    const partnerPayload = {
-      displayName: String(raw.displayName || "").trim(),
-      slug: String(raw.slug || "").trim(),
-      contactPerson: String(raw.contactPerson || "").trim(),
-      phone: String(phones.phone || raw.phone || "").trim(),
-      email: String(raw.email || "").trim(),
-      commission: String(raw.commission || "").trim(),
-      website: String(raw.website || "").trim(),
-      logoUrl: String(raw.logoUrl || "").trim(),
-      companyLogoUrl: String(raw.companyLogoUrl || "").trim(),
-      coverUrl: String(raw.coverUrl || "").trim(),
-      serviceAreas: String(raw.serviceAreas || "").trim(),
-      description: String(raw.description || "").trim(),
-      isPublic: Boolean(form.elements.isPublic?.checked),
-    };
+    const displayName = String(raw.displayName || "").trim();
+    const contactPerson = String(raw.contactPerson || "").trim();
+    const phone = String(phones.phone || raw.phone || "").trim();
+    const email = String(raw.email || "").trim();
     if (isCompany) {
       const companyPostalCode = String(raw.companyPostalCode || "").replace(/\D/g, "").slice(0, 4);
       const companyCity = String(raw.companyCity || "").trim();
       let companyError = "";
-      if (!partnerPayload.displayName) companyError = "A cég neve kötelező.";
+      if (!displayName) companyError = "A cég neve kötelező.";
       else if (companyPostalCode.length !== 4) companyError = "Az irányítószám kötelező (4 számjegy).";
       else if (!companyCity) companyError = "A település kötelező.";
-      else if (!partnerPayload.contactPerson) companyError = "A kapcsolattartó neve kötelező.";
-      else if (!partnerPayload.phone) companyError = "A kapcsolattartó telefonszáma kötelező.";
+      else if (!contactPerson) companyError = "A kapcsolattartó neve kötelező.";
+      else if (!phone) companyError = "A kapcsolattartó telefonszáma kötelező.";
       if (companyError) {
         status.textContent = companyError;
         status.className = "is-error";
@@ -434,7 +433,7 @@ export async function renderPartnerManage(mountRoot) {
         submit.textContent = "Mentés";
         return;
       }
-    } else if (!partnerPayload.phone) {
+    } else if (!phone) {
       status.textContent = "Telefonszám kötelező.";
       status.className = "is-error";
       submit.disabled = false;
@@ -442,19 +441,13 @@ export async function renderPartnerManage(mountRoot) {
       return;
     }
     try {
-      const result = await jsonFetch("/api/partner-profiles/mine", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(partnerPayload),
-      });
-
       if (isCompany) {
         const companyStreet = String(raw.companyStreet || "").trim();
         const companyPostalCode = String(raw.companyPostalCode || "").replace(/\D/g, "").slice(0, 4);
         const companyCity = String(raw.companyCity || "").trim();
         await saveProfile({
           ...getProfile(),
-          company: partnerPayload.displayName,
+          company: displayName,
           companyListingName: String(raw.companyListingName || "").trim(),
           companyTaxId: String(raw.companyTaxId || "").trim(),
           companyActivities: activityIds,
@@ -463,10 +456,10 @@ export async function renderPartnerManage(mountRoot) {
           companyPostalCode,
           companyCity,
           companyCountry: String(raw.companyCountry || "Magyarország").trim() || "Magyarország",
-          companyPhone: partnerPayload.phone,
+          companyPhone: phone,
           companyPhone2: String(phones.companyPhone2 || "").trim(),
           companyPhone3: String(phones.companyPhone3 || "").trim(),
-          companyEmail: partnerPayload.email,
+          companyEmail: email,
           companyEmail2: String(raw.companyEmail2 || "").trim(),
           salespersonName: String(raw.salespersonName || "").trim(),
           salespersonName2: String(raw.salespersonName2 || "").trim(),
@@ -476,14 +469,38 @@ export async function renderPartnerManage(mountRoot) {
           const deviceIdentity = identityForAccountKind(identityFromFormData(raw), { company: true });
           await setDeviceIdentity(user.email, deviceIdentity);
         }
-      }
 
-      syncManageSidebar(accountType);
-      status.textContent =
-        result.profile.application_status === "approved"
-          ? "Mentve."
-          : "Mentve — a partnerjelentkezés jóváhagyásra vár.";
-      status.className = "is-success";
+        syncManageSidebar(accountType);
+        status.textContent = "Mentve.";
+        status.className = "is-success";
+      } else {
+        const partnerPayload = {
+          displayName,
+          slug: String(raw.slug || "").trim(),
+          contactPerson,
+          phone,
+          email,
+          commission: String(raw.commission || "").trim(),
+          website: String(raw.website || "").trim(),
+          logoUrl: String(raw.logoUrl || "").trim(),
+          companyLogoUrl: String(raw.companyLogoUrl || "").trim(),
+          coverUrl: String(raw.coverUrl || "").trim(),
+          serviceAreas: String(raw.serviceAreas || "").trim(),
+          description: String(raw.description || "").trim(),
+          isPublic: Boolean(form.elements.isPublic?.checked),
+        };
+        const result = await jsonFetch("/api/partner-profiles/mine", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(partnerPayload),
+        });
+        syncManageSidebar(accountType);
+        status.textContent =
+          result.profile.application_status === "approved"
+            ? "Mentve."
+            : "Mentve — a partnerjelentkezés jóváhagyásra vár.";
+        status.className = "is-success";
+      }
     } catch (error) {
       status.textContent = error.message;
       status.className = "is-error";

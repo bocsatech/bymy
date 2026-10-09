@@ -13,6 +13,7 @@ struct HubHomeScreen: View {
     @State private var nearbyHouses: [ListingsAPI.Listing] = []
     @State private var loading = true
     @State private var errorText: String?
+    @State private var showMapSearch = false
 
     private let pageBg = Color(red: 0.973, green: 0.976, blue: 0.980)
     private let gutter: CGFloat = 16
@@ -82,6 +83,7 @@ struct HubHomeScreen: View {
                 // Autó kategóriák
                 railHeader(title: "Autó kategóriák") { router.selectTop(.auto) }
                 categoryRail(items: autoCategories)
+                mapSearchStrip
 
                 if let errorText {
                     Text(errorText)
@@ -146,6 +148,77 @@ struct HubHomeScreen: View {
         .background(pageBg.ignoresSafeArea())
         .task(id: auth.token) { await load() }
         .refreshable { await load() }
+        .fullScreenCover(isPresented: $showMapSearch) {
+            NavigationStack {
+                NativeWebPage(page: .auto, query: "map=1")
+                    .environmentObject(auth)
+                    .environmentObject(router)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Bezárás") { showMapSearch = false }
+                        }
+                    }
+            }
+        }
+    }
+
+    /// Web C demó: „Keresés a térképen” sáv a kategória-csempék alatt.
+    private var mapSearchStrip: some View {
+        Button {
+            showMapSearch = true
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color(red: 0.82, green: 0.82, blue: 0.80), lineWidth: 1)
+                        )
+                    Circle()
+                        .fill(Color(red: 0.88, green: 0.11, blue: 0.18))
+                        .frame(width: 8, height: 8)
+                        .shadow(color: Color(red: 0.88, green: 0.11, blue: 0.18).opacity(0.35), radius: 3)
+                }
+                .frame(width: 40, height: 40)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Keresés a térképen")
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(Color(red: 0.07, green: 0.07, blue: 0.07))
+                    Text("Lásd a közeli autókat településenként")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color(red: 0.36, green: 0.42, blue: 0.48))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Text("Megnyitás")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Color(red: 0.07, green: 0.07, blue: 0.07))
+                    .padding(.horizontal, 11)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color(red: 0.94, green: 0.77, blue: 0.17))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(Color(red: 0.88, green: 0.71, blue: 0.13), lineWidth: 1)
+                            )
+                    )
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(red: 0.89, green: 0.91, blue: 0.93))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(Color(red: 0.72, green: 0.75, blue: 0.80), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, gutter)
+        .padding(.top, 4)
     }
 
     // MARK: - Promo

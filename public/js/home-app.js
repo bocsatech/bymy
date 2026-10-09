@@ -1264,7 +1264,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=1ae7e29eba")
+      mapModulePromise = import("./search-results-map.js?v=62e9488ad3")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1663,7 +1663,7 @@ import("./site-side-content.js?v=418fecb6a2")
   .catch((error) => console.error("Oldalsáv betöltés:", error));
 
 loadListings()
-  .then(() => {
+  .then(async () => {
     let fromDetail = false;
     try {
       const ref = document.referrer ? new URL(document.referrer) : null;
@@ -1673,8 +1673,27 @@ loadListings()
     }
     const qs = new URLSearchParams(window.location.search);
     const restoring = shouldRestoreVehicleSearch(PAGE);
-    if (!fromDetail && !restoring && !qs.has("nearby") && !qs.has("kiemelt")) {
+    if (!fromDetail && !restoring && !qs.has("nearby") && !qs.has("kiemelt") && !qs.has("map")) {
       window.scrollTo(0, 0);
+    }
+    /* Hub „Keresés a térképen” → /auto.html?map=1 */
+    if ((PAGE === "auto" || PAGE === "teherauto") && qs.get("map") === "1") {
+      try {
+        const mod = await ensureMapModule();
+        const btn = document.querySelector("[data-search-map-open]");
+        if (btn) {
+          btn.dataset.mapMode = "browse";
+          await mod.openSearchMapNow(btn);
+        }
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("map");
+          history.replaceState({}, "", url.pathname + url.search + url.hash);
+        } catch {
+        }
+      } catch (error) {
+        console.warn("Térkép megnyitás (map=1):", error);
+      }
     }
   })
   .catch((error) => {

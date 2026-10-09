@@ -298,6 +298,19 @@ export async function renderPartnerManage(mountRoot) {
           <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
         </div>
       </section>
+      <div class="partner-form-actions partner-ajanlas-island" role="group" aria-label="Ajánlások">
+        <button type="button" class="partner-ajanlas-btn" data-partner-ajanlas-btn>Ajánlások</button>
+        <label class="partner-switch">
+          <input
+            type="checkbox"
+            name="companyAjanlasok"
+            data-partner-ajanlas-switch
+            ${account.companyAjanlasok === true ? "checked" : ""}
+            aria-label="Ajánlások bekapcsolása"
+          />
+          <span class="partner-switch__track" aria-hidden="true"></span>
+        </label>
+      </div>
       `
           : `
       <section class="partner-form-section">
@@ -355,6 +368,13 @@ export async function renderPartnerManage(mountRoot) {
     phone: profile.phone,
     companyPhone2: account.companyPhone2,
     companyPhone3: account.companyPhone3,
+  });
+
+  const ajanlasSwitch = root.querySelector("[data-partner-ajanlas-switch]");
+  root.querySelector("[data-partner-ajanlas-btn]")?.addEventListener("click", () => {
+    if (!(ajanlasSwitch instanceof HTMLInputElement)) return;
+    ajanlasSwitch.checked = !ajanlasSwitch.checked;
+    ajanlasSwitch.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
   root.querySelector("#partner-form")?.addEventListener("submit", async (event) => {
@@ -419,6 +439,7 @@ export async function renderPartnerManage(mountRoot) {
           companyEmail2: String(raw.companyEmail2 || "").trim(),
           salespersonName: String(raw.salespersonName || "").trim(),
           salespersonName2: String(raw.salespersonName2 || "").trim(),
+          companyAjanlasok: Boolean(form.querySelector('[name="companyAjanlasok"]')?.checked),
         });
 
         syncManageSidebar(accountType);

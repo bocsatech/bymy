@@ -47,7 +47,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=cdac1e6ebc";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
-import { renderPartnerManage } from "./partner-profile.js?v=b5e4c345e5";
+import { renderPartnerManage } from "./partner-profile.js?v=7d6a9c5c0a";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";

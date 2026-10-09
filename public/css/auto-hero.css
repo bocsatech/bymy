@@ -1489,7 +1489,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     white-space: nowrap;
   }
 
-  /* Mobil: Gyártmány & Modell — csak alsó vonal, nincs keret */
+  /* Mobil: Gyártmány & Modell — fehér kártya (mint hirdetésfeladás brand-block) + aláhúzás */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
@@ -1498,12 +1498,13 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 0.45rem !important;
-    padding: 0.1rem 0 0.2rem !important;
+    width: 100% !important;
+    padding: 1.1rem 1.15rem 1.25rem !important;
     margin: 0 !important;
-    background: transparent !important;
+    background: #fff !important;
     border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    border-radius: 1.375rem !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
     box-sizing: border-box !important;
   }
 
@@ -1538,8 +1539,9 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    border: 0 !important;
     border-radius: 0 !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     overflow: visible !important;
@@ -1555,7 +1557,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-qs-drums
     .immo-schema-cell.auto-search-bm-combined
     > .immo-wheel-wrap.auto-search-bm-combined__wrap:has(.immo-wheel-trigger:focus) {
-    border: 0 !important;
+    border-color: transparent !important;
     box-shadow: none !important;
     background: transparent !important;
   }
@@ -1656,8 +1658,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-search-panel
     .auto-qs-drums
     .immo-schema-cell.auto-search-bm-combined {
-    background: transparent !important;
-    border: 0 !important;
+    background: #1d1d1d !important;
     box-shadow: none !important;
   }
 
@@ -1677,7 +1678,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .immo-schema-cell.auto-search-bm-combined
     > .immo-wheel-wrap.auto-search-bm-combined__wrap {
     background: transparent !important;
-    border: 0 !important;
+    border-color: transparent !important;
   }
 
   html[data-theme="dark"]
@@ -2188,7 +2189,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-schema-cell:not(.immo-dual-range__half):not(.auto-search-bm-combined)
+    .immo-schema-cell:not(.immo-dual-range__half)
     > .immo-wheel-wrap {
     position: relative !important;
     display: flex !important;
@@ -2212,7 +2213,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-schema-cell:not(.immo-dual-range__half):not(.auto-search-bm-combined)
+    .immo-schema-cell:not(.immo-dual-range__half)
     > .immo-wheel-wrap
     > .immo-wheel-trigger {
     flex: 1 1 0% !important;
@@ -2229,38 +2230,12 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     height: auto !important;
   }
 
-  /* Gyártmány & Modell: csak alsó vonal (keret nélkül). */
-  body:is([data-site-page="auto"], [data-site-page="teherauto"])
-    .auto-search-panel
-    .auto-qs-drums
-    .immo-schema-cell.auto-search-bm-combined
-    > .immo-wheel-wrap.auto-search-bm-combined__wrap {
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-  }
-
-  body:is([data-site-page="auto"], [data-site-page="teherauto"])
-    .auto-search-panel
-    .auto-qs-drums
-    .immo-schema-cell.auto-search-bm-combined
-    > .immo-wheel-wrap.auto-search-bm-combined__wrap
-    > .immo-wheel-trigger {
-    border: 0 !important;
-    border-bottom: 1.5px solid #cfd6dd !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
   /* Üres menü: jobb oszlop mint feladás LE/X — vonal NEM teljes szélesség */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-schema-cell:not(.immo-dual-range__half):not(.auto-search-bm-combined)
+    .immo-schema-cell:not(.immo-dual-range__half)
     > .immo-wheel-wrap:not(.has-wheel-clear)::after {
     content: "" !important;
     display: block !important;
@@ -3585,7 +3560,7 @@ html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="tehera
   .auto-search-panel
   .auto-qs-drums
   .immo-schema-cell.auto-search-bm-combined {
-  background: transparent !important;
+  background: #1d1d1d !important;
 }
 
 html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -3604,7 +3579,7 @@ html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="tehera
   .immo-wheel-trigger.is-placeholder {
   color: #9aa3ad !important;
   -webkit-text-fill-color: #9aa3ad !important;
-  border-bottom-color: transparent !important;
+  border-bottom-color: #3b4450 !important;
 }
 
 html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="teherauto"])

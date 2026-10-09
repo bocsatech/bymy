@@ -272,6 +272,10 @@ let allItems = [];
 let listingsTotal = null;
 let listingsHasMore = false;
 let listingsLoadingMore = false;
+/** Chrome: a kiemelt-pool és a szűrt fill ne lője ki egymást (loadMore no-op → 0 találat). */
+let listingsLoadChain = Promise.resolve();
+let featuredPoolGen = 0;
+let matchFillGen = 0;
 let listingsOffset = 0;
 let listingsLastFetchAt = 0;
 const LISTINGS_VISIBLE_REFRESH_MS = 60_000;
@@ -817,12 +821,19 @@ async function loadListings() {
 
 async function fillFeaturedBrowsePool() {
   if (!isFeaturedBrowseMode()) return;
+  const gen = ++featuredPoolGen;
   let guard = 0;
-  while (listingsHasMore && guard < FEATURED_POOL_MAX_PAGES && isFeaturedBrowseMode()) {
+  while (
+    listingsHasMore &&
+    guard < FEATURED_POOL_MAX_PAGES &&
+    gen === featuredPoolGen &&
+    isFeaturedBrowseMode()
+  ) {
     guard += 1;
     const before = allItems.length;
     const beforeFeatured = pickFeaturedListings(allItems).length;
     await loadMoreListings({ silent: true });
+    if (gen !== featuredPoolGen) return;
     if (allItems.length === before) break;
     if (!searchRestoreInProgress && isFeaturedBrowseMode()) {
       const afterFeatured = pickFeaturedListings(allItems).length;
@@ -831,7 +842,17 @@ async function fillFeaturedBrowsePool() {
     // Engedjük a böngészőt festeni / kattintani a következő oldal előtt.
     await new Promise((r) => window.setTimeout(r, 0));
   }
-  if (!searchRestoreInProgress && isFeaturedBrowseMode()) renderFeaturedBrowse();
+  if (gen === featuredPoolGen && !searchRestoreInProgress && isFeaturedBrowseMode()) {
+    renderFeaturedBrowse();
+  }
+}
+
+function cancelFeaturedBrowsePool() {
+  featuredPoolGen += 1;
+}
+
+function cancelMatchFill() {
+  matchFillGen += 1;
 }
 
 function mergeListings(existing, incoming) {
@@ -847,99 +868,114 @@ function mergeListings(existing, incoming) {
 }
 
 async function loadMoreListings({ silent = false } = {}) {
-  if (!listingsHasMore || listingsLoadingMore) return;
-  if (isSellerMode()) {
+  if (!listingsHasMore) return false;
+  if (!silent && isFeaturedBrowseMode() && !isSellerMode()) return false;
+
+  const run = async () => {
+    if (!listingsHasMore) return false;
+    if (isSellerMode()) {
+      listingsLoadingMore = true;
+      try {
+        const fromId = sellerFromId();
+        const page = await fetchRelatedListingsPage(fromId, {
+          limit: LISTINGS_PAGE_MORE,
+          offset: listingsOffset,
+          includeSelf: true,
+          tile: true,
+        });
+        const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
+        const got = Math.max(page.listings?.length || 0, 1);
+        listingsOffset = (Number(page.offset) || listingsOffset) + got;
+        if (page.total != null) listingsTotal = Number(page.total);
+        listingsHasMore = Boolean(page.hasMore);
+        if (active.length) allItems = mergeListings(allItems, filterBySitePage(active));
+        featuredListingIds = featuredListingIdSet(allItems);
+        if (!silent) {
+          listRenderCap = Math.max(listRenderCap, allItems.length);
+          renderListings(allItems, { force: true });
+          updateSellerInventoryCount(listingsTotal ?? allItems.length);
+          updateFilterResultCount();
+          statsUi?.refreshActiveCount?.();
+        }
+        return active.length > 0;
+      } catch (error) {
+        console.warn("Készlet folytatás:", error);
+        return false;
+      } finally {
+        listingsLoadingMore = false;
+      }
+    }
+    if (PAGE !== "auto" && PAGE !== "teherauto" && PAGE !== "ingatlan") return false;
     listingsLoadingMore = true;
     try {
-      const fromId = sellerFromId();
-      const page = await fetchRelatedListingsPage(fromId, {
-        limit: LISTINGS_PAGE_MORE,
-        offset: listingsOffset,
-        includeSelf: true,
-        tile: true,
-      });
-      const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
-      const got = Math.max(page.listings?.length || 0, 1);
-      listingsOffset = (Number(page.offset) || listingsOffset) + got;
-      if (page.total != null) listingsTotal = Number(page.total);
-      listingsHasMore = Boolean(page.hasMore);
-      if (active.length) allItems = mergeListings(allItems, filterBySitePage(active));
-      featuredListingIds = featuredListingIdSet(allItems);
-      if (!silent) {
-        listRenderCap = Math.max(listRenderCap, allItems.length);
-        renderListings(allItems, { force: true });
-        updateSellerInventoryCount(listingsTotal ?? allItems.length);
-        updateFilterResultCount();
-        statsUi?.refreshActiveCount?.();
+      let guard = 0;
+      while (listingsHasMore && guard < 20) {
+        guard += 1;
+        const page = await fetchListingsPage({
+          limit: LISTINGS_PAGE_MORE,
+          offset: listingsOffset,
+          status: "feladott",
+          vertical: pageVerticalParam(),
+          tile: true,
+          sort: readDeskSort(),
+        });
+        if (Array.isArray(page.boostOwnerIds) && page.boostOwnerIds.length) {
+          for (const id of page.boostOwnerIds) {
+            const n = Number(id);
+            if (n > 0) boostOwnerIds.add(n);
+          }
+        }
+        if (Array.isArray(page.boostListingIds)) {
+          for (const id of page.boostListingIds) {
+            const n = Number(id);
+            if (n > 0) boostListingIds.add(n);
+          }
+        }
+        for (const item of page.listings || []) {
+          if (item?.ownerBoost === true) {
+            const id = Number(item.id);
+            if (id > 0) boostListingIds.add(id);
+          }
+        }
+        const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
+        const batch = filterBySitePage(active);
+        const got = Math.max(page.listings?.length || 0, 1);
+        listingsOffset = (Number(page.offset) || listingsOffset) + got;
+        if (page.total != null) listingsTotal = Number(page.total);
+        listingsHasMore = Boolean(page.hasMore);
+        if (!batch.length) {
+          if (!listingsHasMore) break;
+          continue;
+        }
+        allItems = mergeListings(allItems, batch);
+        featuredListingIds = featuredListingIdSet(allItems);
+        if (!silent) {
+          populateFilterOptions(allItems);
+          listRenderCap = Math.max(listRenderCap, LISTINGS_INITIAL);
+          if (isFeaturedBrowseMode()) renderFeaturedBrowse();
+          else renderListings(allItems);
+          updateFilterResultCount();
+          statsUi?.refreshActiveCount?.();
+          void refreshOpenMapPins();
+        }
+        return true;
       }
+      return false;
     } catch (error) {
-      console.warn("Készlet folytatás:", error);
+      console.warn("Lista folytatás:", error);
+      return false;
     } finally {
       listingsLoadingMore = false;
     }
-    return;
-  }
-  if (PAGE !== "auto" && PAGE !== "teherauto" && PAGE !== "ingatlan") return;
-  if (!silent && isFeaturedBrowseMode()) return;
-  listingsLoadingMore = true;
-  try {
-    let guard = 0;
-    while (listingsHasMore && guard < 20) {
-      guard += 1;
-      const page = await fetchListingsPage({
-        limit: LISTINGS_PAGE_MORE,
-        offset: listingsOffset,
-        status: "feladott",
-        vertical: pageVerticalParam(),
-        tile: true,
-        sort: readDeskSort(),
-      });
-      if (Array.isArray(page.boostOwnerIds) && page.boostOwnerIds.length) {
-        for (const id of page.boostOwnerIds) {
-          const n = Number(id);
-          if (n > 0) boostOwnerIds.add(n);
-        }
-      }
-      if (Array.isArray(page.boostListingIds)) {
-        for (const id of page.boostListingIds) {
-          const n = Number(id);
-          if (n > 0) boostListingIds.add(n);
-        }
-      }
-      for (const item of page.listings || []) {
-        if (item?.ownerBoost === true) {
-          const id = Number(item.id);
-          if (id > 0) boostListingIds.add(id);
-        }
-      }
-      const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
-      const batch = filterBySitePage(active);
-      const got = Math.max(page.listings?.length || 0, 1);
-      listingsOffset = (Number(page.offset) || listingsOffset) + got;
-      if (page.total != null) listingsTotal = Number(page.total);
-      listingsHasMore = Boolean(page.hasMore);
-      if (!batch.length) {
-        if (!listingsHasMore) break;
-        continue;
-      }
-      allItems = mergeListings(allItems, batch);
-      featuredListingIds = featuredListingIdSet(allItems);
-      if (!silent) {
-        populateFilterOptions(allItems);
-        listRenderCap = Math.max(listRenderCap, LISTINGS_INITIAL);
-        if (isFeaturedBrowseMode()) renderFeaturedBrowse();
-        else renderListings(allItems);
-        updateFilterResultCount();
-        statsUi?.refreshActiveCount?.();
-        void refreshOpenMapPins();
-      }
-      break;
-    }
-  } catch (error) {
-    console.warn("Lista folytatás:", error);
-  } finally {
-    listingsLoadingMore = false;
-  }
+  };
+
+  /* Sorba állás: ne no-op-oljon, ha a kiemelt-pool épp tölt (Chrome race → 0 találat). */
+  const queued = listingsLoadChain.then(run, run);
+  listingsLoadChain = queued.then(
+    () => {},
+    () => {}
+  );
+  return queued;
 }
 
 function formLooksFiltered() {
@@ -987,33 +1023,48 @@ function updateDeskResultCount(filtered) {
 
 async function fillMatchPoolSilent() {
   if (!hasActiveClientFilters()) return;
+  const gen = ++matchFillGen;
   let guard = 0;
-  while (listingsHasMore && guard < 80) {
+  while (listingsHasMore && guard < 80 && gen === matchFillGen) {
     guard += 1;
     const before = allItems.length;
     await loadMoreListings({ silent: true });
+    if (gen !== matchFillGen) return;
     if (allItems.length === before) break;
-    updateDeskResultCount(filterItems(allItems));
+    const filtered = filterItems(allItems);
+    updateDeskResultCount(filtered);
+    updateFilterResultCount();
+    if (searchResultsCommitted && filtered.length > 0) {
+      renderListings(allItems);
+    }
     await new Promise((r) => window.setTimeout(r, 0));
   }
+  if (gen !== matchFillGen) return;
   updateDeskResultCount(filterItems(allItems));
+  updateFilterResultCount();
+  if (searchResultsCommitted) renderListings(allItems);
 }
 
 async function fillFilteredResults() {
-  if (!searchResultsCommitted && isVehicleSearchPage()) return;
+  if (!searchResultsCommitted && isVehicleSearchPage()) return false;
+  const gen = ++matchFillGen;
   let guard = 0;
   let grew = false;
   while (
     hasActiveClientFilters() &&
     listingsHasMore &&
     filterItems(allItems).length < LISTINGS_INITIAL &&
-    guard < 40
+    guard < 40 &&
+    gen === matchFillGen
   ) {
     guard += 1;
     const before = allItems.length;
     await loadMoreListings({ silent: true });
+    if (gen !== matchFillGen) return grew;
     if (allItems.length === before) break;
     grew = true;
+    updateDeskResultCount(filterItems(allItems));
+    updateFilterResultCount();
   }
   return grew;
 }
@@ -1026,6 +1077,16 @@ function previewFilterCountsOnly() {
     browseFeaturedItems = sortDeskListings(pickFeaturedListings(allItems));
     featuredListingIds = featuredListingIdSet(allItems);
   }
+  /* Szűrő előnézet: ha 0 a lokális poolban, háttérben keressük a darabszámot (Chrome ne ragadjon 0-n). */
+  if (
+    isVehicleSearchPage() &&
+    !isSellerMode() &&
+    hasActiveClientFilters() &&
+    filterItems(allItems).length === 0 &&
+    listingsHasMore
+  ) {
+    void fillMatchPoolSilent();
+  }
 }
 
 function applyFilters({ commit = false } = {}) {
@@ -1034,6 +1095,7 @@ function applyFilters({ commit = false } = {}) {
     return;
   }
   if (commit && isVehicleSearchPage() && !isSellerMode()) {
+    cancelFeaturedBrowsePool();
     searchResultsCommitted = true;
     listRenderCap = LISTINGS_INITIAL;
     closeSearchMapDom();
@@ -1052,9 +1114,12 @@ function applyFilters({ commit = false } = {}) {
     updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
   }
   if (hasActiveClientFilters()) {
-    void fillFilteredResults().then((grew) => {
+    void (async () => {
+      const grew = await fillFilteredResults();
       if (grew) renderListings(allItems);
-    });
+      /* Teljes darabszám: folytasd a pool-t (előtte a fillFilteredResults már matchFillGen-t növelte). */
+      await fillMatchPoolSilent();
+    })();
   }
   if (commit) persistCommittedSearch();
 }

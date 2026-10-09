@@ -164,57 +164,74 @@ struct HubHomeScreen: View {
         }
     }
 
-    /// Web C demó: „Keresés a térképen” sáv a kategória-csempék alatt.
+    /// Web: térképes „Keresés a térképen” sáv a kategória-csempék alatt.
     private var mapSearchStrip: some View {
         Button {
             showMapSearch = true
         } label: {
             HStack(spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(Color(red: 0.82, green: 0.82, blue: 0.80), lineWidth: 1)
-                        )
-                    Circle()
-                        .fill(Color(red: 0.88, green: 0.11, blue: 0.18))
-                        .frame(width: 8, height: 8)
-                        .shadow(color: Color(red: 0.88, green: 0.11, blue: 0.18).opacity(0.35), radius: 3)
-                }
-                .frame(width: 40, height: 40)
+                HStack(spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(Color(red: 0.90, green: 0.91, blue: 0.92), lineWidth: 1)
+                            )
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(Color(red: 0.88, green: 0.11, blue: 0.18))
+                    }
+                    .frame(width: 40, height: 40)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Keresés a térképen")
-                        .font(.system(size: 15, weight: .heavy))
-                        .foregroundStyle(Color(red: 0.07, green: 0.07, blue: 0.07))
-                    Text("Lásd a közeli autókat településenként")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Color(red: 0.36, green: 0.42, blue: 0.48))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Keresés a térképen")
+                            .font(.system(size: 15, weight: .heavy))
+                            .foregroundStyle(Color(red: 0.07, green: 0.07, blue: 0.07))
+                        Text("Lásd a közeli autókat térképen")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color(red: 0.20, green: 0.20, blue: 0.22))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.96))
+                        .shadow(color: .black.opacity(0.10), radius: 6, y: 2)
+                )
 
                 Text("Megnyitás")
-                    .font(.system(size: 13, weight: .heavy))
+                    .font(.system(size: 14, weight: .heavy))
                     .foregroundStyle(Color(red: 0.07, green: 0.07, blue: 0.07))
-                    .padding(.horizontal, 11)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                     .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color(red: 0.94, green: 0.77, blue: 0.17))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .stroke(Color(red: 0.88, green: 0.71, blue: 0.13), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.96, green: 0.82, blue: 0.29),
+                                        Color(red: 0.94, green: 0.77, blue: 0.17),
+                                        Color(red: 0.91, green: 0.72, blue: 0.10),
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
                             )
+                            .shadow(color: Color(red: 0.79, green: 0.63, blue: 0.07), radius: 0, y: 3)
+                            .shadow(color: .black.opacity(0.14), radius: 6, y: 4)
                     )
             }
-            .padding(14)
+            .padding(12)
+            .frame(minHeight: 88)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color(red: 0.89, green: 0.91, blue: 0.93))
+                    .fill(Color(red: 0.93, green: 0.94, blue: 0.95))
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(Color(red: 0.72, green: 0.75, blue: 0.80), lineWidth: 1)
+                            .stroke(Color(red: 0.94, green: 0.77, blue: 0.17), lineWidth: 2)
                     )
             )
         }

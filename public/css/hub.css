@@ -920,31 +920,45 @@ body.hub-page--feed {
   padding: 0;
 }
 
-/* Keresés a térképen — külön sáv (C demó 1:1), nem a kategóriák belsejében */
+/* Keresés a térképen — térképes sáv (demó design) */
 .hub-map-strip {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   width: 100%;
   margin: 0;
-  padding: 14px;
-  min-height: 56px;
+  padding: 12px 14px;
+  min-height: 88px;
   border-radius: 14px;
-  border: 1px solid #b8c0cc;
+  border: 2px solid #f0c52c;
   text-decoration: none;
   color: inherit;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(247, 247, 248, 0.94) 0%, rgba(247, 247, 248, 0.78) 55%, rgba(247, 247, 248, 0.55) 100%),
-    repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(15, 23, 42, 0.04) 18px, rgba(15, 23, 42, 0.04) 19px),
-    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(15, 23, 42, 0.04) 18px, rgba(15, 23, 42, 0.04) 19px),
-    #e4e8ee;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 70%),
+    url("/images/hub-map-strip-bg.jpg") center / cover no-repeat;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
 .hub-map-strip:hover {
-  border-color: #9aa3b2;
+  border-color: #e0b420;
+  filter: brightness(1.01);
+}
+
+.hub-map-strip__card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: min(78%, 420px);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(210, 208, 204, 0.9);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.1);
 }
 
 .hub-map-strip__icon {
@@ -953,18 +967,14 @@ body.hub-page--feed {
   height: 40px;
   border-radius: 12px;
   background: #fff;
-  border: 1px solid #d2d0cc;
+  border: 1px solid #e5e7eb;
   display: grid;
   place-items: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.hub-map-strip__pin {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #e11d2e;
-  box-shadow: 0 0 0 3px rgba(225, 29, 46, 0.2);
+.hub-map-strip__pin-svg {
+  display: block;
 }
 
 .hub-map-strip__copy {
@@ -975,31 +985,34 @@ body.hub-page--feed {
 .hub-map-strip__copy strong {
   display: block;
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 800;
   letter-spacing: -0.01em;
   color: #111;
+  line-height: 1.2;
 }
 
 .hub-map-strip__copy span {
   display: block;
-  margin-top: 2px;
+  margin-top: 3px;
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: #5c6b7a;
+  color: #334;
+  line-height: 1.25;
 }
 
 .hub-map-strip__cta {
   flex: 0 0 auto;
-  background: #f0c52c;
+  background: linear-gradient(180deg, #f6d24a 0%, #f0c52c 55%, #e8b71a 100%);
   border: 1px solid #e0b420;
-  border-radius: 10px;
-  padding: 0.45rem 0.7rem;
+  border-radius: 12px;
+  padding: 0.7rem 1.05rem;
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #111;
+  box-shadow: 0 3px 0 #c9a012, 0 6px 14px rgba(15, 23, 42, 0.14);
 }
 
 /* Szekció = maga a C kártya (ne legyen dupla bézs sáv keret) */

@@ -7,13 +7,6 @@ import {
   saveProfile,
   initSiteAuth,
 } from "./site-auth.js?v=b7e73b74b0";
-import {
-  getDeviceIdentity,
-  identityForAccountKind,
-  identityFromFormData,
-  isNativeApp,
-  setDeviceIdentity,
-} from "./device-contract-identity.js?v=cdac1e6ebc";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=ba74000828";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
 
@@ -249,22 +242,6 @@ export async function renderPartnerManage(mountRoot) {
     )
     .join("");
 
-  const native = isNativeApp();
-  const user = getAuthUser();
-  const identity = native ? await getDeviceIdentity(user?.email || "") : null;
-  const seatFallback = [account.companyPostalCode, account.companyCity, account.companyStreet]
-    .map((v) => String(v || "").trim())
-    .filter(Boolean)
-    .join(", ");
-  const contractCompanyName = identity?.companyName || account.company || profile.display_name || "";
-  const contractSeat = identity?.companySeat || seatFallback;
-  const contractRegistry = identity?.companyRegistry || "";
-  const contractRep =
-    identity?.representative ||
-    account.salespersonName ||
-    [account.lastName, account.firstName].filter(Boolean).join(" ") ||
-    "";
-
   root.innerHTML = `
     <header class="partner-manage-head">
       <div>
@@ -359,27 +336,6 @@ export async function renderPartnerManage(mountRoot) {
       `
       }
 
-      ${
-        isCompany
-          ? `
-      <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>4. Szerződéses adatok</h2></div></div>
-        ${
-          native
-            ? ""
-            : `<p class="partner-contract-web-hint">Böngészőben nem szerkeszthető — nyisd meg a Bymy appot a telefonodon.</p>`
-        }
-        <div class="partner-form-grid">
-          <label>Cég neve (szerződés)<input name="local_companyName" value="${esc(native ? contractCompanyName : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="organization" /></label>
-          <label class="partner-form-wide">Székhely<input name="local_companySeat" value="${esc(native ? contractSeat : "")}" ${native ? "" : "readonly"} placeholder="${native ? "pl. 1051 Budapest, …" : "Csak a mobilalkalmazásban"}" autocomplete="street-address" /></label>
-          <label>Cégjegyzék / nyilvántartási szám<input name="local_companyRegistry" value="${esc(native ? contractRegistry : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="off" /></label>
-          <label>Képviselő neve<input name="local_representative" value="${esc(native ? contractRep : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="name" /></label>
-        </div>
-      </section>
-      `
-          : ""
-      }
-
       <div class="partner-form-actions">
         <button type="submit">Mentés</button>
         ${
@@ -464,11 +420,6 @@ export async function renderPartnerManage(mountRoot) {
           salespersonName: String(raw.salespersonName || "").trim(),
           salespersonName2: String(raw.salespersonName2 || "").trim(),
         });
-
-        if (native && user?.email) {
-          const deviceIdentity = identityForAccountKind(identityFromFormData(raw), { company: true });
-          await setDeviceIdentity(user.email, deviceIdentity);
-        }
 
         syncManageSidebar(accountType);
         status.textContent = "Mentve.";

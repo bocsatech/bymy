@@ -305,23 +305,44 @@ function renderProfile(root, partner, opts = {}) {
   const editHref = "/beallitasok.html?szekcio=partner-profil";
 
   const menuBackHref = "/beallitasok.html?szekcio=hirdetes";
-  syncHubBackLink(canEdit ? menuBackHref : listBack, canEdit ? "← Saját menü" : "← Ajánlások");
+  const listingBackHref = listingId
+    ? `/hirdetes.html?id=${encodeURIComponent(listingId)}`
+    : "";
+  // Hirdetés → kereskedés oldal: vissza a kiinduló hirdetéshez
+  const hubBackHref = listingBackHref || (canEdit ? menuBackHref : listBack);
+  const hubBackLabel = listingBackHref
+    ? "← Vissza a hirdetéshez"
+    : canEdit
+      ? "← Saját menü"
+      : "← Ajánlások";
+  syncHubBackLink(hubBackHref, hubBackLabel);
+
+  const crumbLead = listingBackHref
+    ? `<a href="${esc(listingBackHref)}">Hirdetés</a>`
+    : canEdit
+      ? `<a href="${esc(menuBackHref)}">Saját menü</a>`
+      : `<a href="/ajanlasok.html?vertical=${esc(vertical)}">Ajánlások</a>`;
 
   root.innerHTML = `
     <div class="ap-toolbar">
       <p class="ap-crumb">
-        ${
-          canEdit
-            ? `<a href="${esc(menuBackHref)}">Saját menü</a>`
-            : `<a href="/ajanlasok.html?vertical=${esc(vertical)}">Ajánlások</a>`
-        }
-        ${!canEdit && catFromQuery ? ` / <a href="${esc(listBack)}">${esc(categoryLabel(catFromQuery))}</a>` : ""}
+        ${crumbLead}
+        ${!listingBackHref && !canEdit && catFromQuery ? ` / <a href="${esc(listBack)}">${esc(categoryLabel(catFromQuery))}</a>` : ""}
         / <strong>${esc(name)}</strong>
       </p>
       <div class="ap-toolbar-actions">
         ${
+          listingBackHref
+            ? `<a class="ap-back-menu" href="${esc(listingBackHref)}">← Vissza a hirdetéshez</a>`
+            : ""
+        }
+        ${
           canEdit
-            ? `<a class="ap-back-menu" href="${esc(menuBackHref)}">← Saját menü</a>
+            ? `${
+                listingBackHref
+                  ? ""
+                  : `<a class="ap-back-menu" href="${esc(menuBackHref)}">← Saját menü</a>`
+              }
                <a class="ap-edit-toggle" href="${esc(editHref)}">Szerkesztés</a>`
             : ""
         }

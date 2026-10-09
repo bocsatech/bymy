@@ -7,7 +7,7 @@ import {
   fetchPartnerRecommendations,
   loadSavedPostalCode,
   savePostalCode,
-} from "./partner-recommendations.js?v=fc822e523f";
+} from "./partner-recommendations.js?v=e8ec8eb0c9";
 
 const PARTNER_CACHE_KEY = "bymy-ajanlas-partner-v1";
 let lastResultsCity = "";
@@ -446,9 +446,7 @@ function renderResultsList(categories, activeCatId, { postalCode = "", city = ""
   if (!count) {
     const empty = document.createElement("p");
     empty.className = "ajanlas-empty";
-    empty.textContent =
-      active.empty_message ??
-      "Ebben a kategóriában nincs partner, ez a te hirdetésed helye.";
+    empty.textContent = active.empty_message ?? "Partnereket keresünk, jelentkezz";
     stack.append(empty);
   } else {
     for (const partner of active.partners) {
@@ -496,9 +494,7 @@ function renderCategory(category, openId) {
   if (count === 0) {
     const empty = document.createElement("p");
     empty.className = "ajanlas-empty";
-    empty.textContent =
-      category.empty_message ??
-      "Ebben a kategóriában nincs partner, ez a te hirdetésed helye.";
+    empty.textContent = category.empty_message ?? "Partnereket keresünk, jelentkezz";
     panel.append(empty);
   } else {
     for (const partner of category.partners) {

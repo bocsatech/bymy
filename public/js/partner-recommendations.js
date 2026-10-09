@@ -109,8 +109,7 @@ function renderCategoryPanel(category) {
     const empty = document.createElement("p");
     empty.className = "home-partner-empty";
     empty.textContent =
-      category.empty_message ??
-      "Ebben a kategóriában nincs partner, ez a te hirdetésed helye.";
+      category.empty_message ?? "Partnereket keresünk, jelentkezz";
     list.append(empty);
   }
 

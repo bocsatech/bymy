@@ -2466,7 +2466,7 @@ async function handlePartnersApi(req, res, pathname) {
         url.searchParams.get("vertical") ??
         url.searchParams.get("uzletag") ??
         url.searchParams.get("vertical_id");
-      sendJson(res, 200, getPartnerRecommendations(postalCode, { vertical }));
+      sendJson(res, 200, await getPartnerRecommendations(postalCode, { vertical }));
       return;
     }
 

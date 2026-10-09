@@ -1,4 +1,4 @@
-import { getAuthUser, isLoggedIn, refreshAuthSession } from "./site-auth.js?v=4588fd60ff";
+import { getAuthUser, isLoggedIn, refreshAuthSession } from "./site-auth.js?v=20aa3f41c9";
 import { restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
 import { slimListingTile } from "./listing-tile.js?v=0633cb6729";
 import {

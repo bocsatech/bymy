@@ -1119,6 +1119,32 @@ const actions = {
       render();
     }
   },
+  async setAjanlasPriority(ev, el) {
+    const id = el.getAttribute("data-id");
+    if (!id) return;
+    const raw = String(el.value ?? "").trim();
+    const num = raw === "" ? null : Number(raw);
+    if (raw !== "" && (!Number.isFinite(num) || num < 1 || num > 5)) {
+      err = "Az ajánlás prioritás 1–5 lehet.";
+      render();
+      return;
+    }
+    try {
+      await api(`/api/level1/users/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          adminFlags: { ajanlasPriority: raw === "" ? null : num },
+        }),
+      });
+      users = (await api("/api/level1/users")).users;
+      info = raw === "" ? "Ajánlás prioritás törölve (ABC)." : `Ajánlás prioritás: ${num}.`;
+      err = "";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
   async editUser(_, el) {
     err = "";
     info = "";
@@ -2436,6 +2462,13 @@ function userDealerBuckets(user) {
 
 function userAdminFlags(user) {
   const f = user?.adminFlags || user?.profile?.adminFlags || {};
+  const priRaw = f.ajanlasPriority ?? user?.ajanlasPriority;
+  const pri =
+    priRaw == null || priRaw === ""
+      ? null
+      : Number.isFinite(Number(priRaw)) && Number(priRaw) >= 1 && Number(priRaw) <= 5
+        ? Math.round(Number(priRaw))
+        : null;
   return {
     listingBoost: f.listingBoost === true,
     maxListings: {
@@ -2446,6 +2479,7 @@ function userAdminFlags(user) {
     canPromoKiemelt: f.canPromoKiemelt !== false,
     canPromoTop: f.canPromoTop !== false,
     canPhotoSablon: f.canPhotoSablon !== false,
+    ajanlasPriority: pri,
   };
 }
 
@@ -2473,6 +2507,23 @@ function userAdminActionsHtml(u) {
         <label>Teher <input type="text" inputmode="numeric" data-act="setMaxListings" data-id="${u.id}" data-vertical="teher" value="${esc(maxVal("teher"))}" /></label>
         <label>Ingatlan <input type="text" inputmode="numeric" data-act="setMaxListings" data-id="${u.id}" data-vertical="ingatlan" value="${esc(maxVal("ingatlan"))}" /></label>
       </div>
+      ${
+        u.companyAjanlasok === true || flags.ajanlasPriority != null
+          ? `<div class="users-card__max" title="Ajánlások lista prioritás (1 = első)">
+        <label>Ajánlás pri.
+          <select data-act="setAjanlasPriority" data-id="${u.id}">
+            <option value=""${flags.ajanlasPriority == null ? " selected" : ""}>—</option>
+            ${[1, 2, 3, 4, 5]
+              .map(
+                (n) =>
+                  `<option value="${n}"${flags.ajanlasPriority === n ? " selected" : ""}>${n}</option>`
+              )
+              .join("")}
+          </select>
+        </label>
+      </div>`
+          : ""
+      }
     </div>`;
 }
 

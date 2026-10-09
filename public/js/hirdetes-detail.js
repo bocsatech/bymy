@@ -7,10 +7,10 @@ import {
   recordListingView,
   deleteListingFromDb,
 } from "./db-client.js?v=6c1aeac308";
-import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=4588fd60ff";
+import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=20aa3f41c9";
 import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
 import { startConversation } from "./messages-api.js?v=5cf6493dc9";
-import { openListingMessage } from "./start-listing-message.js?v=d8693c3af4";
+import { openListingMessage } from "./start-listing-message.js?v=14f24ce31a";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=289f64e75c";
 import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=1911f0cb28";
 import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=67ac871172";

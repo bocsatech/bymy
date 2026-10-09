@@ -16,8 +16,8 @@ import {
   markMapOpenOnReturn,
 } from "./listing-return.js?v=1911f0cb28";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=0633cb6729";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=d8f49b6d02";
-import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=4588fd60ff";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=6c1c878a2c";
+import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=20aa3f41c9";
 import { fetchListingsPage } from "./db-client.js?v=6c1aeac308";
 import {
   buildNearbyFilter,

@@ -6,7 +6,7 @@ import {
   loadProfileFromServer,
   saveProfile,
   initSiteAuth,
-} from "./site-auth.js?v=4588fd60ff";
+} from "./site-auth.js?v=20aa3f41c9";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=ba74000828";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
 import { categoriesForVertical } from "./partner-categories-data.js?v=b826a00c74";
@@ -645,10 +645,26 @@ export async function renderPartnerManage(mountRoot) {
       <section class="partner-form-section">
         <div class="partner-form-title"><div><h2>2. Cég címe</h2></div></div>
         <div class="partner-form-grid">
-          <label class="partner-form-wide">Utca, házszám<input name="companyStreet" value="${esc(account.companyStreet || account.companyAddress)}" autocomplete="street-address" placeholder="pl. Váci út 1." /></label>
+          <label class="partner-form-wide">Utca, házszám *<input name="companyStreet" value="${esc(account.companyStreet || account.companyAddress)}" autocomplete="street-address" placeholder="pl. Váci út 1." required /></label>
           <label>Irányítószám *<input name="companyPostalCode" value="${esc(account.companyPostalCode)}" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-company-postal required /></label>
           <label>Település *<input name="companyCity" value="${esc(account.companyCity)}" autocomplete="address-level2" placeholder="automatikus" data-company-city required /></label>
           <label>Ország<input name="companyCountry" value="${esc(account.companyCountry || "Magyarország")}" autocomplete="country-name" /></label>
+        </div>
+      </section>
+
+      <section class="partner-form-section" data-partner-work-radius>
+        <div class="partner-form-title"><div><h2>Munkaterület</h2><p>Az Ajánlások listában a cég címe körül ennyi km-en belül jelenik meg a céged.</p></div></div>
+        <div class="partner-form-grid">
+          <label class="partner-form-wide">Sugár (km)
+            <select name="companyWorkRadiusKm">
+              ${[5, 10, 15, 20, 30]
+                .map((km) => {
+                  const cur = Number(account.companyWorkRadiusKm) || 30;
+                  return `<option value="${km}"${km === cur ? " selected" : ""}>${km} km</option>`;
+                })
+                .join("")}
+            </select>
+          </label>
         </div>
       </section>
 
@@ -816,10 +832,12 @@ export async function renderPartnerManage(mountRoot) {
     const phone = String(phones.phone || raw.phone || "").trim();
     const email = String(raw.email || "").trim();
     if (isCompany) {
+      const companyStreetCheck = String(raw.companyStreet || "").trim();
       const companyPostalCode = String(raw.companyPostalCode || "").replace(/\D/g, "").slice(0, 4);
       const companyCity = String(raw.companyCity || "").trim();
       let companyError = "";
       if (!displayName) companyError = "A cég neve kötelező.";
+      else if (!companyStreetCheck) companyError = "Az utca, házszám kötelező.";
       else if (companyPostalCode.length !== 4) companyError = "Az irányítószám kötelező (4 számjegy).";
       else if (!companyCity) companyError = "A település kötelező.";
       else if (!contactPerson) companyError = "A kapcsolattartó neve kötelező.";
@@ -869,6 +887,7 @@ export async function renderPartnerManage(mountRoot) {
           companyPostalCode,
           companyCity,
           companyCountry: String(raw.companyCountry || "Magyarország").trim() || "Magyarország",
+          companyWorkRadiusKm: Number(raw.companyWorkRadiusKm) || 30,
           companyPhone: phone,
           companyPhone2: String(phones.companyPhone2 || "").trim(),
           companyPhone3: String(phones.companyPhone3 || "").trim(),

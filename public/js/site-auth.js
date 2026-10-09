@@ -485,6 +485,7 @@ const EMPTY_PROFILE = {
   companyAjanlasokIngatlan: false,
   companyAjanlasokAutoCats: [],
   companyAjanlasokIngatlanCats: [],
+  companyWorkRadiusKm: 30,
   companyCoverUrl: "",
   companyLogoUrl: "",
   companyAvatarUrl: "",

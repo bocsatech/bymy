@@ -2,8 +2,8 @@
 
 import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=6c1aeac308";
 import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
-import { getAuthUser } from "./site-auth.js?v=4588fd60ff";
-import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=d8693c3af4";
+import { getAuthUser } from "./site-auth.js?v=20aa3f41c9";
+import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=14f24ce31a";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=289f64e75c";
 import { listingDetailHref } from "./listing-return.js?v=1911f0cb28";
 import { qrBlockHtml, withQrSource } from "./qr-display.js?v=d72223d7cd";

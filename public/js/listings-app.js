@@ -1,7 +1,7 @@
 import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=6c1aeac308";
 import { renderListingCells } from "./cells-view.js?v=8237c0fee4";
 import { createListingCard, formatListingDisplayTitle } from "./listing-card.js?v=3e8a4a3fe2";
-import { getAuthUser } from "./site-auth.js?v=4588fd60ff";
+import { getAuthUser } from "./site-auth.js?v=20aa3f41c9";
 import { listingDetailHref, rememberListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
 
 const listEl = document.getElementById("listings-list");

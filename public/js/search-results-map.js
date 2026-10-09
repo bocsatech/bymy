@@ -37,13 +37,16 @@ const LABEL_FILTERED = "Találatok a térképen";
 /** Böngésző térkép: lakhely körüli sugar (km), csoportosítva. */
 const MAP_BROWSE_RADIUS_KM = 10;
 const MAP_BROWSE_MAX_PAGES = 25;
-/** OSM.org csempék gyakran lassúak / limitáltak — Carto CDN gyorsabb HU-ban is. */
-const MAP_TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+/**
+ * Carto raster 2026-09 óta API kulcsot kér (üres „API KEY REQUIRED” csempe).
+ * Esri World Street Map: kulcs nélkül, CDN-ről gyors EU/HU-ban is.
+ */
+const MAP_TILE_URL =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
 const MAP_TILE_OPTS = {
-  maxZoom: 18,
-  subdomains: "abcd",
+  maxZoom: 19,
   attribution:
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, OpenStreetMap',
 };
 
 function addMapTiles(L, map) {

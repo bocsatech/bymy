@@ -249,12 +249,13 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   font-weight: 700;
   line-height: 1.25;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  text-align: center;
 }
 
 .auto-search-toggle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 0.75rem;
   width: 100%;
   margin: 0 0 0.7rem;
@@ -263,7 +264,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   background: transparent;
   color: inherit;
   font: inherit;
-  text-align: left;
+  text-align: center;
   cursor: default;
 }
 
@@ -987,13 +988,16 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 
   .auto-search-toggle {
+    position: relative;
     margin: 0;
-    padding: 0.15rem 0;
+    padding: 0.15rem 1.5rem;
     cursor: pointer;
     color: #111;
     -webkit-tap-highlight-color: transparent;
     flex: 1 1 auto;
     min-width: 0;
+    justify-content: center;
+    text-align: center;
   }
 
   .auto-search-save {
@@ -1013,13 +1017,17 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
   .auto-search-toggle__chevron {
     display: block;
-    margin-right: 0.25rem;
+    position: absolute;
+    right: 0.25rem;
+    top: 50%;
+    margin: 0;
+    transform: translateY(-50%) rotate(45deg);
     border-color: #111;
   }
 
   .auto-search-panel.is-open .auto-search-toggle__chevron {
-    transform: rotate(225deg);
-    margin-top: 0.2rem;
+    transform: translateY(-50%) rotate(225deg);
+    margin-top: 0;
   }
 
   .auto-search-panel:not(.is-open) .auto-search-body {
@@ -1059,6 +1067,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     color: #111;
     font-size: 1.12rem;
     text-shadow: none;
+    width: 100%;
+    text-align: center;
   }
 
   /* Sötét mód: a fehér keresőpanel ne maradjon világos blokk */

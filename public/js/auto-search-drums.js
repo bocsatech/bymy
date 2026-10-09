@@ -7,7 +7,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=c4c7ac29a2";
 import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=f531cca4c9";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=bb243f3133";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=21e4ba01fb";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -1216,10 +1216,129 @@ function bindDrumSavedSearch(form) {
   });
 }
 
+/** Frissítés után: helyreállított dobkerék-HTML-re csak újra kötünk (nincs select→drum remount). */
+export function rebindAutoSearchDrums(form = document.getElementById("home-qs-form")) {
+  if (!form?.querySelector?.("[data-wheel], .immo-dual-range__summary")) return false;
+  bindDrumSavedSearch(form);
+  applyDrumModeClass();
+  form.classList.add("immo-search-form", "auto-qs-drums");
+  const portalUi = usePortalDrums(form);
+  form.classList.toggle("auto-qs-drums--desktop", !portalUi);
+  form.classList.toggle("auto-qs-drums--mobile", portalUi);
+
+  form.querySelectorAll("[data-wheel]").forEach((wheel) => {
+    try {
+      delete wheel.dataset.drumBound;
+      const key = String(wheel.getAttribute("data-wheel") || "");
+      const trigger = wheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger");
+      const emptyLabel =
+        trigger?.dataset?.emptyLabel ||
+        (key.endsWith("_tol") ? "tól" : key.endsWith("_ig") ? "ig" : "Mindegy");
+      const multiple = MULTI_SWITCH_KEYS.has(key) || wheel.dataset.multiple === "1";
+      const forcePortal = Boolean(wheel.closest(".immo-dual-range__half"));
+      initDrumWheel(wheel, {
+        emptyLabel,
+        openMode: forcePortal || portalUi ? "portal" : "inline",
+        multiple,
+      });
+      const live =
+        wheel.closest(".immo-wheel-wrap")?.querySelector("[data-wheel]") ||
+        form.querySelector(`[data-wheel="${CSS.escape?.(key) || key}"]`) ||
+        wheel;
+      syncDrumWheelDisplay(live);
+      bindAutoDrumSheet(live);
+    } catch {
+      /* ignore one wheel */
+    }
+  });
+
+  form.querySelectorAll(".immo-dual-range").forEach((dual) => {
+    const summary = dual.querySelector("[data-dual-range-summary]");
+    if (!summary || summary.dataset.rebound === "1") return;
+    summary.dataset.rebound = "1";
+    const minWheel = dual.querySelector(".immo-dual-range__half--min [data-wheel]");
+    summary.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!minWheel) return;
+      const fakeTrigger =
+        minWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger") || summary;
+      openAutoDrumSheet(minWheel, fakeTrigger);
+    });
+  });
+
+  styleAutoSearchAlapCard(form);
+  styleAutoSearchMoreCard(form);
+  form.dataset.drumsMounted = "1";
+  return true;
+}
+
+function qsDomCacheKey() {
+  const page = document.body?.getAttribute("data-site-page") || "auto";
+  const desk =
+    typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches ? "desk" : "mob";
+  return `bymy-qs-dom:v1:${page}:${desk}`;
+}
+
+export function saveAutoSearchDomCache(form = document.getElementById("home-qs-form")) {
+  if (!form || form.dataset.drumsMounted !== "1") return;
+  const main = form.querySelector("#qs-layout-main");
+  const more = form.querySelector("#qs-more-layout");
+  if (!main?.innerHTML?.trim()) return;
+  try {
+    sessionStorage.setItem(
+      qsDomCacheKey(),
+      JSON.stringify({
+        savedAt: Date.now(),
+        deskQuickKeys: form.dataset.deskQuickKeys || "",
+        mainHtml: main.innerHTML,
+        moreHtml: more?.innerHTML || "",
+      })
+    );
+  } catch {
+    /* quota */
+  }
+}
+
+export function restoreAutoSearchDomCache(form = document.getElementById("home-qs-form")) {
+  if (!form) return false;
+  const main = form.querySelector("#qs-layout-main");
+  const more = form.querySelector("#qs-more-layout");
+  if (!main || main.querySelector(".immo-wheel-trigger, .immo-dual-range-block, [data-qs-field]")) {
+    return false;
+  }
+  try {
+    const raw = sessionStorage.getItem(qsDomCacheKey());
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.mainHtml || parsed.mainHtml.length < 80) return false;
+    main.innerHTML = parsed.mainHtml;
+    if (more && parsed.moreHtml) more.innerHTML = parsed.moreHtml;
+    if (parsed.deskQuickKeys) form.dataset.deskQuickKeys = parsed.deskQuickKeys;
+    form.dataset.qsDomRestored = "1";
+    form.classList.add("immo-search-form", "auto-qs-drums");
+    form.classList.toggle("auto-qs-drums--mobile", usePortalDrums(form));
+    form.classList.toggle("auto-qs-drums--desktop", !usePortalDrums(form));
+    /* Azonnal látszódjon — ne booting-hide (Autoverzum-szerű). */
+    form.classList.add("is-qs-ready");
+    form.classList.remove("auto-qs-booting");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {
   if (!form) return false;
   bindDrumSavedSearch(form);
   if (form.dataset.drumsMounted === "1") return true;
+  /* Helyreállított dobkerék-DOM: ne convertoljunk selectből újra. */
+  if (
+    form.dataset.qsDomRestored === "1" ||
+    form.querySelector("#qs-layout-main .immo-wheel-trigger, #qs-layout-main .immo-dual-range-block")
+  ) {
+    return rebindAutoSearchDrums(form);
+  }
   const page = document.body?.getAttribute("data-site-page") || "";
   const force = form.hasAttribute("data-force-drums") || form.hasAttribute("data-ertek-drums");
   if (!force && page !== "auto" && page !== "teherauto") return false;

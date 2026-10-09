@@ -981,6 +981,14 @@ function wirePostalCityAutofill(form) {
   });
 }
 
+function formHasLiveSearchUi(form) {
+  return Boolean(
+    form?.querySelector?.(
+      "#qs-layout-main .immo-wheel-trigger, #qs-layout-main .immo-dual-range-block, #qs-layout-main .auto-search-alap-card, #qs-more-layout .immo-wheel-trigger"
+    )
+  );
+}
+
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form"), { force = false } = {}) {
   if (!form) return null;
   try {
@@ -1004,10 +1012,17 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
       return layout;
     }
 
+    /* Élő dobkerék / helyreállított panel: ne wipe-oljuk (Chrome villogás + menü eltűnés). */
+    if (!force && formHasLiveSearchUi(form)) {
+      hideLegacy(form);
+      return layout;
+    }
+
     // Remount after a failed boot: clear drum flag so converters can run again.
     delete form.dataset.drumsMounted;
     delete form.dataset.alapCardStyled;
     delete form.dataset.moreCardStyled;
+    delete form.dataset.qsDomRestored;
     form.classList.remove("auto-qs-drums", "auto-qs-drums--mobile", "auto-qs-drums--desktop");
 
     hideLegacy(form);

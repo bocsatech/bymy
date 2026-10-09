@@ -1,6 +1,15 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=bb243f3133";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=9a2f9f6c79";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=21e4ba01fb";
+import {
+  mountAutoSearchDrums,
+  rebindAutoSearchDrums,
+  restoreAutoSearchDomCache,
+  saveAutoSearchDomCache,
+  readAutoDrumFilterValues,
+  resetAutoSearchDrums,
+  styleAutoSearchMoreCard,
+  enhanceDeskDualRanges,
+} from "./auto-search-drums.js?v=fe700ec410";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -222,7 +231,20 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
 
   setMoreOpen(false);
   setDetailedOpen(false);
-  setQsReady(false);
+
+  /* Második látogatás: azonnal a kész szűrő-HTML (ne üres panel / menü eltűnés). */
+  const restoredDom = restoreAutoSearchDomCache(form);
+  if (restoredDom) {
+    try {
+      rebindAutoSearchDrums(form);
+    } catch (rebindError) {
+      console.warn("Kereső dobkerék rebind:", rebindError);
+    }
+    setQsReady(true);
+  } else {
+    setQsReady(false);
+  }
+
   // Never leave the form permanently blocked if a picker hangs.
   const bootFailsafe = window.setTimeout(() => {
     if (!form.classList.contains("is-qs-ready")) {
@@ -269,14 +291,24 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
 
     deskMenuMountPromise = (async () => {
       /* Layout nélkül ne mountoljunk — különben drumsMounted=1 üresen ragad. */
-      if (!f?.querySelector("#qs-layout-main [data-qs-field], #qs-more-layout [data-qs-field]")) {
+      if (
+        !f?.querySelector(
+          "#qs-layout-main [data-qs-field], #qs-more-layout [data-qs-field], #qs-layout-main .immo-wheel-trigger, #qs-layout-main .immo-dual-range-block"
+        )
+      ) {
         return;
       }
       arrangeAutoDeskDemoFields(f);
       try {
-        delete f.dataset.drumsMounted;
-        f.classList.remove("auto-qs-drums", "auto-qs-drums--mobile", "auto-qs-drums--desktop");
-        await mountAutoSearchDrums(f);
+        /* Helyreállított / élő UI: soft rebind — ne full remount. */
+        if (
+          f.dataset.qsDomRestored === "1" ||
+          f.querySelector("#qs-layout-main .immo-wheel-trigger, #qs-layout-main .immo-dual-range-block")
+        ) {
+          rebindAutoSearchDrums(f);
+        } else {
+          await mountAutoSearchDrums(f);
+        }
       } catch (drumError) {
         console.warn("Desk kereső dobkerék:", drumError);
       }
@@ -361,6 +393,13 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
       updateAutoDeskAccSummaries(form);
     } catch (sumError) {
       console.warn("Desk összefoglaló:", sumError);
+    }
+    if (ok || qsHasFields()) {
+      try {
+        saveAutoSearchDomCache(form);
+      } catch {
+        /* ignore */
+      }
     }
     onReady?.();
     resolveReady?.();

@@ -534,12 +534,13 @@ function render(view, listing, related = []) {
   const canMsg = !own;
   const user = getAuthUser();
   const profile = getProfile() || {};
-  const partner = listing?.partner;
+  const partner = listing?.partner || null;
   const partnerHref = partner?.slug
     ? `/ajanlas-partner.html?slug=${encodeURIComponent(partner.slug)}`
-    : listing?.id
+    : partner && listing?.id
       ? `/ajanlas-partner.html?listing=${encodeURIComponent(String(listing.id))}`
       : "";
+  const partnerLabel = String(partner?.display_name || view.sellerName || "").trim();
   const loginNext = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
   root.dataset.listingId = String(view.id);
   root.dataset.listingVertical = listingVerticalFromView(view);
@@ -639,7 +640,9 @@ function render(view, listing, related = []) {
           partnerHref
             ? `<a class="hd-partner-badge" href="${partnerHref}">
                 <span class="hd-partner-badge__mark">✓</span>
-                <span><strong>Ellenőrzött Bymy partner</strong><small>${escapeHtml(partner.display_name)}</small></span>
+                <span><strong>Ellenőrzött Bymy partner</strong>${
+                  partnerLabel ? `<small>${escapeHtml(partnerLabel)}</small>` : ""
+                }</span>
               </a>`
             : ""
         }

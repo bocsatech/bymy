@@ -7,18 +7,18 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=250d8176d9";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=602f83dbab";
-import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=f11fc26a36";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=deb072c855";
+} from "./home-search-filter.js?v=aaf945d091";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=a5a696806b";
+import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=8e0fd8f890";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=96ca48213f";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=f99edb6978";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=7cc9e0b957";
+} from "./ingatlan-search.js?v=3fe92aeebb";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=3a43e30b61";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=3c1365eaf4";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=1433a5b139";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
@@ -400,13 +400,13 @@ async function syncCategoryToSearchMenu(categoryId) {
   if (!form) return;
   try {
     if (quickSearchApi?.whenReady) await quickSearchApi.whenReady;
-    const { mountAutoFuelPicker } = await import("./auto-fuel-picker.js?v=0070b15047");
+    const { mountAutoFuelPicker } = await import("./auto-fuel-picker.js?v=6ddc50f61e");
     if (window.matchMedia("(min-width: 901px)").matches) {
       await mountAutoFuelPicker(form);
     }
-    const { applySavedSearchFilters } = await import("./saved-search.js?v=f11fc26a36");
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=8e0fd8f890");
     await applySavedSearchFilters(form, filters);
-    const { applyDrumSavedSearchFilters } = await import("./auto-search-drums.js?v=35f641a82f");
+    const { applyDrumSavedSearchFilters } = await import("./auto-search-drums.js?v=9b70a78d88");
     applyDrumSavedSearchFilters(form, filters);
     updateAutoDeskAccSummaries(form);
     quickSearchFilters = { ...emptyFilters(), ...filters };

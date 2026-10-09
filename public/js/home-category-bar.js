@@ -1,4 +1,4 @@
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=0070b15047";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=6ddc50f61e";
 
 export const HOME_CATEGORY_IDS = [
   "uj",

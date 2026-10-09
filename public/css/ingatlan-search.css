@@ -3177,12 +3177,6 @@ html:has(body.auto-drum-sheet-open) {
   overflow-x: hidden !important;
 }
 
-/* Chrome: tartsd a scrollbar helyét — sheet nyitáskor ne ugorjon oldalra a layout */
-html.site-app,
-html:has(body.site-app) {
-  scrollbar-gutter: stable;
-}
-
 @media (max-width: 900px) {
   body.site-app.auto-drum-portal-open .mw-app-tabbar,
   body.site-app.immo-scroll-locked .mw-app-tabbar,

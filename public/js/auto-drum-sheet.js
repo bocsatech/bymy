@@ -1170,6 +1170,7 @@ const SHEET_SCROLL_CLEAR_PROPS = [
   "margin-left",
   "margin-right",
   "padding-right",
+  "box-sizing",
   "overflow",
   "overflow-x",
   "overflow-y",
@@ -1240,11 +1241,15 @@ function forceAndroidPageScrollable() {
   body.style.setProperty("touch-action", "auto", "important");
 }
 
+let sheetScrollLockPad = 0;
+
 function lockSheetPageAxes() {
   try {
-    /* Ha már locked, NE írd felül a mentett Y-t — a második hívás (rAF) scrollY=0 lenne. */
-    if (!sheetScrollLocked) {
+    /* Ha már locked, NE írd felül Y-t / paddinget — a 2–3. hívás (rAF) sb=0-t mérne → széles villanás. */
+    const firstLock = !sheetScrollLocked;
+    if (firstLock) {
       sheetScrollLockY = window.scrollY || window.pageYOffset || 0;
+      sheetScrollLockPad = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
       sheetScrollLocked = true;
     }
     const y = sheetScrollLockY;
@@ -1260,21 +1265,24 @@ function lockSheetPageAxes() {
        */
       window.scrollTo(0, y);
     } else {
-      /* Desktop Chrome: a klasszikus scrollbar eltűnése + width:100% oldalcsúszást okoz. */
-      const sb = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+      /*
+       * Desktop Chrome: scrollbar eltűnésekor a body kiszélesedik → menük villognak.
+       * Egy kompenzáció: width:100% + padding-right (első mérés), box-sizing:border-box.
+       */
       document.body.style.setProperty("position", "fixed", "important");
       document.body.style.setProperty("top", `-${y}px`, "important");
       document.body.style.setProperty("left", "0", "important");
-      document.body.style.setProperty("right", "0", "important");
+      document.body.style.setProperty("right", "auto", "important");
+      document.body.style.setProperty("width", "100%", "important");
       document.body.style.setProperty("max-width", "100%", "important");
+      document.body.style.setProperty("box-sizing", "border-box", "important");
       document.body.style.setProperty("margin-left", "0", "important");
       document.body.style.setProperty("margin-right", "0", "important");
-      if (sb > 0) {
-        document.body.style.setProperty("padding-right", `${sb}px`, "important");
+      if (sheetScrollLockPad > 0) {
+        document.body.style.setProperty("padding-right", `${sheetScrollLockPad}px`, "important");
       } else {
         document.body.style.removeProperty("padding-right");
       }
-      document.body.style.removeProperty("width");
       document.body.style.setProperty("overflow", "hidden", "important");
       document.body.style.setProperty("overflow-x", "hidden", "important");
       document.documentElement.style.setProperty("overflow-x", "hidden", "important");
@@ -1298,11 +1306,13 @@ function unlockSheetPageAxes() {
     }
     const y = sheetScrollLockY || 0;
     sheetScrollLocked = false;
+    sheetScrollLockPad = 0;
     window.scrollTo(0, y);
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
   } catch {
     sheetScrollLocked = false;
+    sheetScrollLockPad = 0;
     syncDrumPortalHtmlClass();
   }
 }

@@ -155,7 +155,7 @@ const WIZARD_CATEGORY_OPTIONS = [
   {
     id: "szabadido-sport",
     label: "Szabadidő, sport",
-    image: "",
+    image: "/images/categories/piac-sport.png",
     vertical: "piac",
     subtype: "szabadido-sport",
   },

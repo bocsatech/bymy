@@ -32,7 +32,7 @@ const PIAC_TOP_ICONS = {
   "muszaki-elektronika":
     '<img class="piac-top-icon__img" src="/images/categories/piac-muszaki.png" alt="" width="48" height="44" decoding="async" />',
   "szabadido-sport":
-    '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="14" cy="30" r="7" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="34" cy="30" r="7" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M20 28l6-12h8l4 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    '<img class="piac-top-icon__img" src="/images/categories/piac-sport.png" alt="" width="48" height="44" decoding="async" />',
   "divat-ruhazat":
     '<img class="piac-top-icon__img" src="/images/categories/piac-divat.png" alt="" width="48" height="44" decoding="async" />',
   "uzlet-szolgaltatas":

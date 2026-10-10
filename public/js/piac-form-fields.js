@@ -5,7 +5,7 @@ import {
   syncPiacPropFields,
   readPiacPropValues,
   validatePiacPropForm,
-} from "./piac-prop-fields.js?v=66234603fd";
+} from "./piac-prop-fields.js?v=c01ab6ddfc";
 
 let catalogPromise = null;
 
@@ -444,7 +444,7 @@ export async function ensurePiacFormFields(form) {
   title?.addEventListener("change", () => syncTitleToHidden(form));
 
   const free = root.querySelector("#piac_ingyen");
-  free?.addEventListener("change", () => {
+  free?.addEventListener("change", (event) => {
     const price = form.elements.namedItem("vetelar");
     const field = price instanceof RadioNodeList ? price[0] : price;
     if (!field) return;
@@ -452,11 +452,23 @@ export async function ensurePiacFormFields(form) {
       field.dataset.wasRequired = field.required ? "1" : "0";
       field.required = false;
       field.removeAttribute("required");
-      field.value = "0";
-    } else if (field.dataset.wasRequired === "1") {
-      field.required = true;
-      field.setAttribute("required", "");
-      if (field.value === "0") field.value = "";
+      const digits = String(field.dataset.kmDigits || field.value || "").replace(/\D/g, "");
+      if (digits && digits !== "0") field.dataset.piacPriceBeforeFree = digits;
+      /* Programozott seed ne törölje a már begépelt árat. */
+      if (event.isTrusted || !digits || digits === "0") {
+        field.value = "0";
+        if (field.dataset) field.dataset.kmDigits = "0";
+      }
+    } else {
+      if (field.dataset.wasRequired === "1") {
+        field.required = true;
+        field.setAttribute("required", "");
+      }
+      const restore = String(field.dataset.piacPriceBeforeFree || "").replace(/\D/g, "");
+      if (field.value === "0" || String(field.value || "").trim() === "") {
+        field.value = restore || "";
+        if (field.dataset) field.dataset.kmDigits = restore || "";
+      }
     }
   });
   if (seedFree) free?.dispatchEvent(new Event("change"));
@@ -593,10 +605,36 @@ export async function syncPiacFormVisibility(form) {
     vetelarField.setAttribute("autocomplete", "off");
     vetelarField.setAttribute("inputmode", "numeric");
     vetelarField.setAttribute("placeholder", "pl. 15 000");
+    vetelarField.disabled = false;
+    vetelarField.removeAttribute("disabled");
     const priceLabel = form.querySelector('label[for="vetelar"]');
     if (priceLabel && !priceLabel.dataset.piacLabelSaved) {
       priceLabel.dataset.piacLabelSaved = priceLabel.innerHTML;
       priceLabel.innerHTML = 'Ár: <span class="req">*</span>';
+    }
+    if (vetelarField.dataset.piacRememberBound !== "1") {
+      vetelarField.dataset.piacRememberBound = "1";
+      const rememberPrice = () => {
+        const digits = String(vetelarField.dataset.kmDigits || vetelarField.value || "").replace(/\D/g, "");
+        if (!digits || digits === "0") return;
+        if (!form._bymyLastFormData || typeof form._bymyLastFormData !== "object") {
+          form._bymyLastFormData = {};
+        }
+        form._bymyLastFormData.vetelar = digits;
+      };
+      vetelarField.addEventListener("input", rememberPrice);
+      vetelarField.addEventListener("change", rememberPrice);
+      vetelarField.addEventListener("blur", rememberPrice);
+    }
+    /* Layout / hide ne vegye ki a FormData-ból. */
+    const priceWrap =
+      vetelarField.closest(".labeled-field, .ad-layout-item, .suffix-field")?.closest(".card") ||
+      vetelarField.closest(".card");
+    if (priceWrap) {
+      priceWrap.hidden = false;
+      priceWrap.removeAttribute("hidden");
+      priceWrap.classList.remove("piac-hide-vehicle", "ad-layout-hidden", "ad-immo-orphan");
+      priceWrap.style.removeProperty("display");
     }
   }
 

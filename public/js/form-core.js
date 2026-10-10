@@ -25,8 +25,8 @@ import {
   syncPiacFormVisibility,
   readPiacFormValues,
   validatePiacForm,
-} from "./piac-form-fields.js?v=66234603fd";
-import { syncPiacPropFields } from "./piac-prop-fields.js?v=66234603fd";
+} from "./piac-form-fields.js?v=c01ab6ddfc";
+import { syncPiacPropFields } from "./piac-prop-fields.js?v=c01ab6ddfc";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
@@ -1139,15 +1139,34 @@ function showStep(step, { openDeskAccordion = false } = {}) {
 }
 
 function collectFormData() {
+  const last =
+    form._bymyLastFormData && typeof form._bymyLastFormData === "object" ? form._bymyLastFormData : {};
   const data = Object.fromEntries(new FormData(form).entries());
   data.felszereltseg = [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value);
   data.egyeb_info = [...form.querySelectorAll('input[name="egyeb_info"]:checked')].map((el) => el.value);
   if (data.km != null) data.km = parseKmDigits(data.km);
-  if (data.vetelar != null) data.vetelar = parseKmDigits(data.vetelar);
+
+  /* Ár: FormData / disabled / lépésváltás ne veszítse el — digit + last fallback. */
+  const vetelarEl = document.getElementById("vetelar");
+  const vetelarNow = parseKmDigits(vetelarEl?.dataset?.kmDigits || vetelarEl?.value || data.vetelar || "");
+  const vetelarLast = parseKmDigits(last.vetelar || "");
+  data.vetelar = vetelarNow || vetelarLast || "";
   if (data.vetelar_eur != null) data.vetelar_eur = parseKmDigits(data.vetelar_eur);
+  else if (last.vetelar_eur) data.vetelar_eur = parseKmDigits(last.vetelar_eur);
+
   if (isPiacAd()) {
     Object.assign(data, readPiacFormValues(form));
+    /* Lépésközi mentés full replace — üres collect ne törölje a piactér props / meta értékeket. */
+    for (const [key, raw] of Object.entries(last)) {
+      if (!/^(piac_prop_|allas_|piac_path|piac_intent|piac_cim|piac_ingyen)/.test(key)) continue;
+      const cur = String(data[key] ?? "").trim();
+      const prev = String(raw ?? "").trim();
+      if (!cur && prev) data[key] = prev;
+    }
+    if (!String(data.vetelar || "").trim() && vetelarLast) data.vetelar = vetelarLast;
   }
+
+  form._bymyLastFormData = { ...last, ...data };
   return data;
 }
 

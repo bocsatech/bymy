@@ -280,6 +280,47 @@
         box-shadow: 0 0 0 2px #22c55e;
         background: #0f172a;
       }
+      .piac-subcats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem 0.45rem;
+        margin: 0.15rem auto 0.35rem;
+        max-width: 920px;
+      }
+      .piac-subcats__link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 0.3rem 0.7rem;
+        border: 1px solid #c7d2e0;
+        border-radius: 999px;
+        background: #fff;
+        color: #111827;
+        font-size: 0.82rem;
+        font-weight: 650;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .piac-subcats__link:hover {
+        border-color: #93c5fd;
+        background: #f8fafc;
+      }
+      .piac-subcats__link.is-active {
+        border-color: #22c55e;
+        background: #22c55e;
+        color: #fff;
+      }
+      [data-theme="dark"] .piac-subcats__link {
+        background: #0f172a;
+        border-color: #334155;
+        color: #f1f5f9;
+      }
+      [data-theme="dark"] .piac-subcats__link.is-active {
+        border-color: #22c55e;
+        background: #22c55e;
+        color: #fff;
+      }
       .piac-rail {
         min-height: 148px;
       }
@@ -530,7 +571,7 @@
     </nav>
 
     <script src="/js/hub-rail-drag.js?v=f9476114f4" defer></script>
-    <script src="/js/piacter-hub.js?v=57dabff3ca" type="module"></script>
+    <script src="/js/piacter-hub.js?v=3953acb8df" type="module"></script>
     <script src="/js/nav-counts.js?v=7613897d1d" type="module"></script>
     <script src="/js/theme.js?v=4fe8a2261f" type="module"></script>
     <script src="/js/site-auth.js?v=20aa3f41c9" type="module"></script>

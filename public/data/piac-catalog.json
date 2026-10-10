@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "source": "docs/piac-ref screenshots + jofogas.ai/form new_categories (excl. Ingatlan, Jármű)",
+  "version": 3,
+  "source": "jofogas new_categories (excl. Ingatlan, Jármű/Autó)",
   "createdAt": "2026-10-10",
   "listing": {
     "intent": [
@@ -20,8 +20,7 @@
         "type": "text",
         "min": 12,
         "max": 70,
-        "required": true,
-        "help": "Cím tippek: márka, típus, évjárat, állapot"
+        "required": true
       },
       {
         "key": "kepek",
@@ -38,124 +37,145 @@
     {
       "slug": "allas",
       "label": "Állásajánlatok, álláskeresés",
+      "jfId": "6000",
       "children": [
         {
           "slug": "adminisztracio-irodai-munka",
           "label": "Adminisztráció / irodai munka",
+          "jfId": "6021",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "bank-biztositas-tozsde",
           "label": "Bank / biztosítás / tőzsde",
+          "jfId": "6022",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "cegvezetes-menedzsment",
           "label": "Cégvezetés / menedzsment",
+          "jfId": "6023",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "egeszsegugy-szepseg",
           "label": "Egészségügy / szépség",
+          "jfId": "6024",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "epitoipar-ingatlan",
           "label": "Építőipar / ingatlan",
+          "jfId": "6025",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "ertekesites-kereskedelem",
           "label": "Értékesítés / kereskedelem",
+          "jfId": "6026",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "fizikai-munka-segedmunka",
           "label": "Fizikai munka / segédmunka",
+          "jfId": "6027",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "gyartas-termeles-mernok",
           "label": "Gyártás / termelés / mérnök",
+          "jfId": "6028",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "hr-munkaugy",
           "label": "HR / munkaügy",
+          "jfId": "6029",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "it-telekommunikacio",
           "label": "IT / telekommunikáció",
+          "jfId": "6030",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "jog-kozigazgatas",
           "label": "Jog / közigazgatás",
+          "jfId": "6031",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "kornyezet-mezogazdasag",
           "label": "Környezet / mezőgazdaság",
+          "jfId": "6032",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "marketing-media-muveszet",
           "label": "Marketing / média / művészet",
+          "jfId": "6033",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "oktatas-tudomany",
           "label": "Oktatás / tudomány",
+          "jfId": "6034",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "penzugy-szamvitel",
           "label": "Pénzügy / számvitel",
+          "jfId": "6035",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "szakmunka",
           "label": "Szakmunka",
+          "jfId": "6036",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "szallitas-logisztika",
           "label": "Szállítás / logisztika",
+          "jfId": "6037",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "szemely-es-vagyonvedelem",
           "label": "Személy- és vagyonvédelem",
+          "jfId": "6038",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "ugyfelszolgalat-telemarketing",
           "label": "Ügyfélszolgálat / telemarketing",
+          "jfId": "6039",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "vendeglatas-idegenforgalom",
           "label": "Vendéglátás / idegenforgalom",
+          "jfId": "6041",
           "children": [],
           "leafSkip": true
         }
@@ -164,471 +184,642 @@
     {
       "slug": "otthon-haztartas",
       "label": "Otthon, háztartás",
+      "jfId": "3000",
       "children": [
         {
           "slug": "butor",
           "label": "Bútor",
+          "jfId": "3040",
           "children": [
             {
               "slug": "agyak-matracok",
               "label": "Ágyak, matracok",
-              "children": []
+              "jfId": "3041",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fotelek-kanapek-ulogarniturak",
               "label": "Fotelek, kanapék, ülőgarnitúrák",
-              "children": []
+              "jfId": "3042",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szekrenyek-szekrenysorok-polcok",
               "label": "Szekrények, szekrénysorok, polcok",
-              "children": []
+              "jfId": "3043",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "asztalok-szekek",
               "label": "Asztalok, székek",
-              "children": []
+              "jfId": "3044",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "konyhabutor",
               "label": "Konyhabútor",
-              "children": []
+              "jfId": "3046",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "furdoszoba-butor",
               "label": "Fürdőszoba bútor",
-              "children": []
+              "jfId": "3048",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3047",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "lakaskiegeszitok",
           "label": "Lakáskiegészítők",
+          "jfId": "3045",
           "children": [
             {
               "slug": "lakastextil",
               "label": "Lakástextil",
-              "children": []
+              "jfId": "3071",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "disztargy-kep-festmeny",
               "label": "Dísztárgy, kép, festmény",
-              "children": []
+              "jfId": "3072",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fuggony",
               "label": "Függöny",
-              "children": []
+              "jfId": "3073",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szonyeg",
               "label": "Szőnyeg",
-              "children": []
+              "jfId": "3074",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "agynemu",
               "label": "Ágynemű",
-              "children": []
+              "jfId": "3075",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3076",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "vilagitas",
           "label": "Világítás",
+          "jfId": "3050",
           "children": [
             {
               "slug": "allolampa",
               "label": "Állólámpa",
-              "children": []
+              "jfId": "3051",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "asztali-lampa",
               "label": "Asztali lámpa",
-              "children": []
+              "jfId": "3052",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "mennyezeti-vilagitas",
               "label": "Mennyezeti világítás",
-              "children": []
+              "jfId": "3053",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "falilampa",
               "label": "Falilámpa",
-              "children": []
+              "jfId": "3054",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kulteri-vilagitas",
               "label": "Kültéri világítás",
-              "children": []
+              "jfId": "3055",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "diszvilagitas",
               "label": "Díszvilágítás",
-              "children": []
+              "jfId": "3056",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3057",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "haztartasi-felszerelesek",
           "label": "Háztartási felszerelések",
+          "jfId": "3060",
           "children": [
             {
               "slug": "tal-edeny",
               "label": "Tál, edény",
-              "children": []
+              "jfId": "3061",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "pohar-bogre",
               "label": "Pohár, bögre",
-              "children": []
+              "jfId": "3062",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "etkeszlet-evoeszkoz",
               "label": "Étkészlet, evőeszköz",
-              "children": []
+              "jfId": "3063",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tarolas",
               "label": "Tárolás",
-              "children": []
+              "jfId": "3064",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "furdoszobai-kiegeszito",
               "label": "Fürdőszobai kiegészítő",
-              "children": []
+              "jfId": "3065",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tisztitoszerek",
               "label": "Tisztítószerek",
-              "children": []
+              "jfId": "3067",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kellek-kiegeszito",
               "label": "Kellék, kiegészítő",
-              "children": []
+              "jfId": "3066",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "elelmiszer",
           "label": "Élelmiszer",
+          "jfId": "3001",
           "children": [
             {
               "slug": "alapveto-elelmiszer",
               "label": "Alapvető élelmiszer",
-              "children": []
+              "jfId": "3008",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "hus-hal",
               "label": "Hús, hal",
-              "children": []
+              "jfId": "3003",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tejtermek",
               "label": "Tejtermék",
-              "children": []
+              "jfId": "3005",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tojas",
               "label": "Tojás",
-              "children": []
+              "jfId": "3004",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "zoldseg-gyumolcs",
               "label": "Zöldség, gyümölcs",
-              "children": []
+              "jfId": "3002",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "alkoholmentes-ital",
               "label": "Alkoholmentes ital",
-              "children": []
+              "jfId": "3006",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3007",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "haztartasi-kisgepek",
           "label": "Háztartási kisgépek",
+          "jfId": "3461",
           "children": [
             {
               "slug": "mikrohullamu-suto",
               "label": "Mikrohullámú sütő",
-              "children": []
+              "jfId": "3463",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kavefozo-teafozo",
               "label": "Kávéfőző, teafőző",
-              "children": []
+              "jfId": "3464",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vizforralo-vizszuro",
               "label": "Vízforraló, vízszűrő",
-              "children": []
+              "jfId": "3465",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "mixer-turmixgep",
               "label": "Mixer, turmixgép",
-              "children": []
+              "jfId": "3466",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szendvicssuto-kenyerpirito",
               "label": "Szendvicssütő, kenyérpirító",
-              "children": []
+              "jfId": "3467",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "takaritogep-porszivo",
               "label": "Takarítógép, porszívó",
-              "children": []
+              "jfId": "3468",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "varrogep",
               "label": "Varrógép",
-              "children": []
+              "jfId": "3469",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3470",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "haztartasi-nagygepek",
           "label": "Háztartási nagygépek",
+          "jfId": "3462",
           "children": [
             {
               "slug": "hutogep-fagyaszto",
               "label": "Hűtőgép-fagyasztó",
-              "children": []
+              "jfId": "3471",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "mosogatogep",
               "label": "Mosogatógép",
-              "children": []
+              "jfId": "3472",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "mosogep",
               "label": "Mosógép",
-              "children": []
+              "jfId": "3473",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szaritogep",
               "label": "Szárítógép",
-              "children": []
+              "jfId": "3474",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "paraelszivo",
               "label": "Páraelszívó",
-              "children": []
-            },
-            {
-              "slug": "suto-tuzhely",
-              "label": "Sütő, tűzhely",
-              "children": []
+              "jfId": "3475",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "alkatreszek",
               "label": "Alkatrészek",
-              "children": []
+              "jfId": "3476",
+              "children": [],
+              "leafSkip": true
+            },
+            {
+              "slug": "suto-tuzhely",
+              "label": "Sütő, tűzhely",
+              "jfId": "3477",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3478",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "epuletgepeszet-hutes-futes",
           "label": "Épületgépészet, hűtés-fűtés",
+          "jfId": "3360",
           "children": [
             {
               "slug": "klima-mobil-klima",
               "label": "Klíma, mobil klíma",
-              "children": []
+              "jfId": "3361",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "konvektor-futotest",
               "label": "Konvektor, fűtőtest",
-              "children": []
+              "jfId": "3362",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kalyha-kandallo",
               "label": "Kályha, kandalló",
-              "children": []
+              "jfId": "3363",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kazan-bojler",
               "label": "Kazán, bojler",
-              "children": []
+              "jfId": "3364",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "hosugarzo-ventilator",
               "label": "Hősugárzó, ventilátor",
-              "children": []
+              "jfId": "3367",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tuzifa",
               "label": "Tűzifa",
-              "children": []
+              "jfId": "3368",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3366",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "szerszamok-eszkozok",
           "label": "Szerszámok, eszközök",
+          "jfId": "3080",
           "children": [
             {
               "slug": "barkacs-szerszam",
               "label": "Barkács, szerszám",
-              "children": []
+              "jfId": "3081",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kertiszerszam",
               "label": "Kertiszerszám",
-              "children": []
+              "jfId": "3083",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kerti-kisgepek",
               "label": "Kerti kisgépek",
-              "children": []
+              "jfId": "3084",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3085",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "kerti-butorok-kiegeszitok",
           "label": "Kerti bútorok, kiegészítők",
+          "jfId": "3423",
           "children": [
             {
               "slug": "kerti-butor",
               "label": "Kerti bútor",
-              "children": []
+              "jfId": "3424",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "grillek",
               "label": "Grillek",
-              "children": []
+              "jfId": "3425",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "medencek-kerti-to",
               "label": "Medencék, kerti tó",
-              "children": []
+              "jfId": "3426",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "viragtarto",
               "label": "Virágtartó",
-              "children": []
+              "jfId": "3427",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3428",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "novenyek",
           "label": "Növények",
+          "jfId": "3020",
           "children": [
             {
               "slug": "szobanoveny",
               "label": "Szobanövény",
-              "children": []
+              "jfId": "3021",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vetomag-kulteri-noveny",
               "label": "Vetőmag, kültéri növény",
-              "children": []
+              "jfId": "3022",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "termeny-takarmany",
               "label": "Termény, takarmány",
-              "children": []
+              "jfId": "3024",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tragya-mutragya",
               "label": "Trágya, műtrágya",
-              "children": []
+              "jfId": "3025",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "3023",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "epitoanyag",
           "label": "Építőanyag",
+          "jfId": "3100",
           "children": [
             {
               "slug": "cserep",
               "label": "Cserép",
-              "children": []
+              "jfId": "3102",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "burkolo-anyag-festek",
               "label": "Burkoló anyag, festék",
-              "children": []
+              "jfId": "3103",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szaniter",
               "label": "Szaniter",
-              "children": []
+              "jfId": "3107",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fahaz-mobil-epulet",
               "label": "Faház, mobil épület",
-              "children": []
+              "jfId": "3108",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kerites-kapu-korlat",
               "label": "Kerítés, kapu, korlát",
-              "children": []
+              "jfId": "3109",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ajto-ablak",
               "label": "Ajtó-ablak",
-              "children": []
+              "jfId": "3105",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "falazo-anyagok",
               "label": "Falazó anyagok",
-              "children": []
+              "jfId": "3106",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb-epitoanyag",
               "label": "Egyéb építőanyag",
-              "children": []
+              "jfId": "3101",
+              "children": [],
+              "leafSkip": true
             }
           ]
         }
@@ -637,246 +828,334 @@
     {
       "slug": "muszaki-elektronika",
       "label": "Műszaki cikkek, elektronika",
+      "jfId": "5000",
       "children": [
         {
           "slug": "mobiltelefon-kommunikacio",
           "label": "Mobiltelefon, kommunikáció",
+          "jfId": "5020",
           "children": [
             {
               "slug": "mobiltelefon",
               "label": "Mobiltelefon",
-              "children": []
+              "jfId": "5021",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tokok-es-kiegeszitok",
               "label": "Tokok és kiegészítők",
-              "children": []
+              "jfId": "5022",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vezetekes-telefon",
               "label": "Vezetékes telefon",
-              "children": []
+              "jfId": "5024",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "fenykepezogep-kamera",
           "label": "Fényképezőgép, kamera",
+          "jfId": "5041",
           "children": [
             {
               "slug": "digitalis-fenykepezok",
               "label": "Digitális fényképezők",
-              "children": []
+              "jfId": "5047",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "filmes-fenykepezok",
               "label": "Filmes fényképezők",
-              "children": []
+              "jfId": "5048",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "videokamerak",
               "label": "Videokamerák",
-              "children": []
+              "jfId": "5049",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vakuk-szurok-lencsek",
               "label": "Vakuk, szűrők, lencsék",
-              "children": []
+              "jfId": "5053",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "objektivek",
               "label": "Objektívek",
-              "children": []
+              "jfId": "5051",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "videokamera-tartozekok",
               "label": "Videokamera tartozékok",
-              "children": []
+              "jfId": "5052",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb-kiegeszitok",
               "label": "Egyéb kiegészítők",
-              "children": []
+              "jfId": "5050",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "video-audio-eszkozok",
           "label": "Videó, audió eszközök",
+          "jfId": "5040",
           "children": [
             {
               "slug": "dvd-es-video-lejatszo",
               "label": "DVD és videó lejátszó",
-              "children": []
+              "jfId": "5042",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "discman-walkman-mp3-lejatszo",
               "label": "Discman, walkman, mp3 lejátszó",
-              "children": []
+              "jfId": "5043",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "hifi-torony-mini-hifi",
               "label": "Hifi torony, mini hifi",
-              "children": []
+              "jfId": "5044",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "hazimozi-rendszer-erosito-hangfal",
               "label": "Házimozi rendszer, erősítő, hangfal",
-              "children": []
+              "jfId": "5045",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "radio-lemezjatszo",
               "label": "Rádió, lemezjátszó",
-              "children": []
+              "jfId": "5046",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fejhallgato-fulhallgato",
               "label": "Fejhallgató, fülhallgató",
-              "children": []
+              "jfId": "5054",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "5055",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "tv",
           "label": "TV",
+          "jfId": "5320",
           "children": [
             {
               "slug": "led-lcd",
               "label": "Led-LCD",
-              "children": []
+              "jfId": "5321",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "plazma",
               "label": "Plazma",
-              "children": []
+              "jfId": "5322",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tv-kiegeszitok",
               "label": "TV kiegészítők",
-              "children": []
+              "jfId": "5323",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "muholdas-eszkoz-antenna",
               "label": "Műholdas eszköz, antenna",
-              "children": []
+              "jfId": "5325",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb-tv",
               "label": "Egyéb TV",
-              "children": []
+              "jfId": "5324",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "szamitastechnika",
           "label": "Számítástechnika",
+          "jfId": "5001",
           "children": [
             {
               "slug": "videokartya",
               "label": "Videókártya",
-              "children": []
+              "jfId": "5002",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "memoria",
               "label": "Memória",
-              "children": []
+              "jfId": "5003",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "processzor-alaplap",
               "label": "Processzor, alaplap",
-              "children": []
+              "jfId": "5004",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "optikai-meghajto",
               "label": "Optikai meghajtó",
-              "children": []
+              "jfId": "5005",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "monitor",
               "label": "Monitor",
-              "children": []
+              "jfId": "5006",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "adattarolo-merevlemez",
               "label": "Adattároló, merevlemez",
-              "children": []
+              "jfId": "5007",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "halozati-termek",
               "label": "Hálózati termék",
-              "children": []
+              "jfId": "5009",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "alkatresz-kiegeszito",
               "label": "Alkatrész, kiegészítő",
-              "children": []
+              "jfId": "5008",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "laptop-es-kiegeszitok",
               "label": "Laptop és kiegészítők",
-              "children": []
+              "jfId": "5060",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "asztali-pc-es-kiegeszitok",
               "label": "Asztali PC és kiegészítők",
-              "children": []
+              "jfId": "5360",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tablet-e-book-olvaso-es-kiegeszitok",
               "label": "Tablet, e-book olvasó és kiegészítők",
-              "children": []
+              "jfId": "5370",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szoftver",
               "label": "Szoftver",
-              "children": []
+              "jfId": "5070",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "konzol-videojatek",
           "label": "Konzol, videojáték",
+          "jfId": "5080",
           "children": [
             {
               "slug": "xbox-konzol-es-jatekok",
               "label": "Xbox konzol és játékok",
-              "children": []
+              "jfId": "5081",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "playstation-konzol-es-jatekok",
               "label": "Playstation konzol és játékok",
-              "children": []
+              "jfId": "5082",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "nintendo-konzol-es-jatekok",
               "label": "Nintendo konzol és játékok",
-              "children": []
+              "jfId": "5083",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "pc-jatekok",
               "label": "PC játékok",
-              "children": []
+              "jfId": "5084",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "psp-es-jatekok",
               "label": "PSP és játékok",
-              "children": []
+              "jfId": "5085",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb-jatekok-es-konzolok",
               "label": "Egyéb játékok és konzolok",
-              "children": []
+              "jfId": "5086",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "muszaki-elektronikai-alkatreszek",
           "label": "Műszaki, elektronikai alkatrészek",
+          "jfId": "5010",
           "children": [],
           "leafSkip": true
         }
@@ -885,546 +1164,747 @@
     {
       "slug": "szabadido-sport",
       "label": "Szabadidő, sport",
+      "jfId": "4000",
       "children": [
         {
           "slug": "kerekparok-es-alkatreszek",
           "label": "Kerékpárok és alkatrészek",
+          "jfId": "4310",
           "children": [
             {
               "slug": "felnott-kerekpar",
               "label": "Felnőtt kerékpár",
-              "children": []
+              "jfId": "4316",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "gyermek-kerekpar",
               "label": "Gyermek kerékpár",
-              "children": []
+              "jfId": "4317",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "alkatresz-es-kiegeszitok",
               "label": "Alkatrész és kiegészítők",
-              "children": []
+              "jfId": "4314",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "felnott-ruhazat",
               "label": "Felnőtt ruházat",
-              "children": []
+              "jfId": "4318",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "gyermek-kerekparos-ruhazat",
               "label": "Gyermek kerékpáros ruházat",
-              "children": []
+              "jfId": "4319",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "hazi-es-haszonallat",
           "label": "Házi- és haszonállat",
+          "jfId": "4300",
           "children": [
             {
               "slug": "kutya",
               "label": "Kutya",
-              "children": []
+              "jfId": "4061",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "macska",
               "label": "Macska",
-              "children": []
+              "jfId": "4062",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kisallat",
               "label": "Kisállat",
-              "children": []
+              "jfId": "4301",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "madar",
               "label": "Madár",
-              "children": []
+              "jfId": "4302",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "hullo-es-keteltu",
               "label": "Hüllő és kétéltű",
-              "children": []
+              "jfId": "4303",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "hal",
               "label": "Hal",
-              "children": []
+              "jfId": "4304",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "baromfi",
               "label": "Baromfi",
-              "children": []
+              "jfId": "4321",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "lo",
               "label": "Ló",
-              "children": []
+              "jfId": "4322",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "juh",
               "label": "Juh",
-              "children": []
+              "jfId": "4323",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szarvasmarha",
               "label": "Szarvasmarha",
-              "children": []
+              "jfId": "4324",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kecske",
               "label": "Kecske",
-              "children": []
+              "jfId": "4325",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "sertes",
               "label": "Sertés",
-              "children": []
+              "jfId": "4326",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "elveszett-megtalalt-allatok",
               "label": "Elveszett/megtalált állatok",
-              "children": []
+              "jfId": "4063",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4305",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "allattartasi-kellekek",
           "label": "Állattartási kellékek",
+          "jfId": "4460",
           "children": [
             {
               "slug": "kutyaknak",
               "label": "Kutyáknak",
-              "children": []
+              "jfId": "4461",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "macskaknak",
               "label": "Macskáknak",
-              "children": []
+              "jfId": "4462",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kisallatoknak",
               "label": "Kisállatoknak",
-              "children": []
+              "jfId": "4466",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "madaraknak",
               "label": "Madaraknak",
-              "children": []
+              "jfId": "4467",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "hulloknek",
               "label": "Hüllőknek",
-              "children": []
+              "jfId": "4464",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "halaknak",
               "label": "Halaknak",
-              "children": []
+              "jfId": "4463",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4465",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "hangszerek-es-kiegeszitok",
           "label": "Hangszerek és kiegészítők",
+          "jfId": "4380",
           "children": [
             {
               "slug": "pengetos-hangszerek",
               "label": "Pengetős hangszerek",
-              "children": []
+              "jfId": "4386",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "utos-hangszerek",
               "label": "Ütős hangszerek",
-              "children": []
+              "jfId": "4383",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "billentyus-hangszerek",
               "label": "Billentyűs hangszerek",
-              "children": []
+              "jfId": "4382",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fuvos-hangszerek",
               "label": "Fúvós hangszerek",
-              "children": []
+              "jfId": "4384",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vonos-hangszerek",
               "label": "Vonós hangszerek",
-              "children": []
+              "jfId": "4381",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kotta-kottatarto",
               "label": "Kotta, kottatartó",
-              "children": []
+              "jfId": "4387",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4385",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "konyv-ujsag",
           "label": "Könyv, újság",
+          "jfId": "4390",
           "children": [
             {
               "slug": "konyv",
               "label": "Könyv",
-              "children": []
+              "jfId": "4403",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ujsag-folyoirat-magazin",
               "label": "Újság, folyóirat, magazin",
-              "children": []
+              "jfId": "4392",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tankonyv",
               "label": "Tankönyv",
-              "children": []
+              "jfId": "4395",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szepirodalom",
               "label": "Szépirodalom",
-              "children": []
+              "jfId": "4396",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szakkonyv-kezikonyv",
               "label": "Szakkönyv, kézikönyv",
-              "children": []
+              "jfId": "4397",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ifjusagi-irodalom",
               "label": "Ifjúsági irodalom",
-              "children": []
+              "jfId": "4398",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "gyermekkonyv",
               "label": "Gyermekkönyv",
-              "children": []
+              "jfId": "4399",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "nyelvkonyv-szotar",
               "label": "Nyelvkönyv, szótár",
-              "children": []
+              "jfId": "4400",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "lexikon-enciklopedia",
               "label": "Lexikon, enciklopédia",
-              "children": []
+              "jfId": "4401",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "konyvcsomag",
               "label": "Könyvcsomag",
-              "children": []
+              "jfId": "4402",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4394",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "zene-film",
           "label": "Zene, film",
+          "jfId": "4080",
           "children": [
             {
               "slug": "bakelit-cd-kazetta",
               "label": "Bakelit, CD, kazetta",
-              "children": []
+              "jfId": "4081",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "blu-ray-dvd-es-vhs",
               "label": "Blu-ray, DVD és VHS",
-              "children": []
+              "jfId": "4082",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "diafilm",
               "label": "Diafilm",
-              "children": []
+              "jfId": "4084",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4083",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "sporteszkozok",
           "label": "Sporteszközök",
+          "jfId": "4100",
           "children": [
             {
               "slug": "csapatsportok",
               "label": "Csapatsportok",
-              "children": []
+              "jfId": "4107",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "extrem-sportok",
               "label": "Extrém sportok",
-              "children": []
+              "jfId": "4108",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fitneszgep",
               "label": "Fitneszgép",
-              "children": []
+              "jfId": "4104",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "futas-joga",
               "label": "Futás, jóga",
-              "children": []
+              "jfId": "4109",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tura-lovaglas",
               "label": "Túra, lovaglás",
-              "children": []
+              "jfId": "4106",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "teli-sportok",
               "label": "Téli sportok",
-              "children": []
+              "jfId": "4102",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "utos-sportok",
               "label": "Ütős sportok",
-              "children": []
+              "jfId": "4110",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vizi-sportok",
               "label": "Vízi sportok",
-              "children": []
+              "jfId": "4111",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "horgaszat",
               "label": "Horgászat",
-              "children": []
+              "jfId": "4101",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4105",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "jatek",
           "label": "Játék",
+          "jfId": "4140",
           "children": [
             {
               "slug": "puzzle-kirako",
               "label": "Puzzle, kirakó",
-              "children": []
+              "jfId": "4148",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "lego-epitojatek",
               "label": "Lego, építőjáték",
-              "children": []
+              "jfId": "4143",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kreativ-fejleszto-jatek",
               "label": "Kreatív, fejlesztő játék",
-              "children": []
+              "jfId": "4149",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "logikai-jatek",
               "label": "Logikai játék",
-              "children": []
+              "jfId": "4150",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kisautok",
               "label": "Kisautók",
-              "children": []
+              "jfId": "4146",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "jatekhangszer",
               "label": "Játékhangszer",
-              "children": []
+              "jfId": "4151",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "jatekfigura-pluss",
               "label": "Játékfigura, plüss",
-              "children": []
+              "jfId": "4144",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "jelmez",
               "label": "Jelmez",
-              "children": []
+              "jfId": "4152",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "gyermekjarmu",
               "label": "Gyermekjármű",
-              "children": []
+              "jfId": "4141",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "tarsasjatek",
               "label": "Társasjáték",
-              "children": []
+              "jfId": "4142",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szabadteri-jatek",
               "label": "Szabadtéri játék",
-              "children": []
+              "jfId": "4147",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4145",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "mutargy-gyujtemeny",
           "label": "Műtárgy, gyűjtemény",
+          "jfId": "4040",
           "children": [
             {
               "slug": "antik",
               "label": "Antik",
-              "children": []
+              "jfId": "4044",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "festmeny",
               "label": "Festmény",
-              "children": []
+              "jfId": "4042",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "gyujtemenyek",
               "label": "Gyűjtemények",
-              "children": []
+              "jfId": "4041",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "erme-penz-papirpenz",
               "label": "Érme, pénz, papírpénz",
-              "children": []
+              "jfId": "4046",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kinderfigurak",
               "label": "Kinderfigurák",
-              "children": []
+              "jfId": "4049",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "porcelanok",
               "label": "Porcelánok",
-              "children": []
+              "jfId": "4045",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4043",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "hobby-iskolaszer",
           "label": "Hobby, iskolaszer",
+          "jfId": "4340",
           "children": [
             {
               "slug": "festeszet-rajz",
               "label": "Festészet, rajz",
-              "children": []
+              "jfId": "4344",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "iroszer-iskolaszerek",
               "label": "Irószer, iskolaszerek",
-              "children": []
+              "jfId": "4345",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "makettezes-modellezes",
               "label": "Makettezés, modellezés",
-              "children": []
+              "jfId": "4341",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "buveszkedes-zsonglorkodes",
               "label": "Bűvészkedés, zsonglőrködés",
-              "children": []
+              "jfId": "4346",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "barkacsolas",
               "label": "Barkácsolás",
-              "children": []
+              "jfId": "4347",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "varras-himzes",
               "label": "Varrás, hímzés",
-              "children": []
+              "jfId": "4342",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kotes-horgolas",
               "label": "Kötés, horgolás",
-              "children": []
+              "jfId": "4348",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4343",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "utazas",
           "label": "Utazás",
+          "jfId": "4020",
           "children": [
             {
               "slug": "belfoldi-utazas",
               "label": "Belföldi utazás",
-              "children": []
+              "jfId": "4022",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kulfoldi-utazas",
               "label": "Külföldi utazás",
-              "children": []
+              "jfId": "4021",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "repulo-vonat-buszjegy",
               "label": "Repülő,- vonat,- buszjegy",
-              "children": []
+              "jfId": "4024",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "udulesi-jog",
               "label": "Üdülési jog",
-              "children": []
+              "jfId": "4023",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "jegyek",
           "label": "Jegyek",
+          "jfId": "4360",
           "children": [
             {
               "slug": "szinhaz-mozi",
               "label": "Színház, mozi",
-              "children": []
+              "jfId": "4362",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kiallitas",
               "label": "Kiállítás",
-              "children": []
+              "jfId": "4364",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "koncert",
               "label": "Koncert",
-              "children": []
+              "jfId": "4361",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fesztival",
               "label": "Fesztivál",
-              "children": []
+              "jfId": "4365",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "4363",
+              "children": [],
+              "leafSkip": true
             }
           ]
         }
@@ -1433,344 +1913,474 @@
     {
       "slug": "divat-ruhazat",
       "label": "Divat, ruházat",
+      "jfId": "8000",
       "children": [
         {
           "slug": "noi-ruhazat-es-kiegeszitok",
           "label": "Női ruházat és kiegészítők",
+          "jfId": "8100",
           "children": [
             {
               "slug": "polo",
               "label": "Póló",
-              "children": []
+              "jfId": "8101",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "puloverek",
               "label": "Pulóverek",
-              "children": []
+              "jfId": "8102",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ingek-bluzok",
               "label": "Ingek/blúzok",
-              "children": []
+              "jfId": "8103",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kabatok-mellenyek",
               "label": "Kabátok/mellények",
-              "children": []
+              "jfId": "8104",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "nadragok",
               "label": "Nadrágok",
-              "children": []
+              "jfId": "8105",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ruhak-szoknyak",
               "label": "Ruhák, szoknyák",
-              "children": []
+              "jfId": "8106",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "overalok",
               "label": "Overálok",
-              "children": []
+              "jfId": "8107",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fehernemuk",
               "label": "Fehérneműk",
-              "children": []
+              "jfId": "8108",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "haloingek-pizsamak",
               "label": "Hálóingek, pizsamák",
-              "children": []
+              "jfId": "8109",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "furdoruhak",
               "label": "Fürdőruhák",
-              "children": []
+              "jfId": "8110",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "eskuvoi-ruhak-kiegeszitok",
               "label": "Esküvői ruhák, kiegészítők",
-              "children": []
+              "jfId": "8111",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "cipok",
               "label": "Cipők",
-              "children": []
+              "jfId": "8112",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ekszerek",
               "label": "Ékszerek",
-              "children": []
+              "jfId": "8113",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "karorak",
               "label": "Karórák",
-              "children": []
+              "jfId": "8114",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ovek-szemuvegek-napszemuvegek",
               "label": "Övek, szemüvegek, napszemüvegek",
-              "children": []
+              "jfId": "8115",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "taskak-borondok",
               "label": "Táskák, bőröndök",
-              "children": []
+              "jfId": "8116",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "sapkak-salak-kesztyuk",
               "label": "Sapkák, sálak, kesztyűk",
-              "children": []
+              "jfId": "8117",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "sportruhazat",
               "label": "Sportruházat",
-              "children": []
+              "jfId": "8118",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "szepsegapolas-egeszseg",
           "label": "Szépségápolás, egészség",
+          "jfId": "8030",
           "children": [
             {
               "slug": "parfum",
               "label": "Parfüm",
-              "children": []
+              "jfId": "8031",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "smink",
               "label": "Smink",
-              "children": []
+              "jfId": "8032",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "testapolas",
               "label": "Testápolás",
-              "children": []
+              "jfId": "8033",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "masszirozogepek",
               "label": "Masszírozógépek",
-              "children": []
+              "jfId": "8034",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "hajapolas",
               "label": "Hajápolás",
-              "children": []
+              "jfId": "8035",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "gyogyaszati-orvosi-segedeszkoz",
               "label": "Gyógyászati, orvosi segédeszköz",
-              "children": []
+              "jfId": "8044",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "ferfi-ruhazat-es-kiegeszitok",
           "label": "Férfi ruházat és kiegészítők",
+          "jfId": "8200",
           "children": [
             {
               "slug": "polok-trikok",
               "label": "Pólók, trikók",
-              "children": []
+              "jfId": "8201",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "puloverek",
               "label": "Pulóverek",
-              "children": []
+              "jfId": "8202",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ingek",
               "label": "Ingek",
-              "children": []
+              "jfId": "8203",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kabatok-mellenyek",
               "label": "Kabátok/mellények",
-              "children": []
+              "jfId": "8204",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "nadragok",
               "label": "Nadrágok",
-              "children": []
+              "jfId": "8205",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "oltonyok",
               "label": "Öltönyök",
-              "children": []
+              "jfId": "8206",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "overalok",
               "label": "Overálok",
-              "children": []
+              "jfId": "8207",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fehernemuk",
               "label": "Fehérneműk",
-              "children": []
+              "jfId": "8208",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "pizsamak",
               "label": "Pizsamák",
-              "children": []
+              "jfId": "8209",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "furdoruhak",
               "label": "Fürdőruhák",
-              "children": []
+              "jfId": "8210",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "cipok",
               "label": "Cipők",
-              "children": []
+              "jfId": "8211",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ekszerek",
               "label": "Ékszerek",
-              "children": []
+              "jfId": "8212",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "karorak",
               "label": "Karórák",
-              "children": []
+              "jfId": "8213",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ovek-szemuvegek-napszemuvegek",
               "label": "Övek, szemüvegek, napszemüvegek",
-              "children": []
+              "jfId": "8214",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "taskak-borondok",
               "label": "Táskák, bőröndök",
-              "children": []
+              "jfId": "8215",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "sapkak-salak-kesztyuk",
               "label": "Sapkák, sálak, kesztyűk",
-              "children": []
+              "jfId": "8216",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "sportruhazat",
               "label": "Sportruházat",
-              "children": []
+              "jfId": "8217",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "gyerek-ruhazat-es-kiegeszitok",
           "label": "Gyerek ruházat és kiegészítők",
+          "jfId": "8300",
           "children": [
             {
               "slug": "polok",
               "label": "Pólók",
-              "children": []
+              "jfId": "8301",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "puloverek",
               "label": "Pulóverek",
-              "children": []
+              "jfId": "8302",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ingek-bluzok",
               "label": "Ingek/blúzok",
-              "children": []
+              "jfId": "8303",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kabatok-mellenyek",
               "label": "Kabátok/mellények",
-              "children": []
+              "jfId": "8304",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "nadragok",
               "label": "Nadrágok",
-              "children": []
+              "jfId": "8305",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ruhak-szoknyak",
               "label": "Ruhák, szoknyák",
-              "children": []
+              "jfId": "8306",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "overalok-anorakok",
               "label": "Overálok/anorákok",
-              "children": []
+              "jfId": "8307",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "zoknik-harisnyak-alsonemuk",
               "label": "Zoknik, harisnyák, alsóneműk",
-              "children": []
+              "jfId": "8308",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "haloingek-pizsamak",
               "label": "Hálóingek, pizsamák",
-              "children": []
+              "jfId": "8309",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "furdoruhak",
               "label": "Fürdőruhák",
-              "children": []
+              "jfId": "8310",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "cipok",
               "label": "Cipők",
-              "children": []
+              "jfId": "8311",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ekszerek",
               "label": "Ékszerek",
-              "children": []
+              "jfId": "8312",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "karorak",
               "label": "Karórák",
-              "children": []
+              "jfId": "8313",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ovek-szemuvegek-napszemuvegek",
               "label": "Övek, szemüvegek, napszemüvegek",
-              "children": []
+              "jfId": "8314",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "taskak-borondok",
               "label": "Táskák, bőröndök",
-              "children": []
+              "jfId": "8315",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "sapkak-salak-kesztyuk",
               "label": "Sapkák, sálak, kesztyűk",
-              "children": []
+              "jfId": "8316",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "sportruhazat",
               "label": "Sportruházat",
-              "children": []
+              "jfId": "8317",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "ruhacsomag-balas-ruha",
           "label": "Ruhacsomag, bálás ruha",
+          "jfId": "8400",
           "children": [
             {
               "slug": "noi",
               "label": "Női",
-              "children": []
+              "jfId": "8401",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ferfi",
               "label": "Férfi",
-              "children": []
+              "jfId": "8402",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "gyermek",
               "label": "Gyermek",
-              "children": []
+              "jfId": "8403",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vegyes",
               "label": "Vegyes",
-              "children": []
+              "jfId": "8404",
+              "children": [],
+              "leafSkip": true
             }
           ]
         }
@@ -1779,152 +2389,208 @@
     {
       "slug": "uzlet-szolgaltatas",
       "label": "Üzlet, szolgáltatás",
+      "jfId": "9000",
       "children": [
         {
           "slug": "szolgaltatasok",
           "label": "Szolgáltatások",
+          "jfId": "9020",
           "children": [
             {
               "slug": "eletmod-egeszseg",
               "label": "Életmód-egészség",
-              "children": []
+              "jfId": "9021",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "jarmu",
               "label": "Jármű",
-              "children": []
+              "jfId": "9022",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "webszolgaltatas",
               "label": "Webszolgáltatás",
-              "children": []
+              "jfId": "9023",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "javitas-szereles",
               "label": "Javítás-szerelés",
-              "children": []
+              "jfId": "9024",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "gyermekfelugyelet-idosgondozas",
               "label": "Gyermekfelügyelet, idősgondozás",
-              "children": []
+              "jfId": "9026",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "oktatas-forditas",
               "label": "Oktatás-fordítás",
-              "children": []
+              "jfId": "9027",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "takaritas-hazvezetes",
               "label": "Takarítás, házvezetés",
-              "children": []
+              "jfId": "9028",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "epitkezes",
               "label": "Építkezés",
-              "children": []
+              "jfId": "9029",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vendeglatas",
               "label": "Vendéglátás",
-              "children": []
+              "jfId": "9030",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "uzlet-ceg",
               "label": "Üzlet-Cég",
-              "children": []
+              "jfId": "9031",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "haziallat",
               "label": "Háziállat",
-              "children": []
+              "jfId": "9032",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "mezogazdasag",
               "label": "Mezőgazdaság",
-              "children": []
+              "jfId": "9033",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szallitas-koltoztetes",
               "label": "Szállítás, költöztetés",
-              "children": []
+              "jfId": "9035",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "9034",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "irodafelszereles",
           "label": "Irodafelszerelés",
+          "jfId": "9040",
           "children": [
             {
               "slug": "nyomtato",
               "label": "Nyomtató",
-              "children": []
+              "jfId": "9041",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fax",
               "label": "Fax",
-              "children": []
+              "jfId": "9042",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szkenner",
               "label": "Szkenner",
-              "children": []
+              "jfId": "9043",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "fenymasolo",
               "label": "Fénymásoló",
-              "children": []
+              "jfId": "9046",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "multifunkcionalis-gepek",
               "label": "Multifunkcionális gépek",
-              "children": []
+              "jfId": "9047",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "irodaszer",
               "label": "Irodaszer",
-              "children": []
+              "jfId": "9044",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "9045",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "gepek-berendezesek",
           "label": "Gépek, berendezések",
+          "jfId": "9060",
           "children": [
             {
               "slug": "epitkezes",
               "label": "Építkezés",
-              "children": []
+              "jfId": "9061",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "vendeglatas",
               "label": "Vendéglátás",
-              "children": []
+              "jfId": "9062",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "mezogazdasag",
               "label": "Mezőgazdaság",
-              "children": []
+              "jfId": "9063",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szepsegipar",
               "label": "Szépségipar",
-              "children": []
+              "jfId": "9065",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "9064",
+              "children": [],
+              "leafSkip": true
             }
           ]
         }
@@ -1933,132 +2599,173 @@
     {
       "slug": "baba-mama",
       "label": "Baba-mama",
+      "jfId": "8060",
       "children": [
         {
           "slug": "babaruhazat",
           "label": "Babaruházat",
+          "jfId": "8061",
           "children": [
             {
               "slug": "babacipo",
               "label": "Babacipő",
-              "children": []
+              "jfId": "8069",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "body-kombidressz",
               "label": "Body, kombidressz",
-              "children": []
+              "jfId": "8070",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kabat",
               "label": "Kabát",
-              "children": []
+              "jfId": "8071",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "nadrag",
               "label": "Nadrág",
-              "children": []
+              "jfId": "8072",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "overal-bundazsak",
               "label": "Overál, bundazsák",
-              "children": []
+              "jfId": "8073",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "polo-felso",
               "label": "Póló, felső",
-              "children": []
+              "jfId": "8074",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "pulover",
               "label": "Pulóver",
-              "children": []
+              "jfId": "8075",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "rugdalozo-napozo",
               "label": "Rugdalózó, napozó",
-              "children": []
+              "jfId": "8076",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "ruhacsomag",
               "label": "Ruhacsomag",
-              "children": []
+              "jfId": "8077",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "zokni-harisnya-alsonemu",
               "label": "Zokni, harisnya, alsónemű",
-              "children": []
+              "jfId": "8078",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "8079",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "babajatek",
           "label": "Babajáték",
+          "jfId": "8062",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "babahordozo-babaules",
           "label": "Babahordozó, babaülés",
+          "jfId": "8063",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "bababutor-szobadekoracio",
           "label": "Bababútor, szobadekoráció",
+          "jfId": "8064",
           "children": [
             {
               "slug": "asztal-szek-etetoszek",
               "label": "Asztal, szék, etetőszék",
-              "children": []
+              "jfId": "8080",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "babaszoba-dekoracio",
               "label": "Babaszoba dekoráció",
-              "children": []
+              "jfId": "8081",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "kisagy-matrac-jaroka",
               "label": "Kiságy, matrac, járóka",
-              "children": []
+              "jfId": "8082",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "szekreny-polc-pelenkazo",
               "label": "Szekrény, polc, pelenkázó",
-              "children": []
+              "jfId": "8083",
+              "children": [],
+              "leafSkip": true
             },
             {
               "slug": "egyeb",
               "label": "Egyéb",
-              "children": []
+              "jfId": "8084",
+              "children": [],
+              "leafSkip": true
             }
           ]
         },
         {
           "slug": "babakocsi",
           "label": "Babakocsi",
+          "jfId": "8065",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "babaapolas-biztonsag",
           "label": "Babaápolás, biztonság",
+          "jfId": "8067",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "kismama-ruhazat",
           "label": "Kismama ruházat",
+          "jfId": "8068",
           "children": [],
           "leafSkip": true
         },
         {
           "slug": "egyeb",
           "label": "Egyéb",
+          "jfId": "8066",
           "children": [],
           "leafSkip": true
         }
@@ -2068,7 +2775,8 @@
   "coverage": {
     "excluded": [
       "ingatlan",
-      "jarmu"
+      "jarmu",
+      "auto"
     ],
     "complete": [
       "allas",

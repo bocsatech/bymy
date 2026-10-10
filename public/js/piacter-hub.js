@@ -26,6 +26,41 @@ import {
 const LATEST_WANT = 9;
 const FEATURED_WANT = 9;
 const VERTICAL = "piac";
+const EXCLUDED_TOPS = new Set(["ingatlan", "jarmu", "auto", "teher", "teherauto"]);
+
+const PIAC_TOP_SHORT = {
+  allas: "Állás",
+  "otthon-haztartas": "Otthon",
+  "muszaki-elektronika": "Műszaki",
+  "szabadido-sport": "Szabadidő",
+  "divat-ruhazat": "Divat",
+  "uzlet-szolgaltatas": "Üzlet",
+  "baba-mama": "Baba-mama",
+};
+
+const PIAC_TOP_ICONS = {
+  allas: "/images/categories/piac-allas.png",
+  "otthon-haztartas": "/images/categories/piac-otthon.png",
+  "muszaki-elektronika": "/images/categories/piac-muszaki.png",
+  "szabadido-sport": "/images/categories/piac-sport.png",
+  "divat-ruhazat": "/images/categories/piac-divat.png",
+  "uzlet-szolgaltatas": "/images/categories/piac-uzlet.png",
+  "baba-mama": "/images/categories/piac-baba.png",
+};
+
+let catalogPromise = null;
+
+function loadPiacCatalog() {
+  if (!catalogPromise) {
+    catalogPromise = fetch("/data/piac-catalog.json", { credentials: "same-origin" })
+      .then((res) => {
+        if (!res.ok) throw new Error("piac-catalog");
+        return res.json();
+      })
+      .catch(() => null);
+  }
+  return catalogPromise;
+}
 
 function el(id) {
   return document.getElementById(id);
@@ -129,11 +164,90 @@ function bindSearchForm() {
   });
 }
 
+function topSlugFromCat(cat) {
+  return String(cat || "")
+    .split("/")
+    .map((s) => s.trim())
+    .filter(Boolean)[0] || "";
+}
+
+function subSlugFromCat(cat) {
+  return String(cat || "")
+    .split("/")
+    .map((s) => s.trim())
+    .filter(Boolean)[1] || "";
+}
+
+async function renderCategoryMenus() {
+  const nav = el("piac-cats");
+  if (!nav) return;
+  const catalog = await loadPiacCatalog();
+  const tops = (catalog?.categories || []).filter((n) => n?.slug && !EXCLUDED_TOPS.has(n.slug));
+  if (!tops.length) {
+    bindCategoryMenus();
+    return;
+  }
+
+  const activeCat = readCatFilter();
+  const activeTop = topSlugFromCat(activeCat);
+  const activeSub = subSlugFromCat(activeCat);
+
+  nav.innerHTML = tops
+    .map((top) => {
+      const slug = top.slug;
+      const label = PIAC_TOP_SHORT[slug] || top.label || slug;
+      const icon = PIAC_TOP_ICONS[slug] || "";
+      const active = activeTop === slug ? " is-active" : "";
+      const img = icon
+        ? `<img src="${icon}" alt="" width="72" height="72" decoding="async" />`
+        : "";
+      return `<a class="piac-cats__link${active}" href="/piacter.html?cat=${encodeURIComponent(slug)}" data-piac-cat="${slug}">
+        <span class="piac-cats__box" aria-hidden="true">${img}</span>
+        <span class="piac-cats__label">${label}</span>
+      </a>`;
+    })
+    .join("");
+
+  let subNav = el("piac-subcats");
+  const activeNode = tops.find((t) => t.slug === activeTop) || null;
+  const subs = activeNode?.children || [];
+  if (!subs.length || !activeTop) {
+    subNav?.remove();
+    bindCategoryMenus();
+    return;
+  }
+
+  if (!subNav) {
+    subNav = document.createElement("nav");
+    subNav.id = "piac-subcats";
+    subNav.className = "piac-subcats";
+    subNav.setAttribute("aria-label", "Alkategóriák");
+    nav.insertAdjacentElement("afterend", subNav);
+  }
+
+  subNav.innerHTML = [
+    `<a class="piac-subcats__link${!activeSub ? " is-active" : ""}" href="/piacter.html?cat=${encodeURIComponent(activeTop)}" data-piac-sub="">Összes</a>`,
+    ...subs.map((sub) => {
+      const path = `${activeTop}/${sub.slug}`;
+      const on = activeSub === sub.slug ? " is-active" : "";
+      return `<a class="piac-subcats__link${on}" href="/piacter.html?cat=${encodeURIComponent(path)}" data-piac-sub="${sub.slug}">${sub.label}</a>`;
+    }),
+  ].join("");
+
+  bindCategoryMenus();
+}
+
 function bindCategoryMenus() {
   const cat = readCatFilter();
+  const top = topSlugFromCat(cat);
+  const sub = subSlugFromCat(cat);
   document.querySelectorAll("[data-piac-cat]").forEach((link) => {
     const slug = String(link.getAttribute("data-piac-cat") || "").trim();
-    link.classList.toggle("is-active", Boolean(cat) && slug === cat);
+    link.classList.toggle("is-active", Boolean(top) && slug === top);
+  });
+  document.querySelectorAll("[data-piac-sub]").forEach((link) => {
+    const slug = String(link.getAttribute("data-piac-sub") || "").trim();
+    link.classList.toggle("is-active", slug ? slug === sub : !sub);
   });
 }
 
@@ -523,7 +637,8 @@ let bootGen = 0;
 async function bootRails() {
   const gen = ++bootGen;
   bindSearchForm();
-  bindCategoryMenus();
+  await renderCategoryMenus();
+  if (gen !== bootGen) return;
   const mode = browseMode();
   void bootBrowseResults();
 

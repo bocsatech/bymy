@@ -89,10 +89,13 @@ function highlightSpecsFromView(view) {
     return rows.filter((row) => row.value);
   }
   if (view.vertical === "piac") {
+    if (Array.isArray(view.piacHighlights) && view.piacHighlights.length) {
+      return view.piacHighlights.filter((row) => row?.value);
+    }
     return [
-      { key: "generic", label: "Kategória", value: specValue(view.vehicleSpecs, "Kategória") },
-      { key: "condition", label: "Szándék", value: specValue(view.vehicleSpecs, "Szándék") },
-      { key: "color", label: "Ár", value: specValue(view.vehicleSpecs, "Vételár") || (view.price !== "—" ? view.price : "") },
+      { key: "condition", label: "Állapot", value: specValue(view.vehicleSpecs, "Állapot") || specValue(view.allasSpecs, "Állapot") },
+      { key: "generic", label: "Munkakör", value: specValue(view.allasSpecs, "Munkakör") },
+      { key: "color", label: "Ár", value: view.isAllas ? "" : specValue(view.vehicleSpecs, "Vételár") || (view.price && view.price !== "—" ? view.price : "") },
       { key: "area", label: "Település", value: specValue(view.vehicleSpecs, "Település") },
     ].filter((row) => row.value);
   }
@@ -152,6 +155,16 @@ function navigationHref(view) {
 }
 
 function sideHeadline(view) {
+  if (view.vertical === "piac") {
+    const crumb = [view.piacPathLabel || "", view.piacIntentLabel || ""].filter(Boolean).join(" · ");
+    return {
+      title: view.title,
+      subtitle: crumb || view.metaLine || "",
+      crumb: view.piacPathLabel || "",
+      intent: view.piacIntentLabel || "",
+      isAllas: Boolean(view.isAllas),
+    };
+  }
   if (view.brand && view.typeName) {
     return { title: view.brand, subtitle: [view.typeName, view.year !== "—" ? view.year : ""].filter(Boolean).join(" · ") };
   }
@@ -631,16 +644,40 @@ function render(view, listing, related = []) {
       }
       <aside class="hd-side">
         <div class="hd-side-head">
+          ${
+            view.vertical === "piac" && headline.isAllas
+              ? `<p class="hd-piac-badge">Állásajánlat${headline.intent ? ` · ${escapeHtml(headline.intent)}` : ""}</p>`
+              : view.vertical === "piac" && headline.intent
+                ? `<p class="hd-piac-badge">${escapeHtml(headline.intent)}</p>`
+                : ""
+          }
+          ${
+            view.vertical === "piac" && headline.crumb
+              ? `<p class="hd-piac-crumb">Piactér › ${escapeHtml(headline.crumb)}</p>`
+              : ""
+          }
           <h1 class="hd-side-title">${escapeHtml(headline.title)}</h1>
-          ${headline.subtitle ? `<p class="hd-side-sub">${escapeHtml(headline.subtitle)}</p>` : ""}
+          ${
+            view.vertical === "piac"
+              ? ""
+              : headline.subtitle
+                ? `<p class="hd-side-sub">${escapeHtml(headline.subtitle)}</p>`
+                : ""
+          }
         </div>
-        <div class="hd-price-box">
+        ${
+          view.vertical === "piac" && (view.isAllas || !view.price || view.price === "—")
+            ? view.isAllas
+              ? `<p class="hd-price-note">Nincs vételár — jelentkezés üzenetben</p>`
+              : ""
+            : `<div class="hd-price-box">
           <div class="hd-price-row">
-            <p class="hd-price">${escapeHtml(view.price)}</p>
-            ${priceMarketRatingHtml(view)}
+            <p class="hd-price${view.price === "Ingyen elvihető" ? " hd-price--free" : ""}">${escapeHtml(view.price || "—")}</p>
+            ${view.vertical === "piac" ? "" : priceMarketRatingHtml(view)}
           </div>
           ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
-        </div>
+        </div>`
+        }
         <div class="hd-seller-card">
           ${sellerAvatarHtml(view)}
           <div class="hd-seller-meta">
@@ -663,10 +700,14 @@ function render(view, listing, related = []) {
         ${qrBlockHtml({ url: withQrSource(window.location.href), label: "QR — ez a hirdetés", size: 140 })}
         ${
           canMsg
-            ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet küldése</button>`
+            ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} ${
+                view.isAllas ? "Jelentkezés üzenetben" : "Üzenet küldése"
+              }</button>`
             : own
               ? ""
-              : `<button type="button" class="hd-btn hd-btn--primary" data-hd-goto-form>${ICON.mail} Hirdető kapcsolata</button>`
+              : `<button type="button" class="hd-btn hd-btn--primary" data-hd-goto-form>${ICON.mail} ${
+                  view.isAllas ? "Jelentkezés" : "Hirdető kapcsolata"
+                }</button>`
         }
         <div class="hd-side-actions${own ? " hd-side-actions--3" : ""}">
           ${
@@ -689,13 +730,19 @@ function render(view, listing, related = []) {
             : ""
         }
         ${
-          !own && relatedItems.length
-            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései ${relatedItems.length + 1}</button>`
-            : !own
-              ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései …</button>`
-              : ""
+          view.vertical === "piac"
+            ? ""
+            : !own && relatedItems.length
+              ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései ${relatedItems.length + 1}</button>`
+              : !own
+                ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései …</button>`
+                : ""
         }
-        <a class="hd-btn hd-btn--soft" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
+        ${
+          view.vertical === "piac"
+            ? ""
+            : `<a class="hd-btn hd-btn--soft" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>`
+        }
         ${view.website ? `<a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Céges weboldal</a>` : ""}
         ${
           own
@@ -711,8 +758,8 @@ function render(view, listing, related = []) {
     <div class="hd-specs">
       ${
         view.vertical === "piac"
-          ? `${specBlockHtml("Piactér adatok", view.vehicleSpecs)}
-      ${specBlockHtml("Tulajdonságok", view.allasSpecs)}`
+          ? `${view.isAllas ? "" : specBlockHtml("Piactér adatok", view.vehicleSpecs)}
+      ${specBlockHtml(view.isAllas ? "Állás részletei" : "Tulajdonságok", view.allasSpecs)}`
           : `${specBlockHtml("Jármű adatok", view.vehicleSpecs)}
       ${specBlockHtml("Motor adatok", view.motorSpecs)}
       ${specBlockHtml("Okmányok", view.documentSpecs)}
@@ -738,7 +785,7 @@ function render(view, listing, related = []) {
     </section>
 
     ${
-      !own && relatedItems.length
+      view.vertical !== "piac" && !own && relatedItems.length
         ? `<section class="hd-section" id="hd-related" hidden>
         <div class="hd-related-head">
           <h2 class="hd-h2">Kereskedés többi hirdetései</h2>

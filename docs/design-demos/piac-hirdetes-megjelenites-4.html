@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Piactér hirdetés megjelenítés — 4 javaslat</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --bg: #dfe3e8;
+      --white: #fff;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --red: #dc2626;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      padding: 28px 20px 72px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
+    .lead { margin: 0 0 10px; color: var(--muted); font-size: 0.92rem; max-width: 80ch; line-height: 1.45; }
+    .problems {
+      margin: 0 0 28px;
+      padding: 14px 16px;
+      background: var(--warn-bg);
+      border: 1px solid #fcd34d;
+      border-radius: 12px;
+      max-width: 80ch;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+    .problems strong { color: var(--warn); }
+    .problems ul { margin: 8px 0 0; padding-left: 1.2rem; }
+    .toc { margin: 0 0 28px; font-size: 0.85rem; color: var(--muted); }
+    .toc a { color: var(--ink); font-weight: 700; margin-right: 12px; }
+
+    .demo {
+      margin: 0 0 40px;
+      background: var(--white);
+      border: 1px solid #d8dde4;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+    }
+    .demo-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      background: #f3f4f6;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.82rem;
+    }
+    .demo-label strong { font-weight: 800; }
+    .demo-label span { color: var(--muted); }
+    .stage {
+      padding: 22px;
+      display: flex;
+      justify-content: center;
+      background: #cfd4db;
+    }
+    .frame {
+      width: min(1040px, 100%);
+      background: #eef1f5;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #c5ccd6;
+    }
+
+    /* shared mock pieces */
+    .hd {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .gal {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .photo {
+      aspect-ratio: 4/3;
+      background:
+        linear-gradient(135deg, #94a3b8 0%, #64748b 45%, #334155 100%);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .photo--job {
+      background: linear-gradient(135deg, #0f766e, #134e4a);
+    }
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--line);
+    }
+    .chip {
+      padding: 10px 8px;
+      border-right: 1px solid var(--line);
+      font-size: 0.72rem;
+    }
+    .chip:last-child { border-right: 0; }
+    .chip b { display: block; font-size: 0.8rem; margin-top: 2px; word-break: break-word; }
+    .chip--bad b { color: var(--red); }
+    .side {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 14px 14px 12px;
+    }
+    .side h2 {
+      margin: 0 0 4px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    .sub { margin: 0 0 10px; color: var(--muted); font-size: 0.82rem; }
+    .price {
+      margin: 0 0 12px;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .price--free { color: var(--green); font-size: 1.15rem; }
+    .btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 0.65rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid #c7d2e0;
+      background: #fff;
+      font: inherit;
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin: 0 0 8px;
+      color: var(--ink);
+    }
+    .btn--primary {
+      background: #f5c518;
+      border-color: #e0b40f;
+    }
+    .btn--bad {
+      border-color: #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
+      text-decoration: line-through;
+      opacity: 0.85;
+    }
+    .btn--ghost { background: #f8fafc; }
+    .specs {
+      margin-top: 14px;
+      display: grid;
+      gap: 12px;
+    }
+    .block {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .block h3 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 6px 12px;
+      font-size: 0.85rem;
+    }
+    .kv span { color: var(--muted); }
+    .kv b { font-weight: 700; word-break: break-word; }
+    .kv--bad b { color: var(--red); font-weight: 600; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: #166534;
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .crumb {
+      margin: 0 0 8px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 650;
+    }
+    .crumb strong { color: var(--ink); }
+    .props2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+    }
+    .note {
+      margin: 10px 0 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+    .tag {
+      padding: 0.25rem 0.55rem;
+      border-radius: 8px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .tag--green { background: var(--green-soft); border-color: #86efac; color: #166534; }
+
+    @media (max-width: 800px) {
+      .hd { grid-template-columns: 1fr; }
+      .chips { grid-template-columns: 1fr 1fr; }
+      .props2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Piactér hirdetés megjelenítés — 4 javaslat</h1>
+  <p class="lead">
+    A jelenlegi detail oldal autó-mintára épül. Piactéren ez hibás: slug-útvonal a kategóriában,
+    hiányos / nyers tulajdonság-címkék, állásnál üres munkakör, és autó-CTA-k (adásvételi szerződés).
+  </p>
+  <div class="problems">
+    <strong>Mostani problémák (kódból):</strong>
+    <ul>
+      <li><code>piac_path</code> slugként jelenik meg (<em>allas › adminisztracio-irodai-munka</em>)</li>
+      <li>Cím: <code>composeVehicleTitle</code> / brand–modell elsőbbség — piactéren a <code>piac_cim</code> / <code>hirdetes_cime</code> kell</li>
+      <li>Tulajdonság címkék: csak ~12 hardcode; a többi <code>carrier_level</code> → „carrier level”</li>
+      <li>Állás: <code>piac_prop_position_*</code> nem esik vissza a Munkakör mezőbe</li>
+      <li>CTA: „Adásvételi szerződés”, autó promo — piactéren / állásnál zavaró</li>
+    </ul>
+  </div>
+  <p class="toc">
+    <a href="#a">A · Jelenlegi (rossz)</a>
+    <a href="#b">B · Tiszta piactér</a>
+    <a href="#c">C · Állás fókusz</a>
+    <a href="#d">D · Kompakt (Jófogás-szerű)</a>
+  </p>
+
+  <!-- A -->
+  <section class="demo" id="a" data-demo="a">
+    <div class="demo-label">
+      <strong>A — Jelenlegi állapot (rossz)</strong>
+      <span>Slug path · autó CTA · nyers prop kulcsok</span>
+    </div>
+    <div class="stage">
+      <div class="frame">
+        <div class="hd">
+          <div class="gal">
+            <div class="photo">iPhone fotó</div>
+            <div class="chips">
+              <div class="chip chip--bad"><span>Kategória</span><b>muszaki-elektronika › mobiltelefon-kommunikacio › mobiltelefon</b></div>
+              <div class="chip"><span>Szándék</span><b>Kínál</b></div>
+              <div class="chip"><span>Ár</span><b>89 000 Ft</b></div>
+              <div class="chip"><span>Település</span><b>Budapest</b></div>
+            </div>
+          </div>
+          <aside class="side">
+            <h2>APPLE</h2>
+            <p class="sub">— · —</p>
+            <p class="price">89 000 Ft</p>
+            <button class="btn btn--primary" type="button">Üzenet küldése</button>
+            <button class="btn" type="button">Telefonszám mutatása</button>
+            <button class="btn btn--bad" type="button">Adásvételi szerződés</button>
+            <button class="btn btn--ghost" type="button">Kereskedés többi hirdetései …</button>
+          </aside>
+        </div>
+        <div class="specs">
+          <div class="block">
+            <h3>Piactér adatok</h3>
+            <div class="kv kv--bad">
+              <span>Kategória</span><b>muszaki-elektronika › mobiltelefon-kommunikacio › mobiltelefon</b>
+              <span>Szándék</span><b>Kínál</b>
+              <span>Vételár</span><b>89 000 Ft</b>
+              <span>Település</span><b>Budapest</b>
+            </div>
+          </div>
+          <div class="block">
+            <h3>Tulajdonságok</h3>
+            <div class="kv kv--bad">
+              <span>brand mobiles</span><b>Apple</b>
+              <span>mobile os</span><b>iOS</b>
+              <span>mobile memory</span><b>128 GB</b>
+              <span>electronic condition one</span><b>használt</b>
+            </div>
+            <p class="note">A címke a mezőkulcsból jön (aláhúzás → szóköz), nem a Jófogás magyar labelből.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- B -->
+  <section class="demo" id="b" data-demo="b">
+    <div class="demo-label">
+      <strong>B — Tiszta piactér termék</strong>
+      <span>Emberi breadcrumb · magyar prop címkék · piactér CTA</span>
+    </div>
+    <div class="stage">
+      <div class="frame">
+        <div class="hd">
+          <div class="gal">
+            <div class="photo">iPhone 13 · 128 GB</div>
+            <div class="chips">
+              <div class="chip"><span>Állapot</span><b>Használt</b></div>
+              <div class="chip"><span>Memória</span><b>128 GB</b></div>
+              <div class="chip"><span>Szín</span><b>Fekete</b></div>
+              <div class="chip"><span>Település</span><b>Budapest</b></div>
+            </div>
+          </div>
+          <aside class="side">
+            <p class="crumb">Piactér › Műszaki › Mobiltelefon · <strong>Kínál</strong></p>
+            <h2>iPhone 13, 128 GB, jó állapot</h2>
+            <p class="sub">Feltöltve: 2026. 10. 10.</p>
+            <p class="price">89 000 Ft</p>
+            <button class="btn btn--primary" type="button">Üzenet küldése</button>
+            <button class="btn" type="button">Telefonszám mutatása</button>
+            <button class="btn btn--ghost" type="button">Kedvenchez adás</button>
+          </aside>
+        </div>
+        <div class="specs">
+          <div class="block">
+            <h3>Tulajdonságok</h3>
+            <div class="kv props2">
+              <span>Márka</span><b>Apple</b>
+              <span>Operációs rendszer</span><b>iOS</b>
+              <span>Kártya</span><b>Kártyafüggetlen</b>
+              <span>Memória</span><b>128 GB</b>
+              <span>Felbontás</span><b>10 MP felett</b>
+              <span>Állapot</span><b>Használt</b>
+              <span>Szín</span><b>Fekete</b>
+              <span>Méret</span><b>5.5'' felett</b>
+              <span>Típus</span><b>Okostelefon</b>
+            </div>
+          </div>
+          <div class="block">
+            <h3>Leírás</h3>
+            <p class="note" style="margin:0;color:var(--ink);font-size:0.9rem;">
+              Eredeti dobozzal, 2 hónap maradék garancia. Személyes átvétel Budapesten.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- C -->
+  <section class="demo" id="c" data-demo="c">
+    <div class="demo-label">
+      <strong>C — Állás fókusz</strong>
+      <span>Nincs ár/adásvétel · munkakör chip · dokumentumok</span>
+    </div>
+    <div class="stage">
+      <div class="frame">
+        <div class="hd">
+          <div class="gal">
+            <div class="photo photo--job">Állás · iroda</div>
+            <div class="chips">
+              <div class="chip"><span>Munkakör</span><b>Recepciós</b></div>
+              <div class="chip"><span>Tapasztalat</span><b>1–2 év</b></div>
+              <div class="chip"><span>Munkaidő</span><b>Teljes</b></div>
+              <div class="chip"><span>Település</span><b>Debrecen</b></div>
+            </div>
+          </div>
+          <aside class="side">
+            <span class="badge">Állásajánlat · Kínál</span>
+            <p class="crumb">Piactér › Állás › Adminisztráció / irodai munka</p>
+            <h2>Recepciós munkatársat keresünk Debrecenbe</h2>
+            <p class="sub">Nincs vételár — jelentkezés üzenetben</p>
+            <button class="btn btn--primary" type="button">Jelentkezés üzenetben</button>
+            <button class="btn" type="button">Telefonszám mutatása</button>
+            <button class="btn btn--ghost" type="button">Mentés kedvencekbe</button>
+          </aside>
+        </div>
+        <div class="specs">
+          <div class="block">
+            <h3>Állás részletei</h3>
+            <div class="kv props2">
+              <span>Munkakör</span><b>Recepciós</b>
+              <span>Tapasztalat</span><b>1–2 év tapasztalat</b>
+              <span>Foglalkoztatás</span><b>Teljes munkaidő</b>
+              <span>Végzettség</span><b>középiskola</b>
+              <span>Nyelv</span><b>angol</b>
+              <span>Dokumentumok</span><b>önéletrajz, motivációs levél</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- D -->
+  <section class="demo" id="d" data-demo="d">
+    <div class="demo-label">
+      <strong>D — Kompakt (Jófogás-szerű)</strong>
+      <span>Egy blokk · címkék felül · props 2 oszlop · rövid CTA</span>
+    </div>
+    <div class="stage">
+      <div class="frame">
+        <div class="hd">
+          <div class="gal">
+            <div class="photo">Termékfotó</div>
+          </div>
+          <aside class="side">
+            <div class="tag-row">
+              <span class="tag tag--green">Kínál</span>
+              <span class="tag">Műszaki › Mobiltelefon</span>
+              <span class="tag">Budapest</span>
+            </div>
+            <h2>iPhone 13, 128 GB, jó állapot</h2>
+            <p class="price">89 000 Ft</p>
+            <button class="btn btn--primary" type="button">Érdekel — üzenet</button>
+            <button class="btn" type="button">Hívás</button>
+          </aside>
+        </div>
+        <div class="specs">
+          <div class="block">
+            <h3>Paraméterek</h3>
+            <div class="kv props2">
+              <span>Márka</span><b>Apple</b>
+              <span>OS</span><b>iOS</b>
+              <span>Memória</span><b>128 GB</b>
+              <span>Állapot</span><b>Használt</b>
+              <span>Szín</span><b>Fekete</b>
+              <span>Típus</span><b>Okostelefon</b>
+            </div>
+            <p class="note">Highlight sáv helyett a fontos props a cím mellett / alatt — kevesebb autó-szerű chip.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

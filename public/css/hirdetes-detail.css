@@ -451,6 +451,38 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   letter-spacing: -0.02em;
 }
 
+.hd-piac-badge {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 0.45rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.hd-piac-crumb {
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--hub-muted, #6b7280);
+  line-height: 1.35;
+}
+
+.hd-price-note {
+  margin: 0 0 0.85rem;
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--hub-muted, #6b7280);
+}
+
+.hd-price--free {
+  color: #16a34a;
+  font-size: 1.25rem;
+}
+
 .hd-side-sub {
   margin: 0;
   font-size: 0.92rem;
@@ -1632,6 +1664,16 @@ html[data-theme="dark"] body.site-app[data-site-page="hirdetes"] {
 }
 
 html[data-theme="dark"] body.hd-page .hd-title,
+html[data-theme="dark"] body.hd-page .hd-piac-badge {
+  background: #14532d;
+  color: #bbf7d0;
+}
+
+html[data-theme="dark"] body.hd-page .hd-piac-crumb,
+html[data-theme="dark"] body.hd-page .hd-price-note {
+  color: #94a3b8;
+}
+
 html[data-theme="dark"] body.hd-page .hd-side-title,
 html[data-theme="dark"] body.hd-page .hd-hi-value,
 html[data-theme="dark"] body.hd-page .hd-specbar-main,

@@ -36,7 +36,7 @@ const PIAC_TOP_ICONS = {
   "divat-ruhazat":
     '<img class="piac-top-icon__img" src="/images/categories/piac-divat.png" alt="" width="48" height="44" decoding="async" />',
   "uzlet-szolgaltatas":
-    '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 34l16-16 6 6-16 16H14v-6z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M28 16l4-4 6 6-4 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+    '<img class="piac-top-icon__img" src="/images/categories/piac-uzlet.png" alt="" width="48" height="44" decoding="async" />',
   "baba-mama":
     '<img class="piac-top-icon__img" src="/images/categories/piac-baba.png" alt="" width="48" height="44" decoding="async" />',
 };

@@ -169,7 +169,7 @@ const WIZARD_CATEGORY_OPTIONS = [
   {
     id: "uzlet-szolgaltatas",
     label: "Üzlet, szolgáltatás",
-    image: "",
+    image: "/images/categories/piac-uzlet.png",
     vertical: "piac",
     subtype: "uzlet-szolgaltatas",
   },

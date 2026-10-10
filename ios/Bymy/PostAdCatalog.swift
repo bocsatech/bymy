@@ -21,7 +21,7 @@ enum PostAdCatalog {
         let options: [Category]
 
         enum Accent {
-            case car, truck, immo
+            case car, truck, piac, immo
         }
     }
 
@@ -54,6 +54,29 @@ enum PostAdCatalog {
                       imagePath: "/images/categories/kisteher.png", systemImage: "truck.box.fill"),
                 .init(id: "teherauto", label: "Teherautó 3,5 t-tól", vertical: "teher", subtype: "teherauto",
                       imagePath: "/images/categories/teherauto.png", systemImage: "bus.fill"),
+            ]
+        ),
+        .init(
+            id: "piac",
+            title: "Piactér hirdetés",
+            subtitle: "Állás, divat, otthon és más",
+            thumbURL: "",
+            accent: .piac,
+            options: [
+                .init(id: "allas", label: "Állás", vertical: "piac", subtype: "allas",
+                      systemImage: "briefcase.fill"),
+                .init(id: "otthon-haztartas", label: "Otthon, háztartás", vertical: "piac", subtype: "otthon-haztartas",
+                      systemImage: "house.fill"),
+                .init(id: "muszaki-elektronika", label: "Műszaki, elektronika", vertical: "piac", subtype: "muszaki-elektronika",
+                      systemImage: "desktopcomputer"),
+                .init(id: "szabadido-sport", label: "Szabadidő, sport", vertical: "piac", subtype: "szabadido-sport",
+                      systemImage: "sportscourt.fill"),
+                .init(id: "divat-ruhazat", label: "Divat, ruházat", vertical: "piac", subtype: "divat-ruhazat",
+                      systemImage: "tshirt.fill"),
+                .init(id: "uzlet-szolgaltatas", label: "Üzlet, szolgáltatás", vertical: "piac", subtype: "uzlet-szolgaltatas",
+                      systemImage: "bag.fill"),
+                .init(id: "baba-mama", label: "Baba-mama", vertical: "piac", subtype: "baba-mama",
+                      systemImage: "figure.and.child.holdinghands"),
             ]
         ),
         .init(

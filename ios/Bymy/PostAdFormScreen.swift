@@ -37,7 +37,8 @@ struct PostAdFormScreen: View {
     @State private var sheet: SearchSheet?
     @StateObject private var catalog = VehicleCatalogStore()
 
-    private var isVehicle: Bool { category.vertical != "ingatlan" }
+    private var isVehicle: Bool { category.vertical == "auto" || category.vertical == "teher" }
+    private var isPiac: Bool { category.vertical == "piac" }
     private let pageBg = Color(red: 0.949, green: 0.957, blue: 0.969)
 
     var body: some View {
@@ -47,8 +48,9 @@ struct PostAdFormScreen: View {
                 VStack(alignment: .leading, spacing: 16) {
                     photosSection
                     if isVehicle {
-                        brandModelCard
                         vehicleFields
+                    } else if isPiac {
+                        piacFields
                     } else {
                         immoFields
                     }
@@ -210,45 +212,6 @@ struct PostAdFormScreen: View {
         )
     }
 
-    private var brandModelCard: some View {
-        let empty = brand.isEmpty
-        let summary = empty
-            ? "Gyártmány / Modell"
-            : (model.isEmpty ? brand : "\(brand) · \(model)")
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 4) {
-                Text("Gyártmány & Modell:")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(AppTheme.text)
-                Text("*")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(Color(red: 0.86, green: 0.15, blue: 0.15))
-            }
-            Button {
-                sheet = .list(title: "Gyártmány", options: catalog.brands, selected: brand)
-            } label: {
-                HStack {
-                    Text(summary)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(empty ? Color(red: 0.278, green: 0.333, blue: 0.412) : AppTheme.text)
-                    Spacer(minLength: 0)
-                }
-                .padding(.bottom, 8)
-                .overlay(alignment: .bottom) {
-                    Rectangle()
-                        .fill(Color(red: 0.81, green: 0.84, blue: 0.87))
-                        .frame(height: 1.5)
-                }
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-    }
-
     private var vehicleFields: some View {
         VStack(spacing: 0) {
             sectionTitle("Alapadatok")
@@ -256,6 +219,19 @@ struct PostAdFormScreen: View {
                 .padding(.top, 14)
                 .padding(.bottom, 8)
 
+            sheetRow("Gyártmány", value: brand.isEmpty ? "Mindegy" : brand) {
+                sheet = .list(title: "Gyártmány", options: catalog.brands, selected: brand)
+            }
+            rowDivider
+            sheetRow("Modell", value: model.isEmpty ? "Mindegy" : model) {
+                let models = catalog.models(for: brand)
+                if models.isEmpty {
+                    sheet = .text(title: "Modell", current: model)
+                } else {
+                    sheet = .list(title: "Modell", options: models, selected: model)
+                }
+            }
+            rowDivider
             sheetRow("Évjárat", value: year.isEmpty ? "Mindegy" : year) {
                 sheet = .list(title: "Évjárat", options: SearchCatalog.yearOptions(), selected: year)
             }
@@ -339,12 +315,6 @@ struct PostAdFormScreen: View {
             case "Gyártmány":
                 brand = v
                 if !v.isEmpty { model = "" }
-                let models = catalog.models(for: v)
-                if !v.isEmpty, !models.isEmpty {
-                    DispatchQueue.main.async {
-                        sheet = .list(title: "Modell", options: models, selected: "")
-                    }
-                }
             case "Modell": model = v
             case "Évjárat": year = v
             case "Üzemanyag": fuel = v
@@ -389,6 +359,38 @@ struct PostAdFormScreen: View {
             fieldInline("Település", text: $city, placeholder: "Budapest")
             rowDivider
             fieldInline("Utca, házszám", text: $street, placeholder: "opcionális")
+        }
+        .padding(.bottom, 8)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private var piacFields: some View {
+        VStack(spacing: 0) {
+            sectionTitle("Piactér adatok")
+                .padding(.horizontal, 14)
+                .padding(.top, 14)
+                .padding(.bottom, 8)
+
+            fieldInline("Hirdetés neve", text: $title, placeholder: "pl. iPhone 13, 128 GB")
+            rowDivider
+            HStack {
+                Text("Kategória")
+                    .font(.system(size: 15))
+                    .foregroundStyle(AppTheme.textSecondary)
+                Spacer()
+                Text(category.label)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(AppTheme.text)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            rowDivider
+            fieldInline("Ár (Ft)", text: $price, placeholder: "25000", keyboard: .numberPad)
+            rowDivider
+            fieldInline("Irányítószám", text: $postalCode, placeholder: "1051", keyboard: .numberPad)
+            rowDivider
+            fieldInline("Település", text: $city, placeholder: "Budapest")
         }
         .padding(.bottom, 8)
         .background(Color.white)

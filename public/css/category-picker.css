@@ -11,6 +11,8 @@
   --cp-truck-soft: #fff7ed;
   --cp-immo: #059669;
   --cp-immo-soft: #ecfdf5;
+  --cp-piac: #0f766e;
+  --cp-piac-soft: #f0fdfa;
   --cp-soon: #9ca3af;
   --cp-radius: 14px;
   --cp-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
@@ -153,6 +155,15 @@
   color: var(--cp-immo);
 }
 
+.cp-group[data-accent="piac"].is-open .cp-chevron {
+  color: var(--cp-piac);
+}
+
+.cp-group[data-accent="piac"] .cp-group-thumb--icon {
+  background: var(--cp-piac-soft);
+  color: var(--cp-piac);
+}
+
 .cp-group-body {
   display: none;
   border-top: 1px solid var(--cp-line);
@@ -289,10 +300,25 @@
   background: var(--cp-truck);
 }
 
+.cp-group[data-accent="piac"] .cp-option.is-active,
+.cp-group[data-accent="piac"] .cp-option:not(.is-soon):hover {
+  background: var(--cp-piac-soft);
+}
+
+.cp-group[data-accent="piac"] .cp-option.is-active {
+  color: var(--cp-piac);
+}
+
+.cp-group[data-accent="piac"] .cp-option.is-active .cp-option-bar {
+  background: var(--cp-piac);
+}
+
 .cp-group[data-accent="car"] .cp-option.is-active .cp-option-icon,
 .cp-group[data-accent="truck"] .cp-option.is-active .cp-option-icon,
+.cp-group[data-accent="piac"] .cp-option.is-active .cp-option-icon,
 .cp-group[data-accent="car"] .cp-option.is-active .cp-option-trail,
-.cp-group[data-accent="truck"] .cp-option.is-active .cp-option-trail {
+.cp-group[data-accent="truck"] .cp-option.is-active .cp-option-trail,
+.cp-group[data-accent="piac"] .cp-option.is-active .cp-option-trail {
   color: inherit;
 }
 

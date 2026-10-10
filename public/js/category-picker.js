@@ -39,6 +39,16 @@ const VEHICLE_PRESETS = {
   teherauto: { vertical: "teher", subtype: "teherauto", label: "Teherautó 3,5 t-tól" },
 };
 
+const PIAC_PRESETS = {
+  allas: { vertical: "piac", subtype: "allas", label: "Állás" },
+  "otthon-haztartas": { vertical: "piac", subtype: "otthon-haztartas", label: "Otthon, háztartás" },
+  "muszaki-elektronika": { vertical: "piac", subtype: "muszaki-elektronika", label: "Műszaki, elektronika" },
+  "szabadido-sport": { vertical: "piac", subtype: "szabadido-sport", label: "Szabadidő, sport" },
+  "divat-ruhazat": { vertical: "piac", subtype: "divat-ruhazat", label: "Divat, ruházat" },
+  "uzlet-szolgaltatas": { vertical: "piac", subtype: "uzlet-szolgaltatas", label: "Üzlet, szolgáltatás" },
+  "baba-mama": { vertical: "piac", subtype: "baba-mama", label: "Baba-mama" },
+};
+
 const IMMO_TIPUS = [
   { id: "elado", label: "Eladó Ingatlanok", image: "/images/hub-ingatlan-01-hazak.png" },
   { id: "kiado", label: "Kiadó Ingatlanok", image: "/images/hub-ingatlan-02-lakasok.png" },
@@ -87,6 +97,55 @@ const WIZARD_CATEGORY_OPTIONS = [
     image: "/images/categories/teherauto.png",
     vertical: "teher",
     subtype: "teherauto",
+  },
+  {
+    id: "allas",
+    label: "Állás",
+    image: "",
+    vertical: "piac",
+    subtype: "allas",
+  },
+  {
+    id: "otthon-haztartas",
+    label: "Otthon, háztartás",
+    image: "",
+    vertical: "piac",
+    subtype: "otthon-haztartas",
+  },
+  {
+    id: "muszaki-elektronika",
+    label: "Műszaki, elektronika",
+    image: "",
+    vertical: "piac",
+    subtype: "muszaki-elektronika",
+  },
+  {
+    id: "szabadido-sport",
+    label: "Szabadidő, sport",
+    image: "",
+    vertical: "piac",
+    subtype: "szabadido-sport",
+  },
+  {
+    id: "divat-ruhazat",
+    label: "Divat, ruházat",
+    image: "",
+    vertical: "piac",
+    subtype: "divat-ruhazat",
+  },
+  {
+    id: "uzlet-szolgaltatas",
+    label: "Üzlet, szolgáltatás",
+    image: "",
+    vertical: "piac",
+    subtype: "uzlet-szolgaltatas",
+  },
+  {
+    id: "baba-mama",
+    label: "Baba-mama",
+    image: "",
+    vertical: "piac",
+    subtype: "baba-mama",
   },
   {
     id: "elado",
@@ -157,6 +216,7 @@ function selectionFromUrl() {
   const subtype = String(params.get("subtype") ?? "").trim().toLowerCase();
   if (vertical === "auto" && VEHICLE_PRESETS[subtype]) return { ...VEHICLE_PRESETS[subtype] };
   if (vertical === "teher" && VEHICLE_PRESETS[subtype]) return { ...VEHICLE_PRESETS[subtype] };
+  if (vertical === "piac" && PIAC_PRESETS[subtype]) return { ...PIAC_PRESETS[subtype] };
   if (vertical === "ingatlan") {
     const tipus = String(params.get("tipus") ?? "").trim().toLowerCase();
     const hit = IMMO_TIPUS.find((x) => x.id === tipus);
@@ -285,6 +345,9 @@ export function initCategoryPicker({
   const stub = document.getElementById("ingatlan-stub");
   const stubSummary = document.getElementById("ingatlan-stub-summary");
   const stubBack = document.getElementById("ingatlan-stub-back");
+  const piacStub = document.getElementById("piac-stub");
+  const piacStubSummary = document.getElementById("piac-stub-summary");
+  const piacStubBack = document.getElementById("piac-stub-back");
 
   const state = {
     open: "auto",
@@ -535,12 +598,31 @@ export function initCategoryPicker({
     stepsBar?.setAttribute("hidden", "");
     contextBar?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
+    piacStub?.setAttribute("hidden", "");
     writeStored(null);
     setHiddenFields(null);
     pickerHandlers.onReset?.();
   }
 
+  function showPiacStub(selection) {
+    writeStored(selection);
+    setHiddenFields(selection);
+    pickerShell?.setAttribute("hidden", "");
+    wizardShell?.setAttribute("hidden", "");
+    stepsBar?.setAttribute("hidden", "");
+    contextBar?.setAttribute("hidden", "");
+    stub?.setAttribute("hidden", "");
+    if (piacStub && piacStubSummary) {
+      piacStub.removeAttribute("hidden");
+      piacStubSummary.textContent = `Kategória: ${selection.label || "Piactér"}. A piactér űrlap hamarosan érkezik — a választásod elmentve.`;
+    }
+  }
+
   async function showVehicleWizard(selection) {
+    if (selection?.vertical === "piac") {
+      showPiacStub(selection);
+      return;
+    }
     writeStored(selection);
     setHiddenFields(selection);
     try {
@@ -559,6 +641,7 @@ export function initCategoryPicker({
 
     pickerShell?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
+    piacStub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
     hideWizardStepsForDeskSelection(selection);
 
@@ -576,6 +659,7 @@ export function initCategoryPicker({
     wizardShell?.setAttribute("hidden", "");
     stepsBar?.setAttribute("hidden", "");
     contextBar?.setAttribute("hidden", "");
+    piacStub?.setAttribute("hidden", "");
     if (stub && stubSummary) {
       stub.removeAttribute("hidden");
       const tipus = labelList(selection.immoTipus, IMMO_TIPUS);
@@ -709,6 +793,12 @@ export function initCategoryPicker({
     syncOpenGroups();
   });
 
+  piacStubBack?.addEventListener("click", () => {
+    showPicker();
+    state.open = "piac";
+    syncOpenGroups();
+  });
+
   syncOpenGroups();
   syncImmoLabels();
 
@@ -725,7 +815,10 @@ export function initCategoryPicker({
   const isEditBoot = Number.isFinite(editId) && editId > 0;
   const shouldContinue =
     params.get("continue") === "1" &&
-    (stored?.vertical === "auto" || stored?.vertical === "teher" || stored?.vertical === "ingatlan");
+    (stored?.vertical === "auto" ||
+      stored?.vertical === "teher" ||
+      stored?.vertical === "piac" ||
+      stored?.vertical === "ingatlan");
   const shouldStart = params.get("start") === "1" && urlSelection;
 
   if (shouldStart) {
@@ -748,6 +841,9 @@ export function initCategoryPicker({
       syncOpenGroups();
     } else if (urlSelection?.vertical === "auto") {
       state.open = "auto";
+      syncOpenGroups();
+    } else if (urlSelection?.vertical === "piac") {
+      state.open = "piac";
       syncOpenGroups();
     } else if (urlSelection?.vertical === "ingatlan") {
       state.open = "ingatlan";

@@ -59,12 +59,22 @@ struct PostAdScreen: View {
                 }
             } label: {
                 HStack(spacing: 14) {
-                    AsyncImage(url: URL(string: group.thumbURL)) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image.resizable().scaledToFill()
-                        default:
-                            accentSoft(group.accent)
+                    Group {
+                        if group.thumbURL.isEmpty {
+                            Image(systemName: group.id == "piac" ? "bag.fill" : "square.grid.2x2.fill")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(accentColor(group.accent))
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(accentSoft(group.accent))
+                        } else {
+                            AsyncImage(url: URL(string: group.thumbURL)) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image.resizable().scaledToFill()
+                                default:
+                                    accentSoft(group.accent)
+                                }
+                            }
                         }
                     }
                     .frame(width: 52, height: 52)
@@ -170,6 +180,7 @@ struct PostAdScreen: View {
         switch accent {
         case .car: return Color(red: 0.145, green: 0.388, blue: 0.922) // #2563eb
         case .truck: return Color(red: 0.918, green: 0.345, blue: 0.047) // #ea580c
+        case .piac: return Color(red: 0.059, green: 0.463, blue: 0.431) // #0f766e
         case .immo: return Color(red: 0.020, green: 0.588, blue: 0.412) // #059669
         }
     }
@@ -178,6 +189,7 @@ struct PostAdScreen: View {
         switch accent {
         case .car: return Color(red: 0.937, green: 0.965, blue: 1.0)
         case .truck: return Color(red: 1.0, green: 0.969, blue: 0.929)
+        case .piac: return Color(red: 0.941, green: 0.992, blue: 0.980) // #f0fdfa
         case .immo: return Color(red: 0.925, green: 0.992, blue: 0.961)
         }
     }

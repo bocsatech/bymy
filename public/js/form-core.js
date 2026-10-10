@@ -22,12 +22,17 @@ import { uploadImage } from "./upload-image.js?v=3b023aae7a";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=296f11502f";
 import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=ee862641b7";
 import {
+  syncPiacFormVisibility,
+  readPiacFormValues,
+  validatePiacForm,
+} from "./piac-form-fields.js?v=94fb121482";
+import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=1a522e09d6";
 import { openListingPhotoEditor } from "./listing-photo-edit.js?v=985755542f";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=49adc435c0";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=1c11003682";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=907444b89b";
 import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=dc720507fb";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=30e4feeab0";
 import { bindAdFormKeyboardGuard } from "./ad-form-keyboard-guard.js?v=e753f1b604";
@@ -136,6 +141,8 @@ export function createAdForm(options = {}) {
     "jarmu_kategoria",
     "ingatlan_tipus",
     "ingatlan_kategoria",
+    "piac_path",
+    "piac_intent",
     "csomag",
   ]);
 
@@ -738,6 +745,7 @@ function syncKisteherFields() {
   renderEgyebInfo();
   renderKivitelDropdown();
   void syncIngatlanFormVisibility(form);
+  void syncPiacFormVisibility(form);
   window.dispatchEvent(new Event("ad-form-layout-refresh"));
 }
 
@@ -977,6 +985,13 @@ function updatePublishSuccessCopy() {
     listLink.href = "/teherauto.html";
     return;
   }
+  if (vertical === "piac") {
+    hint.textContent =
+      "A hirdetés a Bymy adatbázisban van — megjelenik a Piactér oldalon és a Hirdetéseim listában.";
+    listLink.textContent = "Piactér oldal";
+    listLink.href = "/piacter.html";
+    return;
+  }
   hint.textContent =
     "A hirdetés a Bymy adatbázisban van — megjelenik az Autó oldalon és a Hirdetéseim listában.";
   listLink.textContent = "Autó oldal";
@@ -997,8 +1012,16 @@ function isIngatlanAd() {
   );
 }
 
+function isPiacAd() {
+  return (
+    String(form.elements.namedItem("hirdetes_vertical")?.value ?? "")
+      .trim()
+      .toLowerCase() === "piac"
+  );
+}
+
 function nextWizardStep(from) {
-  if (isIngatlanAd()) {
+  if (isIngatlanAd() || isPiacAd()) {
     if (from === 1) return 4;
     if (from === 4) return 5;
   }
@@ -1006,7 +1029,7 @@ function nextWizardStep(from) {
 }
 
 function prevWizardStep(from) {
-  if (isIngatlanAd()) {
+  if (isIngatlanAd() || isPiacAd()) {
     if (from === 4) return 1;
     if (from === 5) return 4;
   }
@@ -1014,7 +1037,7 @@ function prevWizardStep(from) {
 }
 
 function shouldSkipWizardStep(step) {
-  return isIngatlanAd() && (step === 2 || step === 3);
+  return (isIngatlanAd() || isPiacAd()) && (step === 2 || step === 3);
 }
 
 function goToStep(step) {
@@ -1120,6 +1143,9 @@ function collectFormData() {
   if (data.km != null) data.km = parseKmDigits(data.km);
   if (data.vetelar != null) data.vetelar = parseKmDigits(data.vetelar);
   if (data.vetelar_eur != null) data.vetelar_eur = parseKmDigits(data.vetelar_eur);
+  if (isPiacAd()) {
+    Object.assign(data, readPiacFormValues(form));
+  }
   return data;
 }
 
@@ -1362,14 +1388,21 @@ function validateFields(names, onlyStep = null) {
 function validateStep(step) {
   if (shouldSkipWizardStep(step)) return true;
   const isIngatlan = isIngatlanAd();
+  const isPiac = isPiacAd();
 
-  const basicRequired = isIngatlan
-    ? ["allapot", "ingatlan_uzletag"]
-    : ["gyartasi_ev", "gyartmany", "modell", "kivitel", "allapot", "okmany_jelleg", "km"];
-  const techRequired = isIngatlan ? [] : ["uzemanyag"];
-  const adRequired = ["vetelar", "iranyitoszam", "telepules", "telefon1_korzet", "telefon1_szam"];
+  const basicRequired = isPiac
+    ? []
+    : isIngatlan
+      ? ["allapot", "ingatlan_uzletag"]
+      : ["gyartasi_ev", "gyartmany", "modell", "kivitel", "allapot", "okmany_jelleg", "km"];
+  const techRequired = isIngatlan || isPiac ? [] : ["uzemanyag"];
+  const freePiac = isPiac && Boolean(form.querySelector("#piac_ingyen")?.checked);
+  const adRequired = freePiac
+    ? ["iranyitoszam", "telepules", "telefon1_korzet", "telefon1_szam"]
+    : ["vetelar", "iranyitoszam", "telepules", "telefon1_korzet", "telefon1_szam"];
 
   if (step === 1) {
+    if (isPiac && !validatePiacForm(form)) return false;
     if (!validateFields(basicRequired, 1) || !validateFields(techRequired, 1) || !validateFields(adRequired, 1)) {
       alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
       return false;
@@ -1408,6 +1441,7 @@ function validateStep(step) {
   if (step === TOTAL_STEPS) {
     applyListingAddressFromProfileSync(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
+    if (isPiac && !validatePiacForm(form)) return false;
     if (!validateFields(basicRequired)) {
       alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
       return false;

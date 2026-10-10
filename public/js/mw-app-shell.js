@@ -268,6 +268,7 @@
   function postAdHref() {
     if (page === "auto") return "/hirdetesfeladas.html?vertical=auto&subtype=szemelyauto&start=1";
     if (page === "teherauto") return "/hirdetesfeladas.html?vertical=auto&subtype=teherauto&start=1";
+    if (page === "piacter") return "/hirdetesfeladas.html?vertical=piac&start=1";
     if (page === "ingatlan") return "/hirdetesfeladas.html?vertical=ingatlan&subtype=ingatlan&start=1";
     return "/hirdetesfeladas.html";
   }
@@ -275,6 +276,7 @@
   function ajanlasokHref() {
     if (page === "auto") return "/ajanlasok.html?vertical=auto";
     if (page === "teherauto") return "/ajanlasok.html?vertical=teherauto";
+    if (page === "piacter") return "/ajanlasok.html";
     if (page === "ingatlan") return "/ajanlasok.html?vertical=ingatlan";
     return "/ajanlasok.html";
   }

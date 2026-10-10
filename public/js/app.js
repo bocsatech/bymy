@@ -5,13 +5,13 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=6c1aeac308";
-import { createAdForm } from "./form-core.js?v=5aed2b9122";
+import { createAdForm } from "./form-core.js?v=167d91371c";
 import { initPriceMarketHint } from "./price-market-hint.js?v=ee49eb1a56";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { initPhoneLanguages } from "./phone-lang-ui.js?v=bc55c36aef";
-import { initCategoryPicker } from "./category-picker.js?v=5d45536b6e";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=1c11003682";
+import { initCategoryPicker } from "./category-picker.js?v=6fcf75f476";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=907444b89b";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -287,7 +287,7 @@ const categoryPicker = initCategoryPicker({
     try {
       const api = ensureFormReady();
       const selVertical = categoryPicker?.getSelection?.()?.vertical;
-      if (!editing && selVertical !== "ingatlan") api?.resetForm?.({ fresh: true });
+      if (!editing && selVertical !== "ingatlan" && selVertical !== "piac") api?.resetForm?.({ fresh: true });
       api?.markTouched?.();
       const sel = categoryPicker?.getSelection?.();
       if (sel) categoryPicker?.syncWizardContext?.(sel);

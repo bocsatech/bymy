@@ -1,0 +1,185 @@
+.piac-fields {
+  margin: 0 0 1.25rem;
+  padding: 0 0 0.25rem;
+}
+
+.piac-fields__head {
+  margin: 0 0 0.75rem;
+}
+
+.piac-fields__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--hub-text, #111827);
+}
+
+.piac-fields__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: var(--hub-muted, #6b7280);
+}
+
+.piac-cat-menus {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 1.1rem;
+}
+
+.piac-cat-col {
+  min-height: 160px;
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--hub-border, #d8dde6);
+  border-radius: 12px;
+  background: var(--hub-surface, #fff);
+}
+
+.piac-cat-col[hidden] {
+  display: none !important;
+}
+
+.piac-cat-list {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 2px;
+}
+
+.piac-cat-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.65rem 0.7rem;
+  background: transparent;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--hub-text, #111827);
+  cursor: pointer;
+}
+
+.piac-cat-item:hover {
+  background: #f0fdfa;
+}
+
+.piac-cat-item.is-active {
+  background: #0f766e;
+  color: #fff;
+}
+
+.piac-intent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.piac-intent__label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.piac-intent__opts {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.piac-intent__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0 0.9rem;
+  border: 1px solid var(--hub-border, #d8dde6);
+  border-radius: 999px;
+  background: var(--hub-surface, #fff);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.piac-intent__opt:has(input:checked) {
+  border-color: #0f766e;
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+.piac-intent__opt input {
+  accent-color: #0f766e;
+}
+
+.piac-field {
+  margin: 0 0 0.9rem;
+}
+
+.piac-field label {
+  display: block;
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.piac-field input[type="text"] {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--hub-border, #d8dde6);
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  box-sizing: border-box;
+  background: var(--hub-surface, #fff);
+  color: var(--hub-text, #111827);
+}
+
+.piac-field input[type="text"]:focus {
+  outline: none;
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.piac-field__hint {
+  margin: 0.3rem 0 0;
+  font-size: 0.82rem;
+  color: var(--hub-muted, #6b7280);
+}
+
+.piac-free {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.piac-free input {
+  accent-color: #0f766e;
+}
+
+body.ad-vertical-piac #ad-form .piac-hide-vehicle {
+  display: none !important;
+}
+
+@media (max-width: 800px) {
+  .piac-cat-menus {
+    grid-template-columns: 1fr;
+  }
+
+  .piac-cat-col {
+    min-height: 0;
+    max-height: 200px;
+  }
+}
+
+html[data-theme="dark"] .piac-cat-item:hover {
+  background: rgba(15, 118, 110, 0.2);
+}
+
+html[data-theme="dark"] .piac-intent__opt:has(input:checked) {
+  background: rgba(15, 118, 110, 0.22);
+}

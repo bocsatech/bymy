@@ -216,7 +216,10 @@ function selectionFromUrl() {
   const subtype = String(params.get("subtype") ?? "").trim().toLowerCase();
   if (vertical === "auto" && VEHICLE_PRESETS[subtype]) return { ...VEHICLE_PRESETS[subtype] };
   if (vertical === "teher" && VEHICLE_PRESETS[subtype]) return { ...VEHICLE_PRESETS[subtype] };
-  if (vertical === "piac" && PIAC_PRESETS[subtype]) return { ...PIAC_PRESETS[subtype] };
+  if (vertical === "piac") {
+    if (subtype && PIAC_PRESETS[subtype]) return { ...PIAC_PRESETS[subtype] };
+    return { vertical: "piac", subtype: "", label: "Piactér" };
+  }
   if (vertical === "ingatlan") {
     const tipus = String(params.get("tipus") ?? "").trim().toLowerCase();
     const hit = IMMO_TIPUS.find((x) => x.id === tipus);
@@ -303,7 +306,9 @@ export function markImmoPostViewReady() {
 function hideWizardStepsForDeskSelection(selection) {
   const stepsBar = document.getElementById("wizard-steps-bar");
   const deskLike =
-    isDeskVehicleSubtype(selection?.subtype) || selection?.vertical === "ingatlan";
+    isDeskVehicleSubtype(selection?.subtype) ||
+    selection?.vertical === "ingatlan" ||
+    selection?.vertical === "piac";
   if (deskLike) stepsBar?.setAttribute("hidden", "");
   else stepsBar?.removeAttribute("hidden");
 }
@@ -604,25 +609,7 @@ export function initCategoryPicker({
     pickerHandlers.onReset?.();
   }
 
-  function showPiacStub(selection) {
-    writeStored(selection);
-    setHiddenFields(selection);
-    pickerShell?.setAttribute("hidden", "");
-    wizardShell?.setAttribute("hidden", "");
-    stepsBar?.setAttribute("hidden", "");
-    contextBar?.setAttribute("hidden", "");
-    stub?.setAttribute("hidden", "");
-    if (piacStub && piacStubSummary) {
-      piacStub.removeAttribute("hidden");
-      piacStubSummary.textContent = `Kategória: ${selection.label || "Piactér"}. A piactér űrlap hamarosan érkezik — a választásod elmentve.`;
-    }
-  }
-
   async function showVehicleWizard(selection) {
-    if (selection?.vertical === "piac") {
-      showPiacStub(selection);
-      return;
-    }
     writeStored(selection);
     setHiddenFields(selection);
     try {

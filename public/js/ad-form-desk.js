@@ -1,5 +1,5 @@
 import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=f5cc36c931";
-import { markImmoPostViewReady } from "./category-picker.js?v=5d45536b6e";
+import { markImmoPostViewReady } from "./category-picker.js?v=6fcf75f476";
 import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
@@ -27,7 +27,18 @@ const DESK_VEHICLE_SUBTYPES = new Set([
   "teherauto",
 ]);
 
-const DESK_AD_SUBTYPES = new Set([...DESK_VEHICLE_SUBTYPES, "ingatlan"]);
+const DESK_AD_SUBTYPES = new Set([...DESK_VEHICLE_SUBTYPES, "ingatlan", "piac"]);
+
+const PIAC_TOP_SUBTYPES = new Set([
+  "allas",
+  "otthon-haztartas",
+  "muszaki-elektronika",
+  "szabadido-sport",
+  "divat-ruhazat",
+  "uzlet-szolgaltatas",
+  "baba-mama",
+  "piac",
+]);
 
 function isDeskWide() {
   return typeof window !== "undefined" && window.matchMedia(DESK_MQ).matches;
@@ -47,10 +58,11 @@ function currentSubtype(form) {
   )
     .trim()
     .toLowerCase();
-  if (subtype) return subtype;
   const vertical = String(form?.elements.namedItem("hirdetes_vertical")?.value ?? "")
     .trim()
     .toLowerCase();
+  if (vertical === "piac") return "piac";
+  if (subtype) return subtype;
   if (vertical === "ingatlan") return "ingatlan";
   return "";
 }
@@ -68,11 +80,10 @@ function isDeskVehicleSubtype(subtype) {
 }
 
 function isDeskAdSubtype(subtype) {
-  return DESK_AD_SUBTYPES.has(
-    String(subtype ?? "")
-      .trim()
-      .toLowerCase()
-  );
+  const id = String(subtype ?? "")
+    .trim()
+    .toLowerCase();
+  return DESK_AD_SUBTYPES.has(id) || PIAC_TOP_SUBTYPES.has(id);
 }
 
 function isDeskVehicleAdForm(form) {
@@ -83,6 +94,10 @@ function isIngatlanAdForm(form) {
   return currentSubtype(form) === "ingatlan";
 }
 
+function isPiacAdForm(form) {
+  return currentSubtype(form) === "piac";
+}
+
 function isAdFormDesk(form) {
   return isDeskAdSubtype(currentSubtype(form));
 }
@@ -90,10 +105,11 @@ function isAdFormDesk(form) {
 function syncIngatlanDeskAccordions(form) {
   const shell = form.querySelector("#ad-form-desk-shell");
   if (!shell) return;
+  const hideTech = isIngatlanAdForm(form) || isPiacAdForm(form);
   for (const id of ["muszaki", "extrak"]) {
     const acc = shell.querySelector(`[data-desk-acc="${id}"]`);
     if (!acc) continue;
-    if (isIngatlanAdForm(form)) {
+    if (hideTech) {
       acc.hidden = true;
       acc.setAttribute("hidden", "");
     } else {
@@ -387,8 +403,10 @@ function accordionForStep(step) {
 function restackCanvasItems(form) {
   const isImmo =
     form.classList.contains("ad-form--ingatlan") || document.body.classList.contains("ad-vertical-ingatlan");
+  const isPiac =
+    form.classList.contains("ad-form--piac") || document.body.classList.contains("ad-vertical-piac");
   form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
-    if (!isImmo) {
+    if (!isImmo && !isPiac) {
       stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: isVehicleStep1Canvas(canvas) });
       return;
     }

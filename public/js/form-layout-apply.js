@@ -1,8 +1,9 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=ee862641b7";
+import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=94fb121482";
 import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=49adc435c0";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=1c11003682";
-import { markImmoPostViewReady } from "./category-picker.js?v=5d45536b6e";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=907444b89b";
+import { markImmoPostViewReady } from "./category-picker.js?v=6fcf75f476";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -1013,6 +1014,7 @@ async function applyAdFormLayout() {
   try {
     const category = currentLayoutCategory(form);
     const isImmo = category === "ingatlan";
+    const isPiac = category === "piac";
     setIngatlanFormMode(form, isImmo);
     if (isImmo) {
       await ensureIngatlanFormFields(form);
@@ -1020,6 +1022,15 @@ async function applyAdFormLayout() {
       form.querySelector("#ingatlan-fields")?.remove();
       clearImmoOrphans(form);
     }
+    if (isPiac) {
+      await ensurePiacFormFields(form);
+      await syncPiacFormVisibility(form);
+      hideVehicleChromeWithoutLayout(form);
+      return;
+    }
+    form.querySelector("#piac-fields")?.remove();
+    form.classList.remove("ad-form--piac");
+    document.body.classList.remove("ad-vertical-piac");
     const res = await fetch(`/api/level1/form-layout?category=${encodeURIComponent(category)}`, {
       credentials: "same-origin",
       cache: "no-store",
@@ -1341,6 +1352,7 @@ function currentLayoutCategory(form) {
     .trim()
     .toLowerCase();
   if (vertical === "ingatlan") return "ingatlan";
+  if (vertical === "piac") return "piac";
   if (vertical === "teher") return "teherauto";
   return "szemelyauto";
 }

@@ -262,11 +262,22 @@ html[data-theme="dark"] .piac-sub-btn {
   color: #93c5fd;
 }
 
-html[data-theme="dark"] .piac-sub-btn.is-active,
-html[data-theme="dark"] .piac-top-icon.is-active {
+html[data-theme="dark"] .piac-sub-btn.is-active {
   background: #16a34a;
   border-color: #16a34a;
   color: #fff;
+}
+
+html[data-theme="dark"] .piac-top-icon__box {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+html[data-theme="dark"] .piac-top-icon.is-active .piac-top-icon__box {
+  background: #0f172a;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px #22c55e;
 }
 
 html[data-theme="dark"] .piac-fields__title {

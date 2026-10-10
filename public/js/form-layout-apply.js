@@ -1,9 +1,9 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=ee862641b7";
-import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=487a882a34";
+import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=3e27bffee1";
 import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=49adc435c0";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=1fc9f1787e";
-import { markImmoPostViewReady } from "./category-picker.js?v=ada2de634e";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=f0e9bc8890";
+import { markImmoPostViewReady } from "./category-picker.js?v=fc7d9295ce";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,

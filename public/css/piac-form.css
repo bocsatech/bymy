@@ -29,13 +29,13 @@
   font-weight: 600;
 }
 
-/* Fő kategóriák — ikonsor (ref.) */
+/* Fő kategóriák — saját lekerekített képbox + címke */
 .piac-top-icons {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.35rem 0.5rem;
+  gap: 0.5rem 0.55rem;
   margin: 0 0 1rem;
-  padding: 0.35rem 0 0.75rem;
+  padding: 0.35rem 0 0.85rem;
   border-bottom: 1px solid var(--hub-border, #e5e7eb);
 }
 
@@ -44,46 +44,58 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.35rem;
-  min-height: 92px;
-  padding: 0.45rem 0.25rem;
-  border: 2px solid transparent;
-  border-radius: 12px;
+  gap: 0.45rem;
+  min-height: 0;
+  padding: 0;
+  border: 0;
   background: transparent;
-  color: #2563eb;
+  color: #1f2937;
   font: inherit;
   cursor: pointer;
 }
 
-.piac-top-icon:hover {
-  background: #eff6ff;
-}
-
-.piac-top-icon.is-active {
-  border-color: #22c55e;
-  background: #22c55e;
-  color: #fff;
-}
-
-.piac-top-icon__glyph {
+.piac-top-icon__box {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 72px;
+  margin: 0 auto;
+  padding: 8px;
+  border: 1px solid var(--hub-border, #d8dde6);
+  border-radius: 14px;
+  background: #fff;
+  box-sizing: border-box;
+  color: #111827;
+  overflow: hidden;
 }
 
-.piac-top-icon__glyph svg,
-.piac-top-icon__glyph .piac-top-icon__img {
-  width: 40px;
-  height: 40px;
+.piac-top-icon__box svg,
+.piac-top-icon__box .piac-top-icon__img {
+  width: 78%;
+  height: 78%;
+  max-width: 44px;
+  max-height: 44px;
   display: block;
+  margin: 0 auto;
   object-fit: contain;
+  object-position: center;
 }
 
-.piac-top-icon.is-active .piac-top-icon__img {
-  /* Sötét vonalak fehérek az aktív zöld háttéren; a zöld csat megmarad. */
-  filter: brightness(0) invert(1);
+.piac-top-icon:hover .piac-top-icon__box {
+  border-color: #93c5fd;
+  background: #f8fafc;
+}
+
+.piac-top-icon.is-active .piac-top-icon__box {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px #22c55e;
+  background: #fff;
+}
+
+.piac-top-icon.is-active .piac-top-icon__label {
+  color: #15803d;
 }
 
 .piac-top-icon__label {
@@ -93,6 +105,7 @@
   line-height: 1.15;
   text-align: center;
   max-width: 100%;
+  color: #1f2937;
 }
 
 /* Alkategória + levél + szándék oszlopok */

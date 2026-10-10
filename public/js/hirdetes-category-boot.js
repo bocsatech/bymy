@@ -1,7 +1,7 @@
 /**
  * Korai kategóriaválasztó — ne várjon az app.js teljes betöltésére.
  */
-import { initCategoryPicker } from "./category-picker.js?v=ada2de634e";
+import { initCategoryPicker } from "./category-picker.js?v=fc7d9295ce";
 import { getAuthUser, loginUrl } from "./site-auth.js?v=20aa3f41c9";
 
 initCategoryPicker({

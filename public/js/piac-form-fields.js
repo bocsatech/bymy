@@ -23,10 +23,10 @@ const PIAC_TOP_SHORT = {
   "baba-mama": "Baba-mama",
 };
 
-/** Egyszerű ikonok a mentett főmenühöz (Ingatlan/Jármű nélkül). */
+/** Fő kategória ikonok — kép vagy SVG a lekerekített képboxba. */
 const PIAC_TOP_ICONS = {
   allas:
-    '<img class="piac-top-icon__img" src="/images/categories/piac-allas.png" alt="" width="40" height="36" decoding="async" />',
+    '<img class="piac-top-icon__img" src="/images/categories/piac-allas.png" alt="" width="48" height="44" decoding="async" />',
   "otthon-haztartas":
     '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 28h32v12H8z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 28V20c0-6 5-10 12-10s12 4 12 10v8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M18 34h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
   "muszaki-elektronika":
@@ -200,7 +200,7 @@ function renderTopIcons(row, tops, selectedSlug, onPick) {
     btn.dataset.slug = item.slug;
     btn.title = item.label;
     btn.innerHTML = `
-      <span class="piac-top-icon__glyph">${PIAC_TOP_ICONS[item.slug] || ""}</span>
+      <span class="piac-top-icon__box" aria-hidden="true">${PIAC_TOP_ICONS[item.slug] || ""}</span>
       <span class="piac-top-icon__label">${item._short || shortPiacTopLabel(item.slug)}</span>
     `;
     btn.addEventListener("click", () => onPick(item));

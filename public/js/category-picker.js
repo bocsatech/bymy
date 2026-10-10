@@ -148,7 +148,7 @@ const WIZARD_CATEGORY_OPTIONS = [
   {
     id: "muszaki-elektronika",
     label: "Műszaki, elektronika",
-    image: "",
+    image: "/images/categories/piac-muszaki.png",
     vertical: "piac",
     subtype: "muszaki-elektronika",
   },

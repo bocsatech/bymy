@@ -526,6 +526,16 @@ export async function syncPiacFormVisibility(form) {
         field.setAttribute("required", "");
       }
     }
+    const priceLabel = form.querySelector('label[for="vetelar"]');
+    if (priceLabel?.dataset?.piacLabelSaved) {
+      priceLabel.innerHTML = priceLabel.dataset.piacLabelSaved;
+      delete priceLabel.dataset.piacLabelSaved;
+    }
+    const vetelar = form.elements.namedItem("vetelar");
+    const vetelarField = vetelar instanceof RadioNodeList ? vetelar[0] : vetelar;
+    if (vetelarField && vetelarField.getAttribute("placeholder") === "pl. 15 000") {
+      vetelarField.setAttribute("placeholder", "pl. 3 700 000");
+    }
     return;
   }
 
@@ -567,6 +577,26 @@ export async function syncPiacFormVisibility(form) {
       wrap.hidden = true;
       wrap.classList.add("piac-hide-vehicle");
       wrap.style.setProperty("display", "none", "important");
+    }
+  }
+
+  /* Vételár: piactéren sima Ft szövegmező — nincs autó-piaci sáv / EUR. */
+  const priceHint = document.getElementById("price-market-hint");
+  if (priceHint) {
+    priceHint.hidden = true;
+    priceHint.setAttribute("hidden", "");
+    priceHint.removeAttribute("data-opinion");
+  }
+  const vetelar = form.elements.namedItem("vetelar");
+  const vetelarField = vetelar instanceof RadioNodeList ? vetelar[0] : vetelar;
+  if (vetelarField) {
+    vetelarField.setAttribute("autocomplete", "off");
+    vetelarField.setAttribute("inputmode", "numeric");
+    vetelarField.setAttribute("placeholder", "pl. 15 000");
+    const priceLabel = form.querySelector('label[for="vetelar"]');
+    if (priceLabel && !priceLabel.dataset.piacLabelSaved) {
+      priceLabel.dataset.piacLabelSaved = priceLabel.innerHTML;
+      priceLabel.innerHTML = 'Ár: <span class="req">*</span>';
     }
   }
 

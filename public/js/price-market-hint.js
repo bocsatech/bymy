@@ -107,6 +107,27 @@ function setHint(state) {
   }
 }
 
+function isPiacForm(form) {
+  return (
+    form?.classList?.contains("ad-form--piac") ||
+    document.body.classList.contains("ad-vertical-piac") ||
+    form?.querySelector?.('input[name="vertical"]:checked')?.value === "piac" ||
+    form?.elements?.namedItem?.("vertical")?.value === "piac"
+  );
+}
+
+function hideHintHard() {
+  const root = el("price-market-hint");
+  if (!root) return;
+  root.hidden = true;
+  root.setAttribute("hidden", "");
+  root.removeAttribute("data-opinion");
+  const bars = root.querySelector(".price-market-bars");
+  const label = root.querySelector(".price-market-label");
+  if (bars) bars.dataset.level = "0";
+  if (label) label.textContent = "";
+}
+
 export function initPriceMarketHint(form = document.getElementById("ad-form")) {
   if (!form || form.dataset.priceMarketHint === "1") return;
   form.dataset.priceMarketHint = "1";
@@ -117,6 +138,10 @@ export function initPriceMarketHint(form = document.getElementById("ad-form")) {
   let seq = 0;
 
   async function refresh() {
+    if (isPiacForm(form)) {
+      hideHintHard();
+      return;
+    }
     ensureHintEl();
     const p = readParams();
     if (!p.gyartmany || !p.modell || !p.ar) {

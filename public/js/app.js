@@ -6,7 +6,7 @@ import {
   getStoredListingId,
 } from "./db-client.js?v=6c1aeac308";
 import { createAdForm } from "./form-core.js?v=a1f6c8e205";
-import { initPriceMarketHint } from "./price-market-hint.js?v=ee49eb1a56";
+import { initPriceMarketHint } from "./price-market-hint.js?v=f212f1d75b";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { initPhoneLanguages } from "./phone-lang-ui.js?v=bc55c36aef";

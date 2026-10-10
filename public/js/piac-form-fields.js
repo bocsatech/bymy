@@ -26,7 +26,7 @@ const PIAC_TOP_SHORT = {
 /** Egyszerű ikonok a mentett főmenühöz (Ingatlan/Jármű nélkül). */
 const PIAC_TOP_ICONS = {
   allas:
-    '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="16" r="8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M10 40c2.5-8 8-12 14-12s11.5 4 14 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M30 12h8v6h-3v8h-5V18h-3v-6z" fill="currentColor"/></svg>',
+    '<img class="piac-top-icon__img" src="/images/categories/piac-allas.png" alt="" width="40" height="36" decoding="async" />',
   "otthon-haztartas":
     '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 28h32v12H8z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 28V20c0-6 5-10 12-10s12 4 12 10v8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M18 34h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
   "muszaki-elektronika":

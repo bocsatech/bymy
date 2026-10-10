@@ -73,10 +73,17 @@
   height: 44px;
 }
 
-.piac-top-icon__glyph svg {
+.piac-top-icon__glyph svg,
+.piac-top-icon__glyph .piac-top-icon__img {
   width: 40px;
   height: 40px;
   display: block;
+  object-fit: contain;
+}
+
+.piac-top-icon.is-active .piac-top-icon__img {
+  /* Sötét vonalak fehérek az aktív zöld háttéren; a zöld csat megmarad. */
+  filter: brightness(0) invert(1);
 }
 
 .piac-top-icon__label {

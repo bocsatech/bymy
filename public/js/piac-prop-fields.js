@@ -64,16 +64,102 @@ function slugify(label) {
     .replace(/^-|-$/g, "");
 }
 
+function normOptionText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+/** Mentett érték → katalógus opció (kis/nagybetű, elírás, régi címke). */
+function matchSelectOption(options, selected = "") {
+  const sel = String(selected || "").trim();
+  const list = (options || []).map((o) => String(o));
+  if (!sel) return { value: "", options: list };
+  if (list.includes(sel)) return { value: sel, options: list };
+  const ci = list.find((o) => o.toLowerCase() === sel.toLowerCase());
+  if (ci) return { value: ci, options: list };
+  const nsel = normOptionText(sel);
+  const byNorm = list.find((o) => normOptionText(o) === nsel);
+  if (byNorm) return { value: byNorm, options: list };
+  const byPart = list.find((o) => {
+    const no = normOptionText(o);
+    return no && nsel && (no.includes(nsel) || nsel.includes(no));
+  });
+  if (byPart) return { value: byPart, options: list };
+  const tokens =
+    String(sel)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .match(/[a-z0-9]{2,}/g) || [];
+  if (tokens.length >= 2) {
+    const byTokens = list.find((o) => {
+      const no = normOptionText(o);
+      return tokens.every((t) => no.includes(t));
+    });
+    if (byTokens) return { value: byTokens, options: list };
+  }
+  const range = sel.match(/(\d+)\s*[-–]\s*(\d+)/);
+  if (range) {
+    const a = Number(range[1]);
+    const b = Number(range[2]);
+    let best = null;
+    let bestScore = -1;
+    for (const o of list) {
+      const om = o.match(/(\d+)\s*[-–]\s*(\d+)/);
+      if (!om) continue;
+      const oa = Number(om[1]);
+      const ob = Number(om[2]);
+      const overlap = Math.max(0, Math.min(b, ob) - Math.max(a, oa));
+      const score = overlap > 0 ? overlap : oa === a || ob === b ? 0.5 : 0;
+      if (score > bestScore) {
+        bestScore = score;
+        best = o;
+      }
+    }
+    if (best && bestScore > 0) return { value: best, options: list };
+  }
+  /* Ne vesszen el: ideiglenes opció a mentett értékkel. */
+  return { value: sel, options: [...list, sel] };
+}
+
 function optionHtml(options, selected = "") {
-  const sel = String(selected || "");
+  const matched = matchSelectOption(options, selected);
+  const sel = matched.value;
   return [
     `<option value="">«Válassz»</option>`,
-    ...options.map((opt) => {
+    ...matched.options.map((opt) => {
       const v = String(opt);
       const picked = v === sel ? " selected" : "";
       return `<option value="${v.replace(/"/g, "&quot;")}"${picked}>${v}</option>`;
     }),
   ].join("");
+}
+
+function prevValueForProp(last, key) {
+  const direct = String(last[`piac_prop_${key}`] || last[key] || "").trim();
+  if (direct) return direct;
+  const aliases = {
+    carrier_level: ["allas_tapasztalat"],
+    jobtype: ["allas_foglalkoztatas"],
+    education: ["allas_vegzettseg"],
+    language: ["allas_nyelv"],
+    job_country: ["allas_kulfoldi_orszag"],
+  };
+  for (const alt of aliases[key] || []) {
+    const v = String(last[alt] || "").trim();
+    if (v) return v;
+  }
+  if (isPositionParam(key)) {
+    const munkakor = String(last.allas_munkakor || "").trim();
+    if (munkakor) return munkakor;
+    for (const [k, v] of Object.entries(last || {})) {
+      if (k.startsWith("piac_prop_position_") && String(v || "").trim()) return String(v).trim();
+    }
+  }
+  return "";
 }
 
 function readPathParts(form) {
@@ -227,7 +313,7 @@ async function syncPiacPropFieldsOnce(form) {
   for (const key of selectable) {
     const el = root.querySelector(`[name="piac_prop_${key}"]`);
     if (el?.type === "checkbox") continue;
-    prevValues[key] = el?.value || String(last[`piac_prop_${key}`] || last[key] || "");
+    prevValues[key] = String(el?.value || "").trim() || prevValueForProp(last, key);
   }
   const prevDocs = [...root.querySelectorAll('input[name="piac_prop_job_documents"]:checked')].map((el) => el.value);
   const lastDocs = String(last.piac_prop_job_documents || last.allas_dokumentumok || "")
@@ -304,6 +390,25 @@ async function syncPiacPropFieldsOnce(form) {
     <div class="piac-allas-grid">${rows.join("")}</div>
     ${data.hint ? `<p class="piac-prop-fields__hint">${data.hint}</p>` : ""}
   `;
+  /* Második menet: race / újrarajzolás után is a mentett érték legyen kiválasztva. */
+  for (const key of selectable) {
+    if (key === "job_documents") continue;
+    const el = root.querySelector(`[name="piac_prop_${key}"]`);
+    if (!el || el.tagName !== "SELECT") continue;
+    const want = prevValues[key] || "";
+    if (!want) continue;
+    const matched = matchSelectOption(
+      [...el.options].map((o) => o.value).filter(Boolean),
+      want
+    );
+    if (matched.value && ![...el.options].some((o) => o.value === matched.value)) {
+      const opt = document.createElement("option");
+      opt.value = matched.value;
+      opt.textContent = matched.value;
+      el.appendChild(opt);
+    }
+    if (matched.value) el.value = matched.value;
+  }
   root.dataset.path = pathParts.join("/");
   root.dataset.ready = "1";
   return root;

@@ -1026,7 +1026,7 @@ async function applyAdFormLayout() {
       await ensurePiacFormFields(form);
       await syncPiacFormVisibility(form);
       try {
-        const { syncPiacPropFields } = await import("./piac-prop-fields.js?v=c4f8a1e902");
+        const { syncPiacPropFields } = await import("./piac-prop-fields.js?v=d9e2b4a701");
         await syncPiacPropFields(form);
       } catch {
         /* props opcionális */

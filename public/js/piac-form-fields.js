@@ -5,7 +5,7 @@ import {
   syncPiacPropFields,
   readPiacPropValues,
   validatePiacPropForm,
-} from "./piac-prop-fields.js?v=c4f8a1e902";
+} from "./piac-prop-fields.js?v=d9e2b4a701";
 
 let catalogPromise = null;
 

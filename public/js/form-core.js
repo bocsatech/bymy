@@ -26,7 +26,7 @@ import {
   readPiacFormValues,
   validatePiacForm,
 } from "./piac-form-fields.js?v=a2d5f8c103";
-import { syncPiacPropFields } from "./piac-prop-fields.js?v=c4f8a1e902";
+import { syncPiacPropFields } from "./piac-prop-fields.js?v=d9e2b4a701";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,

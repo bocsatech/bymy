@@ -5,7 +5,7 @@ import {
   syncPiacPropFields,
   readPiacPropValues,
   validatePiacPropForm,
-} from "./piac-prop-fields.js?v=13a5ca90f6";
+} from "./piac-prop-fields.js?v=a4ba933806";
 
 let catalogPromise = null;
 
@@ -219,9 +219,20 @@ function renderTopIcons(row, tops, selectedSlug, onPick) {
 function placePiacRoot(form, root) {
   if (!form || !root) return false;
   root.classList.remove("piac-fields--desk-top");
+  const deskWide =
+    document.body.classList.contains("ad-form-desk-active") &&
+    window.matchMedia("(min-width: 901px)").matches;
+  if (deskWide) {
+    const shell = form.querySelector("#ad-form-desk-shell");
+    if (shell) {
+      if (root.parentElement !== shell || shell.firstElementChild !== root) {
+        shell.insertBefore(root, shell.firstChild);
+      }
+      return true;
+    }
+  }
   const panel = form.querySelector('.step-panel[data-step="1"]');
   if (!panel) return false;
-  /* Mindig a bal oszlop (Alap) tetején — a képek mellett. */
   if (root.parentElement !== panel || panel.firstElementChild !== root) {
     panel.insertBefore(root, panel.firstChild);
   }
@@ -476,6 +487,21 @@ export async function syncPiacFormVisibility(form) {
     if (isPiac && vehicleStep) el.setAttribute("aria-hidden", "true");
     else if (!form.classList.contains("ad-form--ingatlan")) el.removeAttribute("aria-hidden");
   });
+
+  const leiras = form.querySelector("#leiras");
+  if (leiras) {
+    if (!leiras.dataset.placeholderAuto) {
+      leiras.dataset.placeholderAuto = leiras.getAttribute("placeholder") || "";
+    }
+    if (isPiac) {
+      leiras.setAttribute(
+        "placeholder",
+        "Írj pár mondatot a hirdetésről — a gomb emberszerű szöveget készít belőle."
+      );
+    } else if (leiras.dataset.placeholderAuto) {
+      leiras.setAttribute("placeholder", leiras.dataset.placeholderAuto);
+    }
+  }
 
   if (!isPiac) {
     removePiacFormFields(form);

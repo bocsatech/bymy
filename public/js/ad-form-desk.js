@@ -684,17 +684,18 @@ function pinPiacCategoryBesidePhotos(form) {
   const piac = form?.querySelector("#piac-fields");
   if (!piac || !isPiacAdForm(form)) return;
   piac.classList.remove("piac-fields--desk-top");
+  /* Desk: kategória a bal oszlop tetején, accordionön kívül — mindig látszik a képek mellett. */
+  if (isDeskWide()) {
+    const shell = form.querySelector("#ad-form-desk-shell");
+    if (shell && (piac.parentElement !== shell || shell.firstElementChild !== piac)) {
+      shell.insertBefore(piac, shell.firstChild);
+    }
+    return;
+  }
   const panel = form.querySelector('.step-panel[data-step="1"]');
   if (!panel) return;
   if (piac.parentElement !== panel || panel.firstElementChild !== piac) {
     panel.insertBefore(piac, panel.firstChild);
-  }
-  /* Desk: Alap accordion mindig nyitva a tetején — kategória + képek egymás mellett. */
-  if (isDeskWide()) {
-    const alap = form.querySelector('#ad-form-desk-shell [data-desk-acc="alap"]');
-    if (alap && !alap.classList.contains("is-open")) {
-      openAccordion(form, "alap");
-    }
   }
 }
 

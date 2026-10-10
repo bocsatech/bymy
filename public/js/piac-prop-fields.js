@@ -65,6 +65,15 @@ function resolvePropKeys(data, pathParts) {
   return data.byLeaf?.[leaf] || [];
 }
 
+function isPiacDeskWide() {
+  return (
+    typeof document !== "undefined" &&
+    document.body.classList.contains("ad-form-desk-active") &&
+    typeof window !== "undefined" &&
+    window.matchMedia("(min-width: 901px)").matches
+  );
+}
+
 function placePropSection(form, root) {
   if (!form || !root) return;
   const photosCard =
@@ -74,10 +83,21 @@ function placePropSection(form, root) {
     form.querySelector('.step-panel[data-step="4"]') ||
     form.querySelector("#ad-photo-desk-stage");
   if (photosCard?.parentElement) {
+    /* Desk: képek fent a kategória mellett; Tulajdonságok a képek alá. */
+    if (isPiacDeskWide()) {
+      if (root.previousElementSibling !== photosCard) photosCard.insertAdjacentElement("afterend", root);
+      return;
+    }
     if (root.nextElementSibling !== photosCard) photosCard.insertAdjacentElement("beforebegin", root);
     return;
   }
   if (photoPanel) {
+    if (isPiacDeskWide()) {
+      const photos = photoPanel.querySelector(".card--photos");
+      if (photos && root.previousElementSibling !== photos) photos.insertAdjacentElement("afterend", root);
+      else if (!photos && root.parentElement !== photoPanel) photoPanel.appendChild(root);
+      return;
+    }
     if (root.parentElement !== photoPanel) photoPanel.insertBefore(root, photoPanel.firstChild);
     return;
   }

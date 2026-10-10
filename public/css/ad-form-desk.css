@@ -1169,7 +1169,25 @@ body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-s
   }
 
   body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #piac-fields {
-    margin-top: 0;
+    margin: 0 0 0.85rem;
+    padding: 0.85rem 1rem 0.75rem;
+    border: 1px solid var(--hub-border, #e5e7eb);
+    border-radius: 14px;
+    background: #fff;
+    box-sizing: border-box;
+  }
+
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #ad-form-desk-shell > #piac-fields {
+    order: -1;
+    flex-shrink: 0;
+  }
+
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #ad-photo-desk-stage .card--photos {
+    order: 0;
+  }
+
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #piac-prop-fields {
+    margin-top: 0.85rem;
   }
 
   /* Ingatlan / piactér: a bal sáv ne takaródjon a középső oszlop alá. */

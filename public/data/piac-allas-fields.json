@@ -1,0 +1,337 @@
+{
+  "version": 1,
+  "sectionLabel": "Tulajdonságok",
+  "shared": {
+    "tapasztalat": {
+      "label": "Tapasztalat",
+      "required": true,
+      "options": [
+        "Pályakezdő",
+        "1-2 év tapasztalat",
+        "3-5 év tapasztalat",
+        ">5 év tapasztalat"
+      ]
+    },
+    "vegzettseg": {
+      "label": "Elvárt végzettség",
+      "required": true,
+      "options": [
+        "nem igényel",
+        "általános iskola",
+        "szakiskola/szakmunkás képző",
+        "középiskola",
+        "érettségi",
+        "felsőfokú szakképzettség",
+        "főiskola",
+        "egyetem"
+      ]
+    },
+    "nyelv": {
+      "label": "Szükséges nyelvtudás",
+      "required": true,
+      "options": [
+        "nem igényel",
+        "angol",
+        "német",
+        "francia",
+        "arab",
+        "cseh",
+        "dán",
+        "finn",
+        "holland",
+        "horvát",
+        "japán",
+        "kínai",
+        "lengyel",
+        "olasz",
+        "orosz",
+        "portugál",
+        "román",
+        "spanyol",
+        "svéd",
+        "szerb",
+        "szlovák",
+        "szlovén",
+        "török",
+        "ukrán",
+        "egyéb"
+      ]
+    },
+    "foglalkoztatas": {
+      "label": "Foglalkoztatás jellege",
+      "required": true,
+      "options": [
+        "Teljes munkaidő",
+        "Részmunkaidő (6 órában)",
+        "Részmunkaidő (4 órában)",
+        "Alkalmi/időszakos munka",
+        "Vállalkozói/szerződéses",
+        "Diákmunka",
+        "Megváltozott munkaképességű munka",
+        "Szakmai gyakorlat"
+      ]
+    },
+    "kulfoldi_orszag": {
+      "label": "Külföldi munka esetén ország",
+      "required": false,
+      "options": [
+        "Nem releváns",
+        "Ausztria",
+        "Németország",
+        "Hollandia",
+        "Belgium",
+        "Svájc",
+        "Egyesült Királyság",
+        "Franciaország",
+        "Olaszország",
+        "Spanyolország",
+        "Csehország",
+        "Szlovákia",
+        "Románia",
+        "Lengyelország",
+        "Svédország",
+        "Dánia",
+        "Norvégia",
+        "Egyéb"
+      ]
+    },
+    "dokumentumok": {
+      "label": "Jelentkezéshez szükséges dokumentumok",
+      "required": true,
+      "type": "checkbox",
+      "options": [
+        "önéletrajz",
+        "fényképes önéletrajz",
+        "motivációs levél",
+        "szakképesítést igazoló dokumentum",
+        "nem szükséges"
+      ]
+    }
+  },
+  "munkakorByCategory": {
+    "adminisztracio-irodai-munka": [
+      "Adminisztrációs munkatárs",
+      "Adminisztratív munkatárs",
+      "Adminisztrátor",
+      "Recepciós",
+      "Titkárnő / asszisztens",
+      "Irodavezető",
+      "Adatrögzítő",
+      "Dokumentumkezelő",
+      "Back office munkatárs",
+      "Ügyintéző",
+      "Egyéb"
+    ],
+    "bank-biztositas-tozsde": [
+      "Banki ügyintéző",
+      "Hitelügyintéző",
+      "Pénztáros",
+      "Biztosítási tanácsadó",
+      "Biztosítási ügyintéző",
+      "Befektetési tanácsadó",
+      "Compliance munkatárs",
+      "Kockázatelemző",
+      "Private banking tanácsadó",
+      "Egyéb"
+    ],
+    "cegvezetes-menedzsment": [
+      "Ügyvezető",
+      "Üzletvezető",
+      "Területi vezető",
+      "Projektmenedzser",
+      "Műszakvezető",
+      "Csoportvezető",
+      "Irodaigazgató",
+      "Operatív vezető",
+      "Középvezető",
+      "Egyéb"
+    ],
+    "egeszsegugy-szepseg": [
+      "Ápoló",
+      "Asszisztens",
+      "Orvos",
+      "Fogászati asszisztens",
+      "Gyógyszertári asszisztens",
+      "Fodrász",
+      "Kozmetikus",
+      "Manikűrös / pedikűrös",
+      "Masszőr",
+      "Szépségipari munkatárs",
+      "Egyéb"
+    ],
+    "epitoipar-ingatlan": [
+      "Építőipari munkás",
+      "Kőműves",
+      "Burkoló",
+      "Szobafestő",
+      "Villanyszerelő",
+      "Gipszkarton szerelő",
+      "Ingatlanközvetítő",
+      "Értékbecslő",
+      "Építésvezető",
+      "Műszaki ellenőr",
+      "Egyéb"
+    ],
+    "ertekesites-kereskedelem": [
+      "Bolti eladó",
+      "Eladó",
+      "Értékesítési munkatárs",
+      "Üzletkötő",
+      "Pénztáros",
+      "Árufeltöltő",
+      "Üzletvezető",
+      "Key account manager",
+      "Telemarketinges",
+      "Egyéb"
+    ],
+    "fizikai-munka-segedmunka": [
+      "Betanított munkás",
+      "Segédmunkás",
+      "Rakodó",
+      "Raktáros",
+      "Takarító",
+      "Karbantartó",
+      "Üzemi munkás",
+      "Csomagoló",
+      "Általános fizikai munkás",
+      "Egyéb"
+    ],
+    "gyartas-termeles-mernok": [
+      "Gépkezelő",
+      "Gyártósori munkás",
+      "CNC operátor",
+      "Minőségellenőr",
+      "Folyamatmérnök",
+      "Gépészmérnök",
+      "Villamosmérnök",
+      "Termelési vezető",
+      "Technikus",
+      "Egyéb"
+    ],
+    "hr-munkaugy": [
+      "HR munkatárs",
+      "Toborzó",
+      "Munkaügyi ügyintéző",
+      "Bérszámfejtő",
+      "HR generalista",
+      "HR üzleti partner",
+      "Képzési szakértő",
+      "Egyéb"
+    ],
+    "it-telekommunikacio": [
+      "Szoftverfejlesztő",
+      "Rendszergazda",
+      "IT support",
+      "Tesztelő / QA",
+      "DevOps mérnök",
+      "Adatbázis adminisztrátor",
+      "Hálózati szakember",
+      "Webfejlesztő",
+      "Projektmenedzser (IT)",
+      "Egyéb"
+    ],
+    "jog-kozigazgatas": [
+      "Jogász",
+      "Ügyvédjelölt",
+      "Jogi asszisztens",
+      "Közigazgatási ügyintéző",
+      "Hatósági ügyintéző",
+      "Jegyzőkönyvvezető",
+      "Egyéb"
+    ],
+    "kornyezet-mezogazdasag": [
+      "Mezőgazdasági munkás",
+      "Traktoros",
+      "Állattenyésztő",
+      "Kertész",
+      "Erdészeti munkás",
+      "Környezetvédelmi szakember",
+      "Egyéb"
+    ],
+    "marketing-media-muveszet": [
+      "Marketing munkatárs",
+      "Social media menedzser",
+      "Grafikus",
+      "Fotós",
+      "Tartalomkészítő",
+      "PR munkatárs",
+      "Művészeti munkatárs",
+      "Szerkesztő",
+      "Egyéb"
+    ],
+    "oktatas-tudomany": [
+      "Tanár",
+      "Óvodapedagógus",
+      "Oktató",
+      "Nyelvtanár",
+      "Kutató",
+      "Laboráns",
+      "Iskolatitkár",
+      "Egyéb"
+    ],
+    "penzugy-szamvitel": [
+      "Könyvelő",
+      "Pénzügyi ügyintéző",
+      "Controller",
+      "Számviteli munkatárs",
+      "Adótanácsadó",
+      "Pénzügyi elemző",
+      "Főkönyvelő",
+      "Egyéb"
+    ],
+    "szakmunka": [
+      "Autószerelő",
+      "Lakatos",
+      "Hegesztő",
+      "Villanyszerelő",
+      "Vízvezeték-szerelő",
+      "Asztalos",
+      "Gumiszerelő",
+      "Karosszérialakatos",
+      "Egyéb szakmunkás",
+      "Egyéb"
+    ],
+    "szallitas-logisztika": [
+      "Sofőr",
+      "Tehergépkocsi-vezető",
+      "Nemzetközi sofőr",
+      "Árukézbesítő",
+      "Raktáros",
+      "Targoncás",
+      "Logisztikai ügyintéző",
+      "Fuvarszervező",
+      "Futár",
+      "Egyéb"
+    ],
+    "szemely-es-vagyonvedelem": [
+      "Személy- és vagyonőr",
+      "Biztonsági őr",
+      "Portás",
+      "Recepciós őr",
+      "Pénzszállító",
+      "Vevővédelmi munkatárs",
+      "Egyéb"
+    ],
+    "ugyfelszolgalat-telemarketing": [
+      "Ügyfélszolgálati munkatárs",
+      "Call center operátor",
+      "Telemarketinges",
+      "Helpdesk munkatárs",
+      "Panaszkezelő",
+      "Chat support",
+      "Egyéb"
+    ],
+    "vendeglatas-idegenforgalom": [
+      "Szakács",
+      "Konyhai munkás",
+      "Pincér",
+      "Bartender",
+      "Éttermi munkatárs",
+      "Pizzafutár / ételfutár",
+      "Szobalány",
+      "Recepcíós (hotel)",
+      "Konyhai kisegítő",
+      "Egyéb"
+    ]
+  }
+}

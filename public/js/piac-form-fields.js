@@ -1,6 +1,12 @@
 /**
  * Piactér feladás: mentett kategóriafa — ikonsor + alkategória lista (ref. Jófogás).
  */
+import {
+  syncPiacAllasFields,
+  readPiacAllasValues,
+  validatePiacAllasForm,
+} from "./piac-allas-fields.js?v=436ff792bc";
+
 let catalogPromise = null;
 
 const PIAC_TOP_LABELS = {
@@ -384,6 +390,7 @@ export async function ensurePiacFormFields(form) {
 
     syncAlkategoria(form, path);
     syncIntentToggle();
+    void syncPiacAllasFields(form);
 
     const labels = [];
     const intentVal = root.querySelector('input[name="piac_intent"]:checked')?.value || "";
@@ -563,6 +570,7 @@ export function readPiacFormValues(form) {
     piac_path: path,
     piac_ingyen: free ? "1" : "",
     hirdetes_cime: title,
+    ...readPiacAllasValues(form),
   };
 }
 
@@ -588,5 +596,6 @@ export function validatePiacForm(form) {
     alert("Válaszd ki: Kínál vagy Keres.");
     return false;
   }
+  if (!validatePiacAllasForm(form)) return false;
   return true;
 }

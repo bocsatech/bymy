@@ -1,5 +1,5 @@
 import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=f5cc36c931";
-import { markImmoPostViewReady } from "./category-picker.js?v=c5d611f67b";
+import { markImmoPostViewReady } from "./category-picker.js?v=438d4f30db";
 import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,

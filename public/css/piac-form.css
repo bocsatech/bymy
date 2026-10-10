@@ -211,6 +211,98 @@
   clip: rect(0 0 0 0);
 }
 
+/* Állás — Tulajdonságok */
+.piac-allas-fields {
+  margin: 0.85rem 0 1rem;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid var(--hub-border, #e5e7eb);
+}
+
+.piac-allas-fields__title {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.piac-allas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.piac-allas-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: #111827;
+}
+
+.piac-allas-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #c7d2e0;
+  border-radius: 10px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.piac-allas-field--docs {
+  grid-column: 1 / -1;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.piac-allas-field--docs legend {
+  padding: 0;
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.piac-allas-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.piac-allas-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.piac-allas-check input {
+  accent-color: #16a34a;
+}
+
+@media (max-width: 800px) {
+  .piac-allas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-theme="dark"] .piac-allas-fields__title,
+html[data-theme="dark"] .piac-allas-field {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .piac-allas-field select {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
 .piac-field {
   margin: 0 0 0.9rem;
 }

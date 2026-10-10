@@ -609,7 +609,11 @@ function render(view, listing, related = []) {
           : ""
       }
     </div>`;
-  const galleryBlock = `<div class="hd-gallery">
+  const piacCrumbAbove =
+    view.vertical === "piac" && headline.crumb
+      ? `<p class="hd-piac-crumb hd-piac-crumb--above">Piactér › ${escapeHtml(headline.crumb)}</p>`
+      : "";
+  const galleryBlock = `${piacCrumbAbove}<div class="hd-gallery">
         <div class="hd-stage">
           ${first ? `<button type="button" class="hd-stage-open" data-hd-open aria-label="Kép nagyítása"><img data-hd-main src="${escapeHtml(first)}" alt="" /></button>` : ""}
           ${
@@ -690,11 +694,6 @@ function render(view, listing, related = []) {
               : view.vertical === "piac" && headline.intent
                 ? `<p class="hd-piac-badge">${escapeHtml(headline.intent)}</p>`
                 : ""
-          }
-          ${
-            view.vertical === "piac" && headline.crumb
-              ? `<p class="hd-piac-crumb">Piactér › ${escapeHtml(headline.crumb)}</p>`
-              : ""
           }
           <h1 class="hd-side-title">${escapeHtml(headline.title)}</h1>
           ${

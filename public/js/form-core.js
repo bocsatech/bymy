@@ -25,7 +25,7 @@ import {
   syncPiacFormVisibility,
   readPiacFormValues,
   validatePiacForm,
-} from "./piac-form-fields.js?v=c01ab6ddfc";
+} from "./piac-form-fields.js?v=e471879219";
 import { syncPiacPropFields } from "./piac-prop-fields.js?v=c01ab6ddfc";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
@@ -1156,14 +1156,23 @@ function collectFormData() {
 
   if (isPiacAd()) {
     Object.assign(data, readPiacFormValues(form));
-    /* Lépésközi mentés full replace — üres collect ne törölje a piactér props / meta értékeket. */
+    /* Lépésközi mentés full replace — üres collect ne törölje a piactér props / meta értékeket.
+       piac_ingyen szándékos üres (pipa le) — ne hozza vissza a last-ból. */
     for (const [key, raw] of Object.entries(last)) {
-      if (!/^(piac_prop_|allas_|piac_path|piac_intent|piac_cim|piac_ingyen)/.test(key)) continue;
+      if (key === "piac_ingyen") continue;
+      if (!/^(piac_prop_|allas_|piac_path|piac_intent|piac_cim)/.test(key)) continue;
       const cur = String(data[key] ?? "").trim();
       const prev = String(raw ?? "").trim();
       if (!cur && prev) data[key] = prev;
     }
     if (!String(data.vetelar || "").trim() && vetelarLast) data.vetelar = vetelarLast;
+    /* Ha van ár, ne maradjon „Ingyen elvihető”. */
+    const priceNum = Number(String(data.vetelar || "").replace(/\D/g, "")) || 0;
+    if (priceNum > 0) {
+      data.piac_ingyen = "";
+      const freeEl = form.querySelector("#piac_ingyen");
+      if (freeEl?.checked) freeEl.checked = false;
+    }
   }
 
   form._bymyLastFormData = { ...last, ...data };

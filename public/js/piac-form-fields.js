@@ -621,6 +621,9 @@ export async function syncPiacFormVisibility(form) {
           form._bymyLastFormData = {};
         }
         form._bymyLastFormData.vetelar = digits;
+        form._bymyLastFormData.piac_ingyen = "";
+        const freeEl = form.querySelector("#piac_ingyen");
+        if (freeEl?.checked) freeEl.checked = false;
       };
       vetelarField.addEventListener("input", rememberPrice);
       vetelarField.addEventListener("change", rememberPrice);

@@ -5,7 +5,7 @@ import {
   syncPiacPropFields,
   readPiacPropValues,
   validatePiacPropForm,
-} from "./piac-prop-fields.js?v=a4ba933806";
+} from "./piac-prop-fields.js?v=0376d09067";
 
 let catalogPromise = null;
 
@@ -99,8 +99,9 @@ export function topSlugFromPiacPath(path) {
 
 function removePiacFormFields(form) {
   form?.querySelector("#piac-fields")?.remove();
-  form?.querySelector("#piac-allas-fields")?.remove();
-  form?.querySelector("#piac-prop-fields")?.remove();
+  form
+    ?.querySelectorAll("#piac-allas-fields, #piac-prop-fields, .piac-prop-fields, [data-piac-props]")
+    .forEach((el) => el.remove());
 }
 
 function syncTitleToHidden(form) {

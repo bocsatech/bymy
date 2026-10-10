@@ -1,8 +1,8 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=ee862641b7";
-import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=be14d8b94c";
+import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=2bd36cb45b";
 import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=49adc435c0";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=757791d404";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=e804b6177a";
 import { markImmoPostViewReady } from "./category-picker.js?v=438d4f30db";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -1034,8 +1034,9 @@ async function applyAdFormLayout() {
       return;
     }
     form.querySelector("#piac-fields")?.remove();
-    form.querySelector("#piac-allas-fields")?.remove();
-    form.querySelector("#piac-prop-fields")?.remove();
+    form
+      .querySelectorAll("#piac-allas-fields, #piac-prop-fields, .piac-prop-fields, [data-piac-props]")
+      .forEach((el) => el.remove());
     form.classList.remove("ad-form--piac");
     document.body.classList.remove("ad-vertical-piac");
     const res = await fetch(`/api/level1/form-layout?category=${encodeURIComponent(category)}`, {

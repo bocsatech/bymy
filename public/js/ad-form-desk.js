@@ -701,9 +701,13 @@ function pinPiacCategoryBesidePhotos(form) {
 
 function relocatePiacAllasAbovePhotos(form) {
   pinPiacCategoryBesidePhotos(form);
-  const props =
-    form?.querySelector("#piac-prop-fields") || form?.querySelector("#piac-allas-fields");
-  if (!props) return;
+  const allProps = [
+    ...(form?.querySelectorAll("#piac-prop-fields, #piac-allas-fields, .piac-prop-fields, [data-piac-props]") ||
+      []),
+  ];
+  if (!allProps.length) return;
+  const props = allProps[0];
+  for (let i = 1; i < allProps.length; i += 1) allProps[i].remove();
   const photosCard =
     form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"] .card--photos`) ||
     form.querySelector(".card--photos");

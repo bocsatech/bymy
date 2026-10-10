@@ -4,6 +4,35 @@
 
 let fieldsPromise = null;
 let allasPromise = null;
+/** @type {WeakMap<Element, Promise<Element|null>>} */
+const syncInflight = new WeakMap();
+
+function allPropRoots(form) {
+  return [
+    ...form.querySelectorAll("#piac-prop-fields, #piac-allas-fields, .piac-prop-fields, [data-piac-props]"),
+  ];
+}
+
+/** Egyetlen Tulajdonságok blokk — a párhuzamos sync ne hozzon létre több példányt. */
+function ensureSinglePropRoot(form) {
+  const roots = allPropRoots(form);
+  let root = roots[0] || null;
+  for (let i = 1; i < roots.length; i += 1) roots[i].remove();
+  if (!root) {
+    root = document.createElement("section");
+    root.id = "piac-prop-fields";
+    root.className = "piac-allas-fields piac-prop-fields";
+    root.setAttribute("data-piac-props", "1");
+  }
+  root.id = "piac-prop-fields";
+  root.classList.add("piac-allas-fields", "piac-prop-fields");
+  root.setAttribute("data-piac-props", "1");
+  return root;
+}
+
+function removeAllPropRoots(form) {
+  allPropRoots(form).forEach((el) => el.remove());
+}
 
 function loadPropFields() {
   if (!fieldsPromise) {
@@ -109,22 +138,32 @@ function isPositionParam(name) {
   return /^position_/.test(name);
 }
 
-export async function syncPiacPropFields(form) {
-  if (!form) return null;
+async function syncPiacPropFieldsOnce(form) {
   const host = form.querySelector("#piac-fields");
-  if (!host) return null;
+  if (!host) {
+    removeAllPropRoots(form);
+    return null;
+  }
 
   const pathParts = readPathParts(form);
   const top = pathParts[0] || "";
-  let root = form.querySelector("#piac-allas-fields") || form.querySelector("#piac-prop-fields");
+  /* Root azonnal, await előtt — így a párhuzamos hívások ugyanazt találják. */
+  let root = ensureSinglePropRoot(form);
+  placePropSection(form, root);
 
   if (!top) {
-    root?.remove();
+    removeAllPropRoots(form);
     return null;
   }
 
   const data = await loadPropFields();
-  if (!data) return null;
+  if (!data) {
+    removeAllPropRoots(form);
+    return null;
+  }
+
+  root = ensureSinglePropRoot(form);
+  placePropSection(form, root);
 
   const propKeys = resolvePropKeys(data, pathParts);
   const fieldDefs = data.fields || {};
@@ -138,17 +177,11 @@ export async function syncPiacPropFields(form) {
   });
 
   if (!selectable.length && !(allas && top === "allas")) {
-    root?.remove();
+    removeAllPropRoots(form);
     return null;
   }
 
-  if (!root) {
-    root = document.createElement("section");
-    root.id = "piac-prop-fields";
-    root.className = "piac-allas-fields piac-prop-fields";
-    root.setAttribute("data-piac-props", "1");
-  }
-  root.id = "piac-prop-fields";
+  root = ensureSinglePropRoot(form);
   root.setAttribute("aria-label", data.sectionLabel || "Tulajdonságok");
   placePropSection(form, root);
 
@@ -218,10 +251,12 @@ export async function syncPiacPropFields(form) {
   }
 
   if (!rows.length) {
-    root.remove();
+    removeAllPropRoots(form);
     return null;
   }
 
+  root = ensureSinglePropRoot(form);
+  placePropSection(form, root);
   root.innerHTML = `
     <div class="piac-allas-fields__head">
       <h4 class="piac-allas-fields__title">${data.sectionLabel || "Tulajdonságok"}</h4>
@@ -232,6 +267,20 @@ export async function syncPiacPropFields(form) {
   root.dataset.path = pathParts.join("/");
   root.dataset.ready = "1";
   return root;
+}
+
+export function syncPiacPropFields(form) {
+  if (!form) return Promise.resolve(null);
+  const prev = syncInflight.get(form);
+  /* Sorba állítva: a gyors paint() hívások ne hozzanak létre 12 külön blokkot. */
+  const run = (prev || Promise.resolve())
+    .catch(() => null)
+    .then(() => syncPiacPropFieldsOnce(form))
+    .finally(() => {
+      if (syncInflight.get(form) === run) syncInflight.delete(form);
+    });
+  syncInflight.set(form, run);
+  return run;
 }
 
 /** @deprecated use syncPiacPropFields */

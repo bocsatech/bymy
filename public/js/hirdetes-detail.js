@@ -627,13 +627,19 @@ function render(view, listing, related = []) {
         }
         ${highlightHtml(highlights)}
       </div>`;
+  const descBlock = `<section class="hd-section hd-section--desc hd-textbox">
+      <h2 class="hd-h2">Leírás</h2>
+      ${view.description ? `<p class="hd-desc is-clip" data-hd-desc>${escapeHtml(view.description)}</p>` : "<p class=\"hd-desc\">Nincs leírás.</p>"}
+      ${view.description ? `<button type="button" class="hd-more" data-hd-desc-more>Több megjelenítése +</button>` : ""}
+    </section>`;
 
   root.innerHTML = `
     <div class="hd-hero">
       ${
         view.vertical === "piac"
           ? `<div class="hd-main">${galleryBlock}
-      ${specsBlock}</div>`
+      ${specsBlock}
+      ${descBlock}</div>`
           : galleryBlock
       }
       ${
@@ -786,11 +792,7 @@ function render(view, listing, related = []) {
         : ""
     }
 
-    <section class="hd-section hd-section--desc hd-textbox">
-      <h2 class="hd-h2">Leírás</h2>
-      ${view.description ? `<p class="hd-desc is-clip" data-hd-desc>${escapeHtml(view.description)}</p>` : "<p class=\"hd-desc\">Nincs leírás.</p>"}
-      ${view.description ? `<button type="button" class="hd-more" data-hd-desc-more>Több megjelenítése +</button>` : ""}
-    </section>
+    ${view.vertical === "piac" ? "" : descBlock}
 
     ${
       view.vertical !== "piac" && !own && relatedItems.length

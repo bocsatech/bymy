@@ -725,10 +725,15 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   padding: 1.15rem 1.2rem 1.35rem;
 }
 
-/* Piactér: specs a galéria alatt a bal oszlopban → ugyanaz a szélesség. */
-#hd-root[data-listing-vertical="piac"] .hd-main .hd-specs {
+/* Piactér: specs + leírás a galéria alatt a bal oszlopban → ugyanaz a szélesség, 1 cm rés. */
+#hd-root[data-listing-vertical="piac"] .hd-main .hd-specs,
+#hd-root[data-listing-vertical="piac"] .hd-main .hd-section--desc {
   width: 100%;
   max-width: none;
+}
+
+#hd-root[data-listing-vertical="piac"] .hd-main .hd-section--desc {
+  margin-top: 1cm;
 }
 
 @media (max-width: 900px) {

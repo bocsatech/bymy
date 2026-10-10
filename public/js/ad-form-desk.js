@@ -1,5 +1,5 @@
 import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=f5cc36c931";
-import { markImmoPostViewReady } from "./category-picker.js?v=fc7d9295ce";
+import { markImmoPostViewReady } from "./category-picker.js?v=c5d611f67b";
 import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
@@ -490,8 +490,17 @@ function setDeskActive(on) {
   if (on) document.getElementById("wizard-steps-bar")?.setAttribute("hidden", "");
 }
 
-function ensureGuideFrame(col) {
+function stripPiacGuideFrame(form) {
+  form?.querySelectorAll(".ad-desk-guide-frame, #ad-desk-guide-frame").forEach((el) => el.remove());
+}
+
+function ensureGuideFrame(col, form = null) {
   if (!col) return null;
+  if (form && isPiacAdForm(form)) {
+    stripPiacGuideFrame(form);
+    col.querySelectorAll(".ad-desk-guide-frame, #ad-desk-guide-frame").forEach((el) => el.remove());
+    return null;
+  }
   let guide = col.querySelector("#ad-desk-guide-frame");
   if (guide) return guide;
 
@@ -517,7 +526,7 @@ function migrateLegacyDeskColumns(form) {
 
   // Régi középsó oszlop: csak bővítjük (útmutató keret), SOHA nem töröljük — benne lehet a képmező.
   if (legacyCenter) {
-    ensureGuideFrame(legacyCenter);
+    ensureGuideFrame(legacyCenter, form);
     const panel = legacyCenter.querySelector(".automax-panel");
     if (panel) {
       const tipsCol = ensureTipsColumn(form);
@@ -605,7 +614,7 @@ function ensureCenterColumn(form) {
     const tipsCol = form.querySelector("#ad-desk-tips-col");
     form.insertBefore(col, tipsCol || footer);
   }
-  ensureGuideFrame(col);
+  ensureGuideFrame(col, form);
   return col;
 }
 
@@ -738,6 +747,7 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   if (shell) shell.hidden = false;
   /* Piactér menü: desk mount után is a step-1 tetején maradjon. */
   if (isPiacAdForm(form)) {
+    stripPiacGuideFrame(form);
     const piac = form.querySelector("#piac-fields");
     const panel = form.querySelector('.step-panel[data-step="1"]');
     if (piac && panel && panel.firstElementChild !== piac) {
@@ -755,10 +765,12 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   mountExtrakSubAccordions(form);
   syncPhotoStage(form);
   updateAccordionSums(form);
-  if (accId && accId !== "kepek") showDeskGuideSlot(accId, { photoFocus: false });
-  refreshAdFormDeskGuide(form);
-  initAdFormDeskGuide();
-  afterDeskGuideAlign(form, accId);
+  if (!isPiacAdForm(form)) {
+    if (accId && accId !== "kepek") showDeskGuideSlot(accId, { photoFocus: false });
+    refreshAdFormDeskGuide(form);
+    initAdFormDeskGuide();
+    afterDeskGuideAlign(form, accId);
+  }
   window.dispatchEvent(new Event("ad-form-sync-location-postal"));
   clearAdFormEditBoot();
   if (

@@ -232,6 +232,12 @@ body.ad-vertical-piac #wizard-category-wheel-wrap {
   display: none !important;
 }
 
+/* Piactéren nincs középső „Alap adatok” útmutató keret. */
+body.ad-vertical-piac #ad-desk-guide-frame,
+body.ad-vertical-piac .ad-desk-guide-frame {
+  display: none !important;
+}
+
 body.ad-vertical-piac #ad-form .piac-hide-vehicle {
   display: none !important;
 }

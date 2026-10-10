@@ -236,6 +236,18 @@
   color: #111827;
 }
 
+.piac-prop-fields__hint {
+  margin: 0.85rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #6b7280;
+}
+
+.piac-allas-field .req {
+  color: #dc2626;
+  font-weight: 800;
+}
+
 .piac-allas-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

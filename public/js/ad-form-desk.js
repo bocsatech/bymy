@@ -681,13 +681,14 @@ function syncLeirasInPhotoPanel(form) {
 }
 
 function relocatePiacAllasAbovePhotos(form) {
-  const allas = form?.querySelector("#piac-allas-fields");
-  if (!allas) return;
+  const props =
+    form?.querySelector("#piac-prop-fields") || form?.querySelector("#piac-allas-fields");
+  if (!props) return;
   const photosCard =
     form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"] .card--photos`) ||
     form.querySelector(".card--photos");
-  if (photosCard?.parentElement && allas.nextElementSibling !== photosCard) {
-    photosCard.insertAdjacentElement("beforebegin", allas);
+  if (photosCard?.parentElement && props.nextElementSibling !== photosCard) {
+    photosCard.insertAdjacentElement("beforebegin", props);
   }
 }
 

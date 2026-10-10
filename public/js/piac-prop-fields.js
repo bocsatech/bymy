@@ -77,10 +77,30 @@ function optionHtml(options, selected = "") {
 }
 
 function readPathParts(form) {
-  return String(form?.querySelector?.("#piac_path")?.value || "")
+  const fromEl = String(form?.querySelector?.("#piac_path")?.value || "")
     .split("/")
     .map((s) => s.trim())
     .filter(Boolean);
+  if (fromEl.length) return fromEl;
+  const last = form?._bymyLastFormData && typeof form._bymyLastFormData === "object" ? form._bymyLastFormData : {};
+  return String(last.piac_path || "")
+    .split("/")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function defaultAllasPropKeys(data) {
+  const byPath = data?.byPath || {};
+  const hit = Object.entries(byPath).find(([key, keys]) => key.startsWith("allas/") && Array.isArray(keys) && keys.length);
+  if (hit) return [...hit[1]];
+  return [
+    "carrier_level",
+    "jobtype",
+    "education",
+    "job_documents",
+    "language",
+    "position_generic",
+  ];
 }
 
 function resolvePropKeys(data, pathParts) {
@@ -91,7 +111,24 @@ function resolvePropKeys(data, pathParts) {
     if (byPath[key]?.length) return byPath[key];
   }
   const leaf = pathParts[pathParts.length - 1];
-  return data.byLeaf?.[leaf] || [];
+  if (data.byLeaf?.[leaf]?.length) return data.byLeaf[leaf];
+  /* Állás: ismeretlen / elavult alkategória út esetén is mutassuk a közös mezőket. */
+  if (pathParts[0] === "allas") return defaultAllasPropKeys(data);
+  return [];
+}
+
+function resolveAllasMunkakorOptions(allas, sub) {
+  const map = allas?.munkakorByCategory || {};
+  if (map[sub]?.length) return map[sub];
+  const needle = String(sub || "").toLowerCase();
+  if (needle) {
+    const fuzzy = Object.entries(map).find(([key]) => key.includes(needle) || needle.includes(key));
+    if (fuzzy?.[1]?.length) return fuzzy[1];
+  }
+  if (map["it-telekommunikacio"]?.length && /it|program|szoftver|tech/i.test(needle)) {
+    return map["it-telekommunikacio"];
+  }
+  return ["Egyéb"];
 }
 
 function isPiacDeskWide() {
@@ -234,10 +271,13 @@ async function syncPiacPropFieldsOnce(form) {
 
     if (isPositionParam(key) && allas) {
       label = "Munkakör megnevezése";
-      options = allas.munkakorByCategory?.[sub] || ["Egyéb"];
+      options = resolveAllasMunkakorOptions(allas, sub);
       required = true;
     }
 
+    if (!options.length && fieldDefs[key]?.options?.length) {
+      options = fieldDefs[key].options;
+    }
     if (!options.length) continue;
 
     const reqMark = required ? ' <span class="req">*</span>' : "";

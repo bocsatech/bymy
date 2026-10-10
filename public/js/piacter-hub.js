@@ -6,7 +6,7 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=0633cb6729";
+} from "./listing-tile.js?v=6ccc12364e";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
 import {
   buildNearbyFilter,
@@ -539,6 +539,8 @@ async function bootBrowseResults() {
 
   if (!mode) {
     SECTION.hidden = true;
+    RAIL.classList.remove("piac-rail--allas");
+    document.body.classList.remove("piac-browse-allas");
     return;
   }
 
@@ -555,6 +557,9 @@ async function bootBrowseResults() {
   }
 
   SECTION.hidden = false;
+  const allasBrowse = mode === "cat" && topSlugFromCat(cat) === "allas";
+  RAIL.classList.toggle("piac-rail--allas", allasBrowse);
+  document.body.classList.toggle("piac-browse-allas", allasBrowse);
   if (RAIL.dataset.listingOpenBound !== "1") {
     RAIL.dataset.listingOpenBound = "1";
     bindListingOpen(RAIL);

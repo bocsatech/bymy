@@ -73,7 +73,66 @@ function softTitleCase(value) {
 
 export function listingTilePrice(item) {
   const price = String(item?.preview?.price ?? "").trim();
+  if (isAllasListing(item)) {
+    const form = item?.form ?? {};
+    if (String(form.piac_wo_wage_demands || "").trim() === "1" && !price) {
+      return "Bérigény a jelentkezőtől";
+    }
+    if (price) {
+      const dim = String(form.piac_price_dimension || "hó").trim() || "hó";
+      return `${price} / ${dim}`;
+    }
+    return "";
+  }
   return price || "Ár egyeztetés szerint";
+}
+
+export function isAllasListing(item) {
+  const form = item?.form ?? {};
+  const filter = item?.preview?.filter ?? {};
+  const path = String(form.piac_path || filter.piac_path || "").toLowerCase();
+  if (path === "allas" || path.startsWith("allas/")) return true;
+  const alk = String(form.hirdetes_alkategoria || filter.hirdetes_alkategoria || "").toLowerCase();
+  return alk === "allas" || alk.startsWith("allas");
+}
+
+function listingAllasCompany(item) {
+  const form = item?.form ?? {};
+  return String(
+    form.piac_prop_name_of_company ||
+      form.name_of_company ||
+      form.hirdeto_nev ||
+      item?.preview?.company ||
+      ""
+  ).trim();
+}
+
+function listingAllasJobtype(item) {
+  const form = item?.form ?? {};
+  return String(form.piac_prop_jobtype || form.allas_foglalkoztatas || "").trim();
+}
+
+function listingAllasCity(item) {
+  const preview = item?.preview ?? {};
+  const form = item?.form ?? {};
+  const filter = preview.filter ?? {};
+  return String(filter.telepules || form.telepules || preview.city || "").trim();
+}
+
+function listingAllasDateShort(item) {
+  const raw = item?.created_at || item?.updated_at || "";
+  const d = new Date(raw);
+  if (!Number.isFinite(d.getTime())) return "";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}.${mm}.`;
+}
+
+function listingIsNew(item, days = 7) {
+  const raw = item?.created_at || item?.updated_at || "";
+  const t = new Date(raw).getTime();
+  if (!Number.isFinite(t)) return false;
+  return Date.now() - t < days * 24 * 60 * 60 * 1000;
 }
 
 function pickFilter(preview, form, key) {
@@ -137,11 +196,25 @@ export function slimListingTile(item) {
       uzemanyag: form.uzemanyag ?? null,
       sebessegvalto: form.sebessegvalto ?? null,
       teljesitmeny_le: form.teljesitmeny_le ?? null,
+      piac_path: form.piac_path ?? preview.filter?.piac_path ?? null,
+      piac_cim: form.piac_cim ?? null,
+      piac_price_dimension: form.piac_price_dimension ?? null,
+      piac_wo_wage_demands: form.piac_wo_wage_demands ?? null,
+      piac_prop_jobtype: form.piac_prop_jobtype ?? null,
+      allas_foglalkoztatas: form.allas_foglalkoztatas ?? null,
+      piac_prop_name_of_company: form.piac_prop_name_of_company ?? null,
+      name_of_company: form.name_of_company ?? null,
+      hirdeto_nev: form.hirdeto_nev ?? null,
+      telepules: form.telepules ?? preview.filter?.telepules ?? null,
+      hirdetes_alkategoria: form.hirdetes_alkategoria ?? null,
+      promo_kiemelt: form.promo_kiemelt ?? null,
+      promo_top_ajanlat: form.promo_top_ajanlat ?? null,
     },
     preview: {
       title: preview.title,
       price: preview.price,
       km: preview.km,
+      city: preview.city || preview.filter?.telepules || form.telepules || "",
       specLine: preview.specLine,
       imageUrl: preview.imageUrl || item.fo_kep || "",
       promo: preview.promo || {
@@ -156,6 +229,9 @@ export function slimListingTile(item) {
         uzemanyag: preview.filter?.uzemanyag ?? form.uzemanyag ?? null,
         sebessegvalto: preview.filter?.sebessegvalto ?? form.sebessegvalto ?? null,
         teljesitmeny_le: preview.filter?.teljesitmeny_le ?? form.teljesitmeny_le ?? null,
+        piac_path: preview.filter?.piac_path ?? form.piac_path ?? null,
+        telepules: preview.filter?.telepules ?? form.telepules ?? null,
+        hirdetes_alkategoria: preview.filter?.hirdetes_alkategoria ?? form.hirdetes_alkategoria ?? null,
       },
     },
   };
@@ -178,10 +254,100 @@ function appendSpec(row, iconSvg, text, spec) {
   row.appendChild(el);
 }
 
+function createAllasBrickCard(
+  item,
+  { className = "hf-card hf-card--listing", featured = false, configuredFeaturedIds = null, eager = false } = {}
+) {
+  const preview = item.preview ?? {};
+  const showKiemelt = featured || listingShowsKiemeltDecor(item, configuredFeaturedIds);
+  const showTop = promoTopAjanlatActive(item);
+  const link = document.createElement("a");
+  link.className = `${className} hf-card--allas${showKiemelt ? " hf-card--featured" : ""}`.trim();
+  link.href = listingDetailHref(item.id);
+  link.dataset.listingId = String(item.id);
+  link.setAttribute("role", "listitem");
+
+  const title = listingTileTitle(item);
+  const company = listingAllasCompany(item);
+  const jobtype = listingAllasJobtype(item);
+  const city = listingAllasCity(item);
+  const date = listingAllasDateShort(item);
+  const wage = listingTilePrice(item);
+  const imageUrl = listCardImageUrl(preview.imageUrl || item.fo_kep || "");
+  const isNew = listingIsNew(item);
+
+  const media = document.createElement("span");
+  media.className = "hf-card-media hf-card-media--allas";
+  if (imageUrl) {
+    const img = document.createElement("img");
+    img.className = "hf-card-media-img";
+    img.alt = title;
+    img.width = 96;
+    img.height = 96;
+    img.loading = eager ? "eager" : "lazy";
+    img.decoding = "async";
+    if (eager) img.fetchPriority = "high";
+    img.referrerPolicy = "no-referrer";
+    applyListingImgSrcset(img, imageUrl, { sizes: "96px" });
+    media.appendChild(img);
+  } else {
+    media.classList.add("is-empty");
+  }
+
+  const body = document.createElement("span");
+  body.className = "hf-card-allas-body";
+
+  const label = document.createElement("span");
+  label.className = "hf-card-label";
+  label.textContent = title;
+  body.appendChild(label);
+
+  if (isNew || showKiemelt || showTop) {
+    const badges = document.createElement("span");
+    badges.className = "hf-card-allas-badges";
+    if (isNew) {
+      const neu = document.createElement("span");
+      neu.className = "hf-card-allas-badge";
+      neu.textContent = "Új — jelentkezz";
+      badges.appendChild(neu);
+    }
+    if (showKiemelt) {
+      const k = document.createElement("span");
+      k.className = "hf-card-allas-badge hf-card-allas-badge--kiemelt";
+      k.textContent = "Kiemelt";
+      badges.appendChild(k);
+    }
+    body.appendChild(badges);
+  }
+
+  if (company) {
+    const co = document.createElement("span");
+    co.className = "hf-card-allas-company";
+    co.textContent = company;
+    body.appendChild(co);
+  }
+
+  const metaBits = [date, [jobtype, city].filter(Boolean).join(", ")].filter(Boolean);
+  if (wage) metaBits.push(wage);
+  if (metaBits.length) {
+    const meta = document.createElement("span");
+    meta.className = "hf-card-allas-meta";
+    meta.textContent = metaBits.join(" | ");
+    body.appendChild(meta);
+  }
+
+  link.append(media, body);
+  return link;
+}
+
 export function createListingTileCard(
   item,
   { className = "hf-card hf-card--listing", featured = false, configuredFeaturedIds = null, eager = false } = {}
 ) {
+  if (isAllasListing(item)) {
+    return createAllasBrickCard(item, { className, featured, configuredFeaturedIds, eager });
+  }
+
   const preview = item.preview ?? {};
   const showKiemelt = featured || listingShowsKiemeltDecor(item, configuredFeaturedIds);
   const showTop = promoTopAjanlatActive(item);

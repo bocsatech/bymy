@@ -998,3 +998,155 @@
     display: none !important;
   }
 }
+
+/* Állás — vízszintes téglacsempe (Willhaben-szerű lista) */
+body.hub-page--feed .hf-rail.piac-rail--allas {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  gap: 10px !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  scroll-snap-type: none !important;
+}
+
+body.hub-page--feed .hf-rail.piac-rail--allas > .hf-card--allas,
+body.hub-page--feed .hf-card--allas {
+  --hf-card-w: 100%;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 0.85rem !important;
+  padding: 0.75rem 0.85rem !important;
+  border: 1px solid #e2dfd9;
+  border-radius: 12px;
+  background: #fff;
+  box-sizing: border-box !important;
+  text-decoration: none;
+  color: inherit;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-media--allas {
+  position: relative !important;
+  flex: 0 0 88px !important;
+  width: 88px !important;
+  height: 88px !important;
+  aspect-ratio: 1 / 1 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: #f3f4f6 !important;
+  align-self: center;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-media--allas.is-empty {
+  background:
+    linear-gradient(145deg, #eef2ff 0%, #e5e7eb 100%);
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-media--allas img,
+body.hub-page--feed .hf-card--allas .hf-card-media-img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 0.35rem !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.28rem;
+  padding: 0.1rem 0;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-label {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 1.02rem !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  color: #111 !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-badge--kiemelt {
+  background: #f0c14b;
+  color: #111;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-company {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.25;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-meta {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+html[data-theme="dark"] body.hub-page--feed .hf-card--allas {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html[data-theme="dark"] body.hub-page--feed .hf-card--allas .hf-card-label,
+html[data-theme="dark"] body.hub-page--feed .hf-card--allas .hf-card-allas-company {
+  color: #f1f5f9 !important;
+}
+
+html[data-theme="dark"] body.hub-page--feed .hf-card--allas .hf-card-allas-meta {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] body.hub-page--feed .hf-card--allas .hf-card-media--allas {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+@media (min-width: 801px) {
+  body.hub-page--feed .hf-rail.piac-rail--allas {
+    max-width: 720px;
+  }
+
+  body.hub-page--feed .hf-card--allas .hf-card-media--allas {
+    flex-basis: 104px !important;
+    width: 104px !important;
+    height: 104px !important;
+  }
+}

@@ -211,8 +211,32 @@ export function filterAutoListings(items) {
   return (items ?? []).filter((item) => {
     if ((item.status || "feladott") !== "feladott") return false;
     const vertical = String(item?.preview?.filter?.hirdetes_vertical ?? "").trim().toLowerCase();
-    return vertical !== "teher" && vertical !== "ingatlan";
+    return vertical !== "teher" && vertical !== "ingatlan" && vertical !== "piac";
   });
+}
+
+export function filterPiacListings(items) {
+  return (items ?? []).filter((item) => {
+    if ((item.status || "feladott") !== "feladott") return false;
+    const vertical = String(
+      item?.preview?.filter?.hirdetes_vertical ?? item?.form?.hirdetes_vertical ?? ""
+    )
+      .trim()
+      .toLowerCase();
+    return vertical === "piac";
+  });
+}
+
+export function piacNearbyHref(postal, radiusKm, city = "") {
+  const params = new URLSearchParams({
+    nearby: "1",
+    radius: String(radiusKm ?? 30),
+  });
+  const code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
+  if (code.length === 4) params.set("postal", code);
+  const cityName = String(city || "").trim();
+  if (cityName) params.set("city", cityName);
+  return `/piacter.html?${params}`;
 }
 
 function listingField(item, key) {

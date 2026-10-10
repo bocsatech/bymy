@@ -27,6 +27,7 @@ enum TopPage: String, CaseIterable, Identifiable {
     case hub
     case auto
     case teherauto
+    case piacter
     case ingatlan
     case ertekbecsles
     case ajanlasok
@@ -38,6 +39,7 @@ enum TopPage: String, CaseIterable, Identifiable {
         case .hub: return "Kezdőlap"
         case .auto: return "Autó"
         case .teherauto: return "Teherautó"
+        case .piacter: return "Piactér"
         case .ingatlan: return "Ingatlan"
         case .ertekbecsles: return "Értékbecslés"
         case .ajanlasok: return "Ajánlások"
@@ -107,7 +109,7 @@ final class AppRouter: ObservableObject {
             bottomTab = .feed
         case .hub:
             bottomTab = .home
-        case .auto, .teherauto, .ingatlan, .ertekbecsles:
+        case .auto, .teherauto, .piacter, .ingatlan, .ertekbecsles:
             // Web: vertical pages → Keresés tab active family
             bottomTab = .home
         }

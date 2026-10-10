@@ -15,7 +15,7 @@ import {
   readNearbyPrefs,
   STORAGE_POSTAL,
   STORAGE_RADIUS,
-} from "./nearby-search.js?v=0efee20d13";
+} from "./nearby-search.js?v=620e979a5c";
 import { initHubListingRail } from "./hub-listing-rail.js?v=28cddcfab0";
 import {
   TILE_PAGE_INITIAL,

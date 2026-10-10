@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("bymy-theme");
+          if (t !== "dark" && t !== "light") {
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        try {
+          var raw = sessionStorage.getItem("bymy-auth-user");
+          var user = raw ? JSON.parse(raw) : null;
+          var loggedIn = !!(user && user.email);
+          document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
+          var first = "";
+          if (user) {
+            first = String((user.profile && user.profile.firstName) || "").trim();
+            if (!first && user.displayName && String(user.displayName).indexOf("@") < 0) {
+              first = String(user.displayName).trim().split(/\s+/)[0] || "";
+            }
+            if (!first && user.email) {
+              var local = String(user.email).split("@")[0] || "";
+              first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
+            }
+          }
+          if (first) {
+            document.addEventListener("DOMContentLoaded", function () {
+              document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
+                el.textContent = first;
+              });
+              var letter = first.charAt(0).toUpperCase();
+              document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
+                el.textContent = letter;
+              });
+            });
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-auth", "guest");
+        }
+      })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Bymy" />
+    <link rel="apple-touch-icon" href="/images/bymy-logo.png?v=08e46e9d97" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
+    <title>Piactér — Bymy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" as="image" href="/images/bymy-logo.png?v=08e46e9d97" fetchpriority="high" />
+    <link rel="preload" as="style" href="/css/hub.css?v=42a61417f0" />
+    <link rel="preload" as="style" href="/css/site-app.css?v=debcd9ef44" />
+    <link rel="stylesheet" href="/css/hub.css?v=42a61417f0" />
+    <link rel="stylesheet" href="/css/listing-photo-cover.css?v=b60e28d793" />
+    <link rel="stylesheet" href="/css/listing-featured.css?v=49bf39cc29" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=7fdaee1223" />
+    <link rel="stylesheet" href="/css/site-app.css?v=debcd9ef44" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=f14985a2ca" />
+    <link rel="stylesheet" href="/css/site-desk-header.css?v=3c33acc7fa" />
+    <style id="hf-tile-edge5">
+      @media (max-width: 800px) {
+        body.hub-page--feed {
+          --hf-gutter: 16px;
+        }
+        body.hub-page--feed .hub-intro {
+          padding-left: var(--hf-gutter) !important;
+          padding-right: var(--hf-gutter) !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          max-width: none !important;
+          box-sizing: border-box !important;
+          overflow-x: visible !important;
+        }
+        body.hub-page--feed .hub-feed {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          max-width: none !important;
+          box-sizing: border-box !important;
+        }
+        body.hub-page--feed .hf-head,
+        body.hub-page--feed .hf-status {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+        }
+        body.hub-page--feed .hf-section {
+          padding: 14px var(--hf-gutter) 16px !important;
+          margin: 0 0 28px !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+          width: 100% !important;
+          max-width: none !important;
+          box-sizing: border-box !important;
+        }
+        body.hub-page--feed .hf-rail {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          scroll-snap-type: none !important;
+          scroll-padding: 0 !important;
+          box-sizing: border-box !important;
+        }
+        body.hub-page--feed .hf-card--listing,
+        body.hub-page--feed .hf-card--ajanlas {
+          --hf-card-w: calc((100vw - (2 * var(--hf-gutter)) - var(--hf-rail-gap, 10px)) / 2);
+          flex: 0 0 var(--hf-card-w) !important;
+          width: var(--hf-card-w) !important;
+          max-width: var(--hf-card-w) !important;
+        }
+        body.hub-page--feed .hf-rail > * {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+        }
+        body.hub-page--feed .hf-card--listing.hf-card--featured,
+        body.hub-page--feed .hf-card--featured {
+          box-shadow: none !important;
+        }
+      }
+    </style>
+    <style id="piac-search-bar">
+      .piac-search {
+        margin: 0 0 18px;
+        padding: 0;
+      }
+      .piac-search__form {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+        width: 100%;
+        max-width: 720px;
+      }
+      .piac-search__field {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 14px;
+        min-height: 48px;
+        border: 1px solid var(--hub-border, #d8dde6);
+        border-radius: 12px;
+        background: var(--hub-surface, #fff);
+        box-sizing: border-box;
+      }
+      .piac-search__field:focus-within {
+        border-color: var(--hub-accent, #1a73e8);
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+      }
+      .piac-search__icon {
+        flex: 0 0 auto;
+        color: var(--hub-muted, #6b7280);
+      }
+      .piac-search__input {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 0;
+        outline: none;
+        background: transparent;
+        font: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--hub-text, #111827);
+      }
+      .piac-search__input::placeholder {
+        color: var(--hub-muted, #9ca3af);
+        font-weight: 500;
+      }
+      .piac-search__submit {
+        flex: 0 0 auto;
+        min-height: 48px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 12px;
+        background: #111827;
+        color: #fff;
+        font: inherit;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .piac-search__submit:hover {
+        background: #000;
+      }
+      [data-theme="dark"] .piac-search__submit {
+        background: #f3f4f6;
+        color: #111827;
+      }
+      [data-theme="dark"] .piac-search__submit:hover {
+        background: #fff;
+      }
+      .piac-rail {
+        min-height: 148px;
+      }
+      @media (max-width: 800px) {
+        .piac-search {
+          padding-left: 0;
+          padding-right: 0;
+        }
+        .piac-search__form {
+          max-width: none;
+        }
+        .piac-search__submit {
+          padding: 0 14px;
+        }
+      }
+    </style>
+  </head>
+  <body class="hub-page site-page site-app hub-page--feed" data-site-page="piacter">
+    <script src="/js/mw-app-shell.js?v=89305eb843"></script>
+
+    <header class="mw-app-top" aria-label="Bymy mobil">
+      <div class="mw-app-top-row">
+        <a class="mw-app-logo" href="/" aria-label="Bymy">
+          <img class="bymy-logo-img" src="/images/bymy-logo.png?v=08e46e9d97" alt="Bymy.hu" width="140" height="40" decoding="async" />
+        </a>
+        <div class="mw-app-top-actions">
+          <a class="mw-app-post" href="/hirdetesfeladas.html" data-auth-guard aria-label="Új hirdetés" title="Új hirdetés">+</a>
+          <button type="button" class="hub-theme-toggle mw-app-theme" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
+          <a class="mw-app-msg" href="/uzenetek.html" data-auth-member hidden aria-label="Üzenetek" title="Üzenetek">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="mw-app-login" href="/belepes.html" data-auth-guest aria-label="Belépés" title="Belépés">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20.2c1.7-3.2 4.3-4.8 7.5-4.8s5.8 1.6 7.5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </a>
+          <a class="mw-app-avatar" href="/fiok.html" data-auth-member hidden aria-label="Fiók" title="Fiók">
+            <span data-avatar-letter>A</span>
+            <img data-avatar-img alt="" hidden width="44" height="44" />
+          </a>
+        </div>
+      </div>
+      <nav class="mw-app-pages" aria-label="Főmenü">
+        <a class="mw-app-pages-link" href="/">Kezdőlap</a>
+        <a class="mw-app-pages-link" href="/auto.html">Autó</a>
+        <a class="mw-app-pages-link" href="/teherauto.html">Teherautó</a>
+        <a class="mw-app-pages-link is-active" href="/piacter.html" aria-current="page">Piactér</a>
+        <a class="mw-app-pages-link" href="/ingatlan.html" hidden>Ingatlan</a>
+        <a class="mw-app-pages-link" href="/ertekbecsles.html">Értékbecslés</a>
+        <a class="mw-app-pages-link" href="/ajanlasok.html">Ajánlások</a>
+      </nav>
+    </header>
+
+    <header class="hub-header">
+      <div class="hub-header-inner">
+        <div class="hub-header-top">
+          <a class="hub-logo" href="/" aria-label="Bymy">
+            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=08e46e9d97" alt="Bymy.hu" width="260" height="68" decoding="async" />
+          </a>
+          <div class="hub-header-actions site-header-actions">
+            <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span>Üzenetek</span>
+            </a>
+            <div class="site-header-auth-row" data-auth-guest>
+              <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
+              <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
+            </div>
+            <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
+              <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">
+                <span class="site-header-avatar">
+                  <span data-avatar-letter>A</span>
+                  <img data-avatar-img alt="" hidden width="44" height="44" />
+                </span>
+                <span class="site-header-firstname" data-auth-firstname></span>
+                <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard><span class="hub-post-full">+ Hirdetésfeladás</span><span class="hub-post-compact" aria-hidden="true">+</span></a>
+            <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
+          </div>
+        </div>
+        <div class="hub-nav-band">
+          <nav class="hub-nav" aria-label="Főmenü">
+            <a class="hub-nav-link" href="/">Kezdőlap</a>
+            <a class="hub-nav-link" href="/auto.html">Autó</a>
+            <a class="hub-nav-link" href="/teherauto.html">Teherautó</a>
+            <a class="hub-nav-link active" href="/piacter.html" aria-current="page">Piactér</a>
+            <a class="hub-nav-link" href="/ingatlan.html" hidden>Ingatlan</a>
+            <a class="hub-nav-link" href="/ertekbecsles.html">Értékbecslés</a>
+            <a class="hub-nav-link" href="/ajanlasok.html">Ajánlások</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main aria-label="Piactér">
+      <div class="hub-intro">
+        <section class="piac-search" aria-label="Keresés a piactéren">
+          <form class="piac-search__form" id="piac-search-form" action="/piacter.html" method="get" role="search">
+            <label class="piac-search__field">
+              <svg class="piac-search__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.2" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <input
+                class="piac-search__input"
+                id="piac-search-input"
+                type="search"
+                name="q"
+                placeholder="Mit keresel?"
+                autocomplete="off"
+                enterkeyhint="search"
+              />
+            </label>
+            <button class="piac-search__submit" type="submit">Keresés</button>
+          </form>
+        </section>
+      </div>
+
+      <div class="hub-feed">
+        <section class="hf-section" data-hf="talalatok" id="piac-search-section" hidden>
+          <div class="hf-head">
+            <h2 class="hf-title">
+              Találatok
+              <span class="hf-count" id="piac-search-count" hidden></span>
+            </h2>
+            <a class="hf-all" id="piac-search-clear" href="/piacter.html">Törlés</a>
+          </div>
+          <p class="hf-status" id="piac-search-status" hidden></p>
+          <div class="hf-rail piac-rail" id="piac-search-rail" role="list"></div>
+          <p class="hf-empty" id="piac-search-empty" hidden>Nincs találat erre a keresésre.</p>
+        </section>
+
+        <section class="hf-section" data-hf="legujabb" id="piac-latest-section">
+          <div class="hf-head">
+            <h2 class="hf-title">
+              Új hirdetések
+              <span class="hf-count" id="piac-latest-count" hidden></span>
+            </h2>
+            <a class="hf-all" id="piac-latest-all" href="/piacter.html?sort=newest">Összes</a>
+          </div>
+          <div class="hf-rail piac-rail" id="piac-latest-rail" role="list"></div>
+          <p class="hf-empty" id="piac-latest-empty" hidden>Még nincs piactér hirdetés.</p>
+        </section>
+
+        <section class="hf-section" data-hf="kozelben" id="piac-nearby-section">
+          <div class="hf-head">
+            <h2 class="hf-title">
+              Hirdetések a közelben
+              <span class="hf-count" id="piac-nearby-count" hidden></span>
+            </h2>
+            <a class="hf-all" id="piac-nearby-all" href="/piacter.html?nearby=1">Összes</a>
+          </div>
+          <p class="hf-status" id="piac-nearby-status" hidden></p>
+          <div class="hf-rail piac-rail" id="piac-nearby-rail" role="list"></div>
+          <p class="hf-empty" id="piac-nearby-empty" hidden>Állítsd be az irányítószámot a fiókban a közeli hirdetésekhez.</p>
+        </section>
+
+        <section class="hf-section" data-hf="kedvencek" id="piac-fav-section">
+          <div class="hf-head">
+            <h2 class="hf-title">
+              Kedvenc hirdetések
+              <span class="hf-count" id="piac-fav-count" hidden></span>
+            </h2>
+            <a class="hf-all" id="piac-fav-all" href="/beallitasok.html?szekcio=parkolo">Összes</a>
+          </div>
+          <p class="hf-status" id="piac-fav-status" hidden></p>
+          <div class="hf-rail piac-rail" id="piac-fav-rail" role="list"></div>
+          <p class="hf-empty" id="piac-fav-empty" hidden>Még nincs kedvenc piactér hirdetésed.</p>
+        </section>
+
+        <section class="hf-section" data-hf="kiemelt" id="piac-featured-section">
+          <div class="hf-head">
+            <h2 class="hf-title">Kiemelt hirdetések</h2>
+            <a class="hf-all" id="piac-featured-all" href="/piacter.html?kiemelt=1">Összes</a>
+          </div>
+          <div class="hf-rail piac-rail" id="piac-featured-rail" role="list"></div>
+          <p class="hf-empty" id="piac-featured-empty" hidden>Még nincs kiemelt piactér hirdetés.</p>
+        </section>
+      </div>
+    </main>
+
+    <nav class="mw-app-tabbar" aria-label="Mobil főmenü">
+      <a class="mw-app-tab" href="/">
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 11.2 12 5l7.5 6.2V19a1 1 0 0 1-1 1h-4v-4.6H9.5V20h-4a1 1 0 0 1-1-1v-7.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        </span>
+        <span>Főoldal</span>
+      </a>
+      <a class="mw-app-tab is-active" href="/kereses.html" aria-current="page">
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.2" stroke="currentColor" stroke-width="1.7"/><path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </span>
+        <span>Keresés</span>
+      </a>
+      <a class="mw-app-tab mw-app-tab--fab" href="/hirdetesfeladas.html" data-auth-guard aria-label="Hirdetés feladás" title="Hirdetés feladás">
+        <span class="mw-app-tab__fab" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 6v12M6 12h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </span>
+        <span class="mw-app-tab__fab-label">Feladás</span>
+      </a>
+      <a class="mw-app-tab" href="/ajanlasok.html">
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-6.5-4.2-8.5-8.2C2.1 9.2 3.6 5.8 6.8 5.2c1.8-.3 3.5.5 4.5 2 1-1.5 2.7-2.3 4.5-2 3.2.6 4.7 4 3.3 7.1-2 4-8.5 8.2-8.5 8.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </span>
+        <span>Hírfolyam</span>
+      </a>
+      <a class="mw-app-tab" href="/fiok.html">
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.2" r="3.6" stroke="currentColor" stroke-width="1.7"/><path d="M5.2 19.2c1.6-2.9 4.2-4.4 6.8-4.4s5.2 1.5 6.8 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </span>
+        <span>Fiók</span>
+      </a>
+    </nav>
+
+    <script src="/js/hub-rail-drag.js?v=f9476114f4" defer></script>
+    <script src="/js/piacter-hub.js?v=cfd2df017f" type="module"></script>
+    <script src="/js/nav-counts.js?v=7613897d1d" type="module"></script>
+    <script src="/js/theme.js?v=4fe8a2261f" type="module"></script>
+    <script src="/js/site-auth.js?v=20aa3f41c9" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
+  </body>
+</html>

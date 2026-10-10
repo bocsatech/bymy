@@ -23,7 +23,13 @@
   function isActivePage(id) {
     if (page === id) return true;
     if (id === "hub" && (page === "hub" || page === "" || page === "index")) return true;
-    if (id === "search" && (page === "kereses" || page === "auto" || page === "teherauto" || page === "ingatlan")) return true;
+    if (
+      id === "search" &&
+      (page === "kereses" || page === "auto" || page === "teherauto" || page === "piacter" || page === "ingatlan")
+    ) {
+      return true;
+    }
+    if (id === "piacter" && page === "piacter") return true;
     if (id === "ertekbecsles" && page === "ertekbecsles") return true;
     if (id === "ajanlasok" && page === "ajanlasok") return true;
     if (id === "fiok" && (page === "fiok" || page === "beallitasok" || page === "uzenetek")) return true;
@@ -39,6 +45,7 @@
       { id: "hub", href: "/", label: "Kezdőlap" },
       { id: "auto", href: "/auto.html", label: "Autó" },
       { id: "teherauto", href: "/teherauto.html", label: "Teherautó" },
+      { id: "piacter", href: "/piacter.html", label: "Piactér" },
       { id: "ingatlan", href: "/ingatlan.html", label: "Ingatlan" },
       { id: "ertekbecsles", href: "/ertekbecsles.html", label: "Értékbecslés" },
       { id: "ajanlasok", href: "/ajanlasok.html", label: "Ajánlások" },
@@ -286,6 +293,7 @@
     if (id === "hub") return isActivePage("hub") ? " active" : "";
     if (id === "auto") return page === "auto" ? " active" : "";
     if (id === "teherauto") return page === "teherauto" ? " active" : "";
+    if (id === "piacter") return page === "piacter" ? " active" : "";
     if (id === "ingatlan") return page === "ingatlan" ? " active" : "";
     if (id === "ertekbecsles") return page === "ertekbecsles" ? " active" : "";
     if (id === "ajanlasok") return page === "ajanlasok" ? " active" : "";
@@ -435,6 +443,9 @@
       '" href="/teherauto.html">Teherautó ' +
       navCountHtml("teher", counts) +
       "</a>" +
+      '<a class="hub-nav-link' +
+      navActiveClass("piacter") +
+      '" href="/piacter.html">Piactér</a>' +
       '<a class="hub-nav-link' +
       navActiveClass("ingatlan") +
       '" href="/ingatlan.html"' +

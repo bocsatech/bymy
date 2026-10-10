@@ -7,6 +7,7 @@ struct NativeWebPage: View {
         case hub = "index.html"
         case auto = "auto.html"
         case teherauto = "teherauto.html"
+        case piacter = "piacter.html"
         case ingatlan = "ingatlan.html"
         case ertekbecsles = "ertekbecsles.html"
         case ajanlasok = "ajanlasok.html"

@@ -575,7 +575,7 @@ function setSection(section) {
     void ensurePartnerProfilPanel();
   }
   if (next === "ertekbecslo") {
-    void import("./ertekbecslo-app.js?v=30209af5f1")
+    void import("./ertekbecslo-app.js?v=f65e47f181")
       .then((mod) => mod.initErtekbecsloPanel?.())
       .catch((err) => console.error("[beallitasok] ertekbecslo load failed", err));
   }

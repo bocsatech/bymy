@@ -4,7 +4,7 @@ import {
   STORAGE_POSTAL,
   STORAGE_RADIUS,
   STORAGE_CITY,
-} from "./nearby-search.js?v=0efee20d13";
+} from "./nearby-search.js?v=620e979a5c";
 import {
   buildCityIndex,
   filterListingsInRadius,

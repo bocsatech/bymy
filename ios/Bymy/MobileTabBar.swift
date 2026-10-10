@@ -80,7 +80,7 @@ struct MobileTabBar: View {
             // Web: Keresés aktív kereses.html-en ÉS auto/teher/ingatlan oldalakon
             if router.bottomTab == .search { return true }
             return router.bottomTab == .home
-                && (router.topPage == .auto || router.topPage == .teherauto || router.topPage == .ingatlan)
+                && (router.topPage == .auto || router.topPage == .teherauto || router.topPage == .piacter || router.topPage == .ingatlan)
         case .post:
             return router.bottomTab == .post
         case .feed:

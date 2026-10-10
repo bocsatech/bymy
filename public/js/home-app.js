@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=aaf945d091";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=a5a696806b";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=7e97e881f3";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=8e0fd8f890";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=96ca48213f";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=f99edb6978";
@@ -20,8 +20,8 @@ import {
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=3a43e30b61";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=1433a5b139";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
-import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
+import { initHomeStatsBar } from "./home-stats-bar.js?v=9fbe103b55";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=620e979a5c";
 import { getAuthUser } from "./site-auth.js?v=20aa3f41c9";
 import {
   bindListingOpen,
@@ -410,7 +410,7 @@ async function syncCategoryToSearchMenu(categoryId) {
     }
     const { applySavedSearchFilters } = await import("./saved-search.js?v=8e0fd8f890");
     await applySavedSearchFilters(form, filters);
-    const { applyDrumSavedSearchFilters } = await import("./auto-search-drums.js?v=9b70a78d88");
+    const { applyDrumSavedSearchFilters } = await import("./auto-search-drums.js?v=fe700ec410");
     applyDrumSavedSearchFilters(form, filters);
     updateAutoDeskAccSummaries(form);
     quickSearchFilters = { ...emptyFilters(), ...filters };
@@ -1329,7 +1329,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=9dac197506")
+      mapModulePromise = import("./search-results-map.js?v=b4b7a4b145")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

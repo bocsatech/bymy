@@ -23,7 +23,7 @@ import {
   buildNearbyFilter,
   readNearbyPrefs,
   STORAGE_CITY,
-} from "./nearby-search.js?v=0efee20d13";
+} from "./nearby-search.js?v=620e979a5c";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;

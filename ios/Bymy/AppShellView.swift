@@ -84,6 +84,8 @@ struct TopPagesPager: View {
             CategorySearchScreen(title: "Autó", category: "auto")
         case .teherauto:
             CategorySearchScreen(title: "Teherautó", category: "teherauto")
+        case .piacter:
+            NativeWebPage(page: .piacter)
         case .ingatlan:
             CategorySearchScreen(title: "Ingatlan", category: "ingatlan")
         case .ertekbecsles:

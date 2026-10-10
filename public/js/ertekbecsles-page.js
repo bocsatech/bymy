@@ -1,7 +1,7 @@
 import { createAdForm } from "./form-core.js?v=5aed2b9122";
 import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=49adc435c0";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=30209af5f1";
-import { mountErtekDualRanges } from "./ertekbecsles-ev-range.js?v=805d2ca993";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=f65e47f181";
+import { mountErtekDualRanges } from "./ertekbecsles-ev-range.js?v=be52d9ddb0";
 
 const CATEGORY = {
   hirdetes_vertical: "auto",

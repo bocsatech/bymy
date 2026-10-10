@@ -5,7 +5,7 @@ import {
   syncPiacAllasFields,
   readPiacAllasValues,
   validatePiacAllasForm,
-} from "./piac-allas-fields.js?v=436ff792bc";
+} from "./piac-allas-fields.js?v=ed48456e55";
 
 let catalogPromise = null;
 
@@ -99,6 +99,7 @@ export function topSlugFromPiacPath(path) {
 
 function removePiacFormFields(form) {
   form?.querySelector("#piac-fields")?.remove();
+  form?.querySelector("#piac-allas-fields")?.remove();
 }
 
 function syncTitleToHidden(form) {
@@ -288,6 +289,7 @@ export async function ensurePiacFormFields(form) {
       existing._piacRepaint(path);
     }
     existing._piacTops = tops;
+    void syncPiacAllasFields(form);
     return existing;
   }
 
@@ -497,6 +499,7 @@ export async function syncPiacFormVisibility(form) {
     root.removeAttribute("hidden");
     root.style.removeProperty("display");
     placePiacRoot(form, root);
+    void syncPiacAllasFields(form);
   }
 
   form

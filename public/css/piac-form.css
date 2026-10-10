@@ -211,16 +211,22 @@
   clip: rect(0 0 0 0);
 }
 
-/* Állás — Tulajdonságok */
+/* Állás — Tulajdonságok (külön szekció a kategória alatt) */
 .piac-allas-fields {
-  margin: 0.85rem 0 1rem;
-  padding: 0.85rem 0 0;
-  border-top: 1px solid var(--hub-border, #e5e7eb);
+  display: block;
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.05rem 1.1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--hub-border, #e5e7eb);
+  border-radius: 14px;
+  background: #f8fafc;
 }
 
 .piac-allas-fields__title {
-  margin: 0 0 0.75rem;
-  font-size: 1.05rem;
+  margin: 0 0 0.85rem;
+  font-size: 1.12rem;
   font-weight: 800;
   color: #111827;
 }
@@ -292,13 +298,18 @@
   }
 }
 
+html[data-theme="dark"] .piac-allas-fields {
+  background: #0f172a;
+  border-color: #334155;
+}
+
 html[data-theme="dark"] .piac-allas-fields__title,
 html[data-theme="dark"] .piac-allas-field {
   color: #f1f5f9;
 }
 
 html[data-theme="dark"] .piac-allas-field select {
-  background: #0f172a;
+  background: #111827;
   border-color: #334155;
   color: #f1f5f9;
 }

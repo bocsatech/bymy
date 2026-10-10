@@ -711,7 +711,8 @@ function render(view, listing, related = []) {
     <div class="hd-specs">
       ${
         view.vertical === "piac"
-          ? specBlockHtml("Piactér adatok", view.vehicleSpecs)
+          ? `${specBlockHtml("Piactér adatok", view.vehicleSpecs)}
+      ${specBlockHtml("Tulajdonságok", view.allasSpecs)}`
           : `${specBlockHtml("Jármű adatok", view.vehicleSpecs)}
       ${specBlockHtml("Motor adatok", view.motorSpecs)}
       ${specBlockHtml("Okmányok", view.documentSpecs)}

@@ -47,6 +47,14 @@ function readPathSub(form) {
   return path.split("/").map((s) => s.trim()).filter(Boolean)[1] || "";
 }
 
+function placeAllasSection(form, root) {
+  const host = form.querySelector("#piac-fields");
+  if (!host || !root) return;
+  if (host.nextElementSibling !== root) {
+    host.insertAdjacentElement("afterend", root);
+  }
+}
+
 export async function syncPiacAllasFields(form) {
   if (!form) return null;
   const host = form.querySelector("#piac-fields");
@@ -67,14 +75,13 @@ export async function syncPiacAllasFields(form) {
   const shared = data.shared || {};
 
   if (!root) {
-    root = document.createElement("div");
+    root = document.createElement("section");
     root.id = "piac-allas-fields";
     root.className = "piac-allas-fields";
     root.setAttribute("data-piac-allas", "1");
-    const afterPath = host.querySelector(".piac-fields__path");
-    if (afterPath) afterPath.insertAdjacentElement("afterend", root);
-    else host.appendChild(root);
+    root.setAttribute("aria-label", data.sectionLabel || "Tulajdonságok");
   }
+  placeAllasSection(form, root);
 
   const last = form._bymyLastFormData && typeof form._bymyLastFormData === "object" ? form._bymyLastFormData : {};
   const lastDocs = String(last.allas_dokumentumok || "")

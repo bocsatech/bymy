@@ -749,9 +749,13 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   if (isPiacAdForm(form)) {
     stripPiacGuideFrame(form);
     const piac = form.querySelector("#piac-fields");
+    const allas = form.querySelector("#piac-allas-fields");
     const panel = form.querySelector('.step-panel[data-step="1"]');
     if (piac && panel && panel.firstElementChild !== piac) {
       panel.insertBefore(piac, panel.firstChild);
+    }
+    if (piac && allas && piac.nextElementSibling !== allas) {
+      piac.insertAdjacentElement("afterend", allas);
     }
   }
 

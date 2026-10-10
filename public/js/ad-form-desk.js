@@ -736,6 +736,14 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   syncIngatlanDeskAccordions(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
+  /* Piactér menü: desk mount után is a step-1 tetején maradjon. */
+  if (isPiacAdForm(form)) {
+    const piac = form.querySelector("#piac-fields");
+    const panel = form.querySelector('.step-panel[data-step="1"]');
+    if (piac && panel && panel.firstElementChild !== piac) {
+      panel.insertBefore(piac, panel.firstChild);
+    }
+  }
 
   const preserved =
     form.querySelector("[data-desk-acc]:not(.auto-desk-acc--sub).is-open")?.getAttribute("data-desk-acc") || "";

@@ -1,27 +1,24 @@
 .piac-fields {
   margin: 0 0 1.25rem;
-  padding: 0 0 0.25rem;
+  padding: 0 0 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .piac-fields__head {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.65rem;
 }
 
 .piac-fields__title {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--hub-text, #111827);
-}
-
-.piac-fields__hint {
-  margin: 0.25rem 0 0;
-  font-size: 0.9rem;
-  color: var(--hub-muted, #6b7280);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #c2410c;
 }
 
 .piac-fields__path {
-  margin: 0 0 1rem;
+  margin: 0.65rem 0 1rem;
   font-size: 0.9rem;
   font-weight: 650;
   color: #0f766e;
@@ -32,149 +29,128 @@
   font-weight: 600;
 }
 
-.piac-top-row {
+/* Fő kategóriák — ikonsor (ref.) */
+.piac-top-icons {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0 0 0.85rem;
+  gap: 0.35rem 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0.35rem 0 0.75rem;
+  border-bottom: 1px solid var(--hub-border, #e5e7eb);
 }
 
-.piac-top-item {
+.piac-top-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  min-height: 92px;
+  padding: 0.45rem 0.25rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: #2563eb;
+  font: inherit;
+  cursor: pointer;
+}
+
+.piac-top-icon:hover {
+  background: #eff6ff;
+}
+
+.piac-top-icon.is-active {
+  border-color: #22c55e;
+  background: #22c55e;
+  color: #fff;
+}
+
+.piac-top-icon__glyph {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
-  padding: 0.45rem 0.35rem;
-  border: 1px solid var(--hub-border, #d8dde6);
-  border-radius: 12px;
-  background: var(--hub-surface, #fff);
-  color: var(--hub-text, #111827);
-  font: inherit;
-  font-size: 0.78rem;
+  width: 44px;
+  height: 44px;
+}
+
+.piac-top-icon__glyph svg {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+.piac-top-icon__label {
+  display: block;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.15;
   text-align: center;
-  cursor: pointer;
+  max-width: 100%;
 }
 
-.piac-top-item:hover {
-  border-color: #0f766e;
-  background: #f0fdfa;
-}
-
-.piac-top-item.is-active {
-  border-color: #0f766e;
-  background: #0f766e;
-  color: #fff;
-}
-
-.piac-top-item__label {
-  display: block;
-}
-
-.piac-cat-menus {
+/* Alkategória + levél + szándék oszlopok */
+.piac-drill {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0 0 0.75rem;
+  gap: 12px;
+  align-items: start;
+  margin: 0 0 0.5rem;
 }
 
-.piac-cat-col {
-  min-height: 160px;
-  max-height: 320px;
-  overflow: auto;
-  border: 1px solid var(--hub-border, #d8dde6);
-  border-radius: 12px;
-  background: var(--hub-surface, #fff);
+.piac-sub-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
-.piac-cat-col[hidden] {
+.piac-sub-col[hidden] {
   display: none !important;
 }
 
-.piac-cat-menus:has(.piac-cat-col--intent[hidden]):has([data-level="2"][hidden]) {
-  grid-template-columns: 1fr;
+.piac-drill:has(.piac-sub-col--intent[hidden]):has([data-level="2"][hidden]) {
+  grid-template-columns: minmax(0, 22rem);
 }
 
-.piac-cat-menus:has(.piac-cat-col--intent[hidden]):not(:has([data-level="2"][hidden])) {
+.piac-drill:has(.piac-sub-col--intent[hidden]):not(:has([data-level="2"][hidden])) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.piac-cat-list {
-  display: flex;
-  flex-direction: column;
-  padding: 6px;
-  gap: 2px;
-}
-
-.piac-cat-item {
+.piac-sub-btn {
   display: block;
   width: 100%;
   text-align: left;
-  border: 0;
-  border-radius: 8px;
-  padding: 0.65rem 0.7rem;
-  background: transparent;
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #c7d2e0;
+  border-radius: 10px;
+  background: #fff;
+  color: #1d4ed8;
   font: inherit;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--hub-text, #111827);
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.25;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
-.piac-cat-item:hover {
-  background: #f0fdfa;
+.piac-sub-btn:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
 }
 
-.piac-cat-item.is-active {
-  background: #0f766e;
+.piac-sub-btn.is-active {
+  border-color: #22c55e;
+  background: #22c55e;
   color: #fff;
 }
 
-.piac-intent {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.65rem 1rem;
-  margin: 0 0 1rem;
-}
-
-.piac-intent[hidden] {
-  display: none !important;
-}
-
-.piac-intent__label {
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.piac-intent__opts {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.piac-intent__opt {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 40px;
-  padding: 0 0.9rem;
-  border: 1px solid var(--hub-border, #d8dde6);
-  border-radius: 999px;
-  background: var(--hub-surface, #fff);
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.piac-intent__opt:has(input:checked) {
-  border-color: #0f766e;
-  background: #f0fdfa;
-  color: #0f766e;
-}
-
-.piac-intent__opt input {
-  accent-color: #0f766e;
+.piac-intent-radios {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 
 .piac-field {
@@ -225,41 +201,54 @@
   accent-color: #0f766e;
 }
 
+/* Piactéren a régi „Kategória” kerék elrejtve — a menü az űrlapon van. */
+body.ad-vertical-piac #wizard-category-wheel-wrap {
+  display: none !important;
+}
+
 body.ad-vertical-piac #ad-form .piac-hide-vehicle {
   display: none !important;
 }
 
-@media (max-width: 960px) {
-  .piac-top-row {
+body.ad-vertical-piac #ad-form-desk-shell [data-desk-acc="alap"] .step-panel[data-step="1"] > .card {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 1100px) {
+  .piac-top-icons {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 800px) {
-  .piac-top-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .piac-top-icons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .piac-cat-menus,
-  .piac-cat-menus:has(.piac-cat-col--intent[hidden]):not(:has([data-level="2"][hidden])),
-  .piac-cat-menus:has(.piac-cat-col--intent[hidden]):has([data-level="2"][hidden]) {
+  .piac-top-icon {
+    min-height: 84px;
+  }
+
+  .piac-drill,
+  .piac-drill:has(.piac-sub-col--intent[hidden]):not(:has([data-level="2"][hidden])),
+  .piac-drill:has(.piac-sub-col--intent[hidden]):has([data-level="2"][hidden]) {
     grid-template-columns: 1fr;
   }
-
-  .piac-cat-col {
-    min-height: 0;
-    max-height: 220px;
-  }
 }
 
-html[data-theme="dark"] .piac-top-item:hover {
-  background: rgba(15, 118, 110, 0.2);
+html[data-theme="dark"] .piac-sub-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #93c5fd;
 }
 
-html[data-theme="dark"] .piac-cat-item:hover {
-  background: rgba(15, 118, 110, 0.2);
+html[data-theme="dark"] .piac-sub-btn.is-active,
+html[data-theme="dark"] .piac-top-icon.is-active {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
 }
 
-html[data-theme="dark"] .piac-intent__opt:has(input:checked) {
-  background: rgba(15, 118, 110, 0.22);
+html[data-theme="dark"] .piac-fields__title {
+  color: #fb923c;
 }

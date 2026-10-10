@@ -1,8 +1,8 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=ee862641b7";
-import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=3862bae4e2";
+import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=487a882a34";
 import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=49adc435c0";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=47bb21bf35";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=1fc9f1787e";
 import { markImmoPostViewReady } from "./category-picker.js?v=ada2de634e";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -1026,6 +1026,11 @@ async function applyAdFormLayout() {
       await ensurePiacFormFields(form);
       await syncPiacFormVisibility(form);
       hideVehicleChromeWithoutLayout(form);
+      const panel = form.querySelector('.step-panel[data-step="1"]');
+      const piac = form.querySelector("#piac-fields");
+      if (panel && piac && panel.firstElementChild !== piac) {
+        panel.insertBefore(piac, panel.firstChild);
+      }
       return;
     }
     form.querySelector("#piac-fields")?.remove();
@@ -1352,7 +1357,19 @@ function currentLayoutCategory(form) {
     .trim()
     .toLowerCase();
   if (vertical === "ingatlan") return "ingatlan";
-  if (vertical === "piac") return "piac";
+  if (
+    vertical === "piac" ||
+    subtype === "piac" ||
+    subtype === "allas" ||
+    subtype === "otthon-haztartas" ||
+    subtype === "muszaki-elektronika" ||
+    subtype === "szabadido-sport" ||
+    subtype === "divat-ruhazat" ||
+    subtype === "uzlet-szolgaltatas" ||
+    subtype === "baba-mama"
+  ) {
+    return "piac";
+  }
   if (vertical === "teher") return "teherauto";
   return "szemelyauto";
 }

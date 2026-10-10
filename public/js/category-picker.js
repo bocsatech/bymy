@@ -141,7 +141,7 @@ const WIZARD_CATEGORY_OPTIONS = [
   {
     id: "otthon-haztartas",
     label: "Otthon, háztartás",
-    image: "",
+    image: "/images/categories/piac-otthon.png",
     vertical: "piac",
     subtype: "otthon-haztartas",
   },

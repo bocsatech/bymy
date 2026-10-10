@@ -28,7 +28,7 @@ const PIAC_TOP_ICONS = {
   allas:
     '<img class="piac-top-icon__img" src="/images/categories/piac-allas.png" alt="" width="48" height="44" decoding="async" />',
   "otthon-haztartas":
-    '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 28h32v12H8z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 28V20c0-6 5-10 12-10s12 4 12 10v8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M18 34h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+    '<img class="piac-top-icon__img" src="/images/categories/piac-otthon.png" alt="" width="48" height="44" decoding="async" />',
   "muszaki-elektronika":
     '<img class="piac-top-icon__img" src="/images/categories/piac-muszaki.png" alt="" width="48" height="44" decoding="async" />',
   "szabadido-sport":

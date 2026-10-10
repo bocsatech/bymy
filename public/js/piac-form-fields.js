@@ -5,7 +5,7 @@ import {
   syncPiacAllasFields,
   readPiacAllasValues,
   validatePiacAllasForm,
-} from "./piac-allas-fields.js?v=ed48456e55";
+} from "./piac-allas-fields.js?v=287b1e00ff";
 
 let catalogPromise = null;
 

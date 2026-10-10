@@ -680,6 +680,17 @@ function syncLeirasInPhotoPanel(form) {
   leirasWrap.style.removeProperty("display");
 }
 
+function relocatePiacAllasAbovePhotos(form) {
+  const allas = form?.querySelector("#piac-allas-fields");
+  if (!allas) return;
+  const photosCard =
+    form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"] .card--photos`) ||
+    form.querySelector(".card--photos");
+  if (photosCard?.parentElement && allas.nextElementSibling !== photosCard) {
+    photosCard.insertAdjacentElement("beforebegin", allas);
+  }
+}
+
 function syncPhotoStage(form) {
   const panel = form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
   if (!panel || !isAdFormDesk(form)) return;
@@ -691,6 +702,7 @@ function syncPhotoStage(form) {
     form.querySelector("#ad-photo-desk-stage")?.remove();
     syncPhotoGridInPanel(form);
     syncLeirasInPhotoPanel(form);
+    relocatePiacAllasAbovePhotos(form);
     window.dispatchEvent(new Event("ad-form-photo-stage-sync"));
     return;
   }
@@ -700,6 +712,7 @@ function syncPhotoStage(form) {
   if (stage && panel.parentElement !== stage) stage.appendChild(panel);
   syncPhotoGridInPanel(form);
   syncLeirasInPhotoPanel(form);
+  relocatePiacAllasAbovePhotos(form);
   window.dispatchEvent(new Event("ad-form-photo-stage-sync"));
 }
 
@@ -749,13 +762,9 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   if (isPiacAdForm(form)) {
     stripPiacGuideFrame(form);
     const piac = form.querySelector("#piac-fields");
-    const allas = form.querySelector("#piac-allas-fields");
     const panel = form.querySelector('.step-panel[data-step="1"]');
     if (piac && panel && panel.firstElementChild !== piac) {
       panel.insertBefore(piac, panel.firstChild);
-    }
-    if (piac && allas && piac.nextElementSibling !== allas) {
-      piac.insertAdjacentElement("afterend", allas);
     }
   }
 

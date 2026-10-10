@@ -211,10 +211,10 @@
   clip: rect(0 0 0 0);
 }
 
-/* Állás — Tulajdonságok (külön szekció a kategória alatt) */
+/* Állás — Tulajdonságok (képfeltöltés szekció felett) */
 .piac-allas-fields {
   display: block;
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   padding: 1rem 1.05rem 1.1rem;
   width: 100%;
   max-width: 100%;
@@ -222,6 +222,11 @@
   border: 1px solid var(--hub-border, #e5e7eb);
   border-radius: 14px;
   background: #f8fafc;
+}
+
+.step-panel[data-step="4"] > .piac-allas-fields,
+#ad-photo-desk-stage .piac-allas-fields {
+  margin: 0 0 1rem;
 }
 
 .piac-allas-fields__title {

@@ -1,8 +1,8 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=ee862641b7";
-import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=50d5fa95ed";
+import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=96753a1298";
 import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=49adc435c0";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=82f61b22ef";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=c11c419ad9";
 import { markImmoPostViewReady } from "./category-picker.js?v=438d4f30db";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -1028,12 +1028,8 @@ async function applyAdFormLayout() {
       hideVehicleChromeWithoutLayout(form);
       const panel = form.querySelector('.step-panel[data-step="1"]');
       const piac = form.querySelector("#piac-fields");
-      const allas = form.querySelector("#piac-allas-fields");
       if (panel && piac && panel.firstElementChild !== piac) {
         panel.insertBefore(piac, panel.firstChild);
-      }
-      if (piac && allas && piac.nextElementSibling !== allas) {
-        piac.insertAdjacentElement("afterend", allas);
       }
       return;
     }

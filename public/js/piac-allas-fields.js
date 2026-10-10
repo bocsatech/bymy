@@ -48,9 +48,29 @@ function readPathSub(form) {
 }
 
 function placeAllasSection(form, root) {
+  if (!form || !root) return;
+  /* Képfeltöltés szekció felett (step 4 / desk photo stage). */
+  const photosCard =
+    form.querySelector('.step-panel[data-step="4"] .card--photos') ||
+    form.querySelector(".card--photos");
+  const photoPanel =
+    photosCard?.closest(".step-panel") ||
+    form.querySelector('.step-panel[data-step="4"]') ||
+    form.querySelector("#ad-photo-desk-stage");
+  if (photosCard && photosCard.parentElement) {
+    if (root.nextElementSibling !== photosCard) {
+      photosCard.insertAdjacentElement("beforebegin", root);
+    }
+    return;
+  }
+  if (photoPanel) {
+    if (root.parentElement !== photoPanel) {
+      photoPanel.insertBefore(root, photoPanel.firstChild);
+    }
+    return;
+  }
   const host = form.querySelector("#piac-fields");
-  if (!host || !root) return;
-  if (host.nextElementSibling !== root) {
+  if (host && host.nextElementSibling !== root) {
     host.insertAdjacentElement("afterend", root);
   }
 }

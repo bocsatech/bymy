@@ -1234,6 +1234,8 @@ body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-s
     .ad-photo-desk-stage *,
     .card--photos,
     .card--photos *,
+    #piac-allas-fields,
+    #piac-allas-fields *,
     .ad-desk-guide-frame__img
   ) {
     pointer-events: auto;

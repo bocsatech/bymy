@@ -711,7 +711,7 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 }
 
 .hd-specs {
-  margin-top: 1.35rem;
+  margin-top: 1cm;
   max-width: none;
   background: var(--hd-card);
   border: 1px solid var(--hd-line);

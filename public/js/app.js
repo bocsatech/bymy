@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=6c1aeac308";
-import { createAdForm } from "./form-core.js?v=adcea8cb91";
+import { createAdForm } from "./form-core.js?v=a9d7e641c8";
 import { initPriceMarketHint } from "./price-market-hint.js?v=391fef60f7";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";

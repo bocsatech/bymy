@@ -22,7 +22,7 @@ import {
   TILE_PAGE_MORE,
   fetchTilePagesUntil,
 } from "./listing-tile-pager.js?v=248671f94e";
-import { openPiacCategoryDrum } from "./piac-category-drum.js?v=c96b480763";
+import { openPiacCategoryDrum } from "./piac-category-drum.js?v=fd64be72f6";
 
 const LATEST_WANT = 9;
 const FEATURED_WANT = 9;

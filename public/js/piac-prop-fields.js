@@ -1,6 +1,8 @@
 /**
- * Piactér Tulajdonságok — kategóriánkénti legördülők (Jófogás paramok).
+ * Piactér Tulajdonságok — menüsiget + dobkerék sheet (Jófogás paramok).
  */
+
+import { openPiacOptionSheet } from "./piac-category-drum.js?v=fd64be72f6";
 
 let fieldsPromise = null;
 let allasPromise = null;
@@ -353,7 +355,7 @@ async function syncPiacPropFieldsOnce(form) {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const rows = [];
+  const menuItems = [];
   for (const key of selectable) {
     if (key === "job_documents") {
       const opts = allas?.shared?.dokumentumok?.options || [
@@ -364,22 +366,14 @@ async function syncPiacPropFieldsOnce(form) {
         "nem szükséges",
       ];
       const checked = prevDocs.length ? prevDocs : lastDocs;
-      rows.push(`
-        <fieldset class="piac-allas-field piac-allas-field--docs">
-          <legend>${allas?.shared?.dokumentumok?.label || "Jelentkezéshez szükséges dokumentumok"} <span class="req">*</span></legend>
-          <div class="piac-allas-checks">
-            ${opts
-              .map((opt) => {
-                const id = `piac_doc_${slugify(opt)}`;
-                const on = checked.includes(opt) ? " checked" : "";
-                return `<label class="piac-allas-check" for="${id}">
-                  <input type="checkbox" id="${id}" name="piac_prop_job_documents" value="${String(opt).replace(/"/g, "&quot;")}"${on} />
-                  <span>${opt}</span>
-                </label>`;
-              })
-              .join("")}
-          </div>
-        </fieldset>`);
+      menuItems.push({
+        key: "job_documents",
+        label: allas?.shared?.dokumentumok?.label || "Jelentkezéshez szükséges dokumentumok",
+        required: true,
+        multi: true,
+        options: opts,
+        value: checked,
+      });
       continue;
     }
 
@@ -391,7 +385,6 @@ async function syncPiacPropFieldsOnce(form) {
       label = "Munkakör megnevezése";
       options = allas ? resolveAllasMunkakorOptions(allas, sub) : ["Egyéb"];
       required = true;
-      /* Mentett munkakör mindig legyen a listában (pl. Egyéb / idegen címke). */
       const wantPos = prevValues[key] || firstLastPositionValue(last);
       if (wantPos && !options.some((o) => String(o) === wantPos)) options = [...options, wantPos];
       if (wantPos) prevValues[key] = wantPos;
@@ -402,31 +395,87 @@ async function syncPiacPropFieldsOnce(form) {
     }
     if (!options.length) continue;
 
-    const reqMark = required ? ' <span class="req">*</span>' : "";
-    rows.push(`
-      <label class="piac-allas-field">
-        <span>${label}${reqMark}</span>
-        <select id="piac_prop_${key}" name="piac_prop_${key}" ${required ? "required" : ""}>
-          ${optionHtml(options, prevValues[key] || "")}
-        </select>
-      </label>`);
+    const matched = matchSelectOption(options, prevValues[key] || "");
+    menuItems.push({
+      key,
+      label,
+      required,
+      multi: false,
+      options: matched.options,
+      value: matched.value || "",
+    });
   }
 
-  if (!rows.length) {
+  if (!menuItems.length) {
     removeAllPropRoots(form);
     return null;
   }
 
   root = ensureSinglePropRoot(form);
   placePropSection(form, root);
+
+  const rowsHtml = menuItems
+    .map((item) => {
+      const name = item.multi ? "piac_prop_job_documents" : `piac_prop_${item.key}`;
+      const reqMark = item.required ? ' <span class="req">*</span>' : "";
+      const display = item.multi
+        ? item.value?.length
+          ? item.value.join(", ")
+          : "Válassz…"
+        : item.value || "Válassz…";
+      const empty = item.multi ? !item.value?.length : !item.value;
+      const hiddenSelect = item.multi
+        ? item.options
+            .map((opt) => {
+              const on = (item.value || []).includes(opt) ? " checked" : "";
+              return `<input type="checkbox" class="piac-prop-menu-check" name="piac_prop_job_documents" value="${String(opt).replace(/"/g, "&quot;")}"${on} tabindex="-1" />`;
+            })
+            .join("")
+        : `<select id="piac_prop_${item.key}" name="${name}" class="piac-prop-menu-select" ${item.required ? "required" : ""} tabindex="-1" aria-hidden="true">
+            ${optionHtml(item.options, item.value || "")}
+          </select>`;
+      return `
+        <div class="piac-prop-menu-row" data-prop-key="${item.key}" data-prop-multi="${item.multi ? "1" : "0"}">
+          <button type="button" class="piac-prop-menu-trigger" data-prop-trigger="${item.key}">
+            <span class="piac-prop-menu-trigger__label">${item.label}${reqMark}</span>
+            <span class="piac-prop-menu-trigger__value${empty ? " is-empty" : ""}">${String(display).replace(/</g, "&lt;")}</span>
+            <span class="piac-prop-menu-trigger__chev" aria-hidden="true">›</span>
+          </button>
+          <div class="piac-prop-menu-hidden">${hiddenSelect}</div>
+        </div>`;
+    })
+    .join("");
+
   root.innerHTML = `
     <div class="piac-allas-fields__head">
       <h4 class="piac-allas-fields__title">${data.sectionLabel || "Tulajdonságok"}</h4>
     </div>
-    <div class="piac-allas-grid">${rows.join("")}</div>
+    <div class="piac-prop-menu-island" role="group" aria-label="${data.sectionLabel || "Tulajdonságok"}">
+      ${rowsHtml}
+    </div>
     ${data.hint ? `<p class="piac-prop-fields__hint">${data.hint}</p>` : ""}
   `;
-  /* Második menet: race / újrarajzolás után is a mentett érték legyen kiválasztva. */
+
+  const itemByKey = Object.fromEntries(menuItems.map((it) => [it.key, it]));
+
+  function syncTriggerDisplay(key) {
+    const row = root.querySelector(`[data-prop-key="${key}"]`);
+    const valueEl = row?.querySelector(".piac-prop-menu-trigger__value");
+    if (!row || !valueEl) return;
+    const item = itemByKey[key];
+    if (!item) return;
+    if (item.multi) {
+      const checked = [...row.querySelectorAll('input[name="piac_prop_job_documents"]:checked')].map((el) => el.value);
+      valueEl.textContent = checked.length ? checked.join(", ") : "Válassz…";
+      valueEl.classList.toggle("is-empty", !checked.length);
+      return;
+    }
+    const sel = row.querySelector("select");
+    const v = String(sel?.value || "").trim();
+    valueEl.textContent = v || "Válassz…";
+    valueEl.classList.toggle("is-empty", !v);
+  }
+
   for (const key of selectable) {
     if (key === "job_documents") continue;
     const el = root.querySelector(`[name="piac_prop_${key}"]`);
@@ -447,12 +496,69 @@ async function syncPiacPropFieldsOnce(form) {
       el.value = matched.value;
       rememberPropValue(form, el.name, matched.value);
     }
+    syncTriggerDisplay(key);
   }
+  syncTriggerDisplay("job_documents");
+
   root.querySelectorAll("select[name^='piac_prop_']").forEach((el) => {
     if (el.dataset.piacRememberBound === "1") return;
     el.dataset.piacRememberBound = "1";
     el.addEventListener("change", () => rememberPropValue(form, el.name, el.value));
   });
+
+  root.querySelectorAll("[data-prop-trigger]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = btn.getAttribute("data-prop-trigger") || "";
+      const item = itemByKey[key];
+      if (!item) return;
+      const row = root.querySelector(`[data-prop-key="${key}"]`);
+      if (item.multi) {
+        const current = [...(row?.querySelectorAll('input[name="piac_prop_job_documents"]:checked') || [])].map(
+          (el) => el.value
+        );
+        openPiacOptionSheet({
+          title: item.label,
+          multi: true,
+          includeEmpty: false,
+          items: item.options.map((o) => ({ value: o, label: o })),
+          value: current,
+          onDone: (picked) => {
+            const set = new Set((picked || []).map(String));
+            row?.querySelectorAll('input[name="piac_prop_job_documents"]').forEach((el) => {
+              el.checked = set.has(el.value);
+            });
+            rememberPropValue(form, "piac_prop_job_documents", [...set].join("|"));
+            syncTriggerDisplay(key);
+          },
+        });
+        return;
+      }
+      const sel = row?.querySelector("select");
+      openPiacOptionSheet({
+        title: item.label,
+        multi: false,
+        includeEmpty: !item.required,
+        emptyLabel: "«Válassz»",
+        items: item.options.map((o) => ({ value: o, label: o })),
+        value: String(sel?.value || item.value || ""),
+        onDone: (picked) => {
+          if (!sel) return;
+          const want = String(picked || "").trim();
+          if (want && ![...sel.options].some((o) => o.value === want)) {
+            const opt = document.createElement("option");
+            opt.value = want;
+            opt.textContent = want;
+            sel.appendChild(opt);
+          }
+          sel.value = want;
+          sel.dispatchEvent(new Event("change", { bubbles: true }));
+          rememberPropValue(form, sel.name, want);
+          syncTriggerDisplay(key);
+        },
+      });
+    });
+  });
+
   root.dataset.path = pathParts.join("/");
   root.dataset.ready = "1";
   return root;
@@ -540,9 +646,12 @@ export function validatePiacPropForm(form) {
   if (!root) return true;
   for (const sel of root.querySelectorAll("select[required]")) {
     if (!String(sel.value || "").trim()) {
-      const label = sel.closest("label")?.querySelector("span")?.textContent?.replace(/\*/g, "").trim() || "mező";
+      const label =
+        sel.closest(".piac-prop-menu-row")?.querySelector(".piac-prop-menu-trigger__label")?.textContent?.replace(/\*/g, "").trim() ||
+        sel.closest("label")?.querySelector("span")?.textContent?.replace(/\*/g, "").trim() ||
+        "mező";
       alert(`Válaszd ki: ${label}.`);
-      sel.focus();
+      sel.closest(".piac-prop-menu-row")?.querySelector("[data-prop-trigger]")?.focus();
       return false;
     }
   }
@@ -551,6 +660,7 @@ export function validatePiacPropForm(form) {
     const any = [...docs].some((el) => el.checked);
     if (!any) {
       alert("Jelöld meg a jelentkezéshez szükséges dokumentumokat.");
+      root.querySelector('[data-prop-key="job_documents"] [data-prop-trigger]')?.focus();
       root.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
       return false;
     }

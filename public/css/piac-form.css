@@ -272,6 +272,91 @@
   gap: 0.75rem 1rem;
 }
 
+/* Tulajdonságok — külön menüsziget, soronként dobkerék sheet */
+.piac-prop-menu-island {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid #d8dee8;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+}
+
+.piac-prop-menu-row {
+  border-bottom: 1px solid #eef2f7;
+}
+
+.piac-prop-menu-row:last-child {
+  border-bottom: 0;
+}
+
+.piac-prop-menu-trigger {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 3.15rem;
+  padding: 0.75rem 0.95rem;
+  border: 0;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.piac-prop-menu-trigger:active {
+  background: #f8fafc;
+}
+
+.piac-prop-menu-trigger__label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+  min-width: 0;
+}
+
+.piac-prop-menu-trigger__value {
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: #0f172a;
+  text-align: right;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.piac-prop-menu-trigger__value.is-empty {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.piac-prop-menu-trigger__chev {
+  color: #64748b;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.piac-prop-menu-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.piac-prop-menu-row {
+  position: relative;
+}
+
 .piac-allas-field {
   display: flex;
   flex-direction: column;
@@ -282,7 +367,8 @@
   color: #111827;
 }
 
-.piac-allas-field select {
+.piac-allas-field select,
+.piac-prop-menu-select {
   width: 100%;
   min-height: 42px;
   padding: 0.45rem 0.7rem;
@@ -331,6 +417,27 @@
   .piac-allas-grid {
     grid-template-columns: 1fr;
   }
+
+  .piac-prop-menu-trigger {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+  }
+
+  .piac-prop-menu-trigger__label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .piac-prop-menu-trigger__value {
+    grid-column: 1;
+    grid-row: 2;
+    text-align: left;
+  }
+
+  .piac-prop-menu-trigger__chev {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
 }
 
 html[data-theme="dark"] .piac-allas-fields {
@@ -347,6 +454,33 @@ html[data-theme="dark"] .piac-allas-field select {
   background: #111827;
   border-color: #334155;
   color: #f1f5f9;
+}
+
+html[data-theme="dark"] .piac-prop-menu-island {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html[data-theme="dark"] .piac-prop-menu-trigger {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .piac-prop-menu-trigger:active {
+  background: #111827;
+}
+
+html[data-theme="dark"] .piac-prop-menu-trigger__label,
+html[data-theme="dark"] .piac-prop-menu-trigger__value {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .piac-prop-menu-trigger__value.is-empty {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .piac-prop-menu-row {
+  border-bottom-color: #1e293b;
 }
 
 .piac-field {

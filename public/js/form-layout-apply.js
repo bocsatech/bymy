@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=ee862641b7";
-import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=eeb5a17119";
+import { ensurePiacFormFields, syncPiacFormVisibility } from "./piac-form-fields.js?v=5ca78fb3c3";
 import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=49adc435c0";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=cbdce3801f";
@@ -1026,7 +1026,7 @@ async function applyAdFormLayout() {
       await ensurePiacFormFields(form);
       await syncPiacFormVisibility(form);
       try {
-        const { syncPiacPropFields } = await import("./piac-prop-fields.js?v=f90c102c10");
+        const { syncPiacPropFields } = await import("./piac-prop-fields.js?v=45fcafc9d8");
         await syncPiacPropFields(form);
       } catch {
         /* props opcionális */

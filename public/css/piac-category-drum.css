@@ -184,17 +184,25 @@ body.piac-cat-drum-open {
   overflow: hidden;
 }
 
+/* Desk: menüsáv / bal oldalsáv mellett — ne viewport-középen */
 @media (min-width: 801px) {
   .piac-cat-drum__stage {
-    left: 50%;
+    inset: auto;
+    left: 1.5rem;
     right: auto;
     top: 50%;
     bottom: auto;
-    width: min(440px, calc(100vw - 2rem));
-    height: min(640px, calc(100vh - 2rem));
-    transform: translate(-50%, -50%);
-    border-radius: 18px;
+    width: min(28rem, calc(100vw - 3rem));
+    max-width: min(28rem, calc(100vw - 3rem));
+    height: fit-content;
+    max-height: min(86vh, 48rem);
+    transform: translateY(-50%);
+    border-radius: 1.35rem;
     overflow: hidden;
-    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.28);
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18);
+  }
+
+  .piac-cat-drum__card {
+    max-height: min(62vh, 34rem);
   }
 }

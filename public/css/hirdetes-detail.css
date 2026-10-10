@@ -217,6 +217,12 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   align-items: start;
 }
 
+.hd-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .hd-gallery {
   background: var(--hd-card);
   border: 1px solid var(--hd-line);
@@ -719,16 +725,10 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   padding: 1.15rem 1.2rem 1.35rem;
 }
 
-/* Piactér: Tulajdonságok / Állás részletei = galéria-sziget szélessége (nem teljes sor). */
-@media (min-width: 901px) {
-  #hd-root[data-listing-vertical="piac"] .hd-specs {
-    width: calc(
-      (100% - var(--hd-hero-gap, 1.1rem)) * 1.65 / (1.65 + 0.78)
-    );
-    max-width: calc(
-      (100% - var(--hd-hero-gap, 1.1rem)) * 1.65 / (1.65 + 0.78)
-    );
-  }
+/* Piactér: specs a galéria alatt a bal oszlopban → ugyanaz a szélesség. */
+#hd-root[data-listing-vertical="piac"] .hd-main .hd-specs {
+  width: 100%;
+  max-width: none;
 }
 
 @media (max-width: 900px) {

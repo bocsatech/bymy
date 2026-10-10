@@ -583,9 +583,23 @@ function render(view, listing, related = []) {
   if (root) root.dataset.ownListing = own ? "1" : "0";
   if (own) clearRelatedUi();
 
-  root.innerHTML = `
-    <div class="hd-hero">
-      <div class="hd-gallery">
+  const specsInner =
+    view.vertical === "piac"
+      ? `${view.isAllas ? "" : specBlockHtml("Piactér adatok", view.vehicleSpecs)}
+      ${specBlockHtml(view.isAllas ? "Állás részletei" : "Tulajdonságok", view.allasSpecs)}`
+      : `${specBlockHtml("Jármű adatok", view.vehicleSpecs)}
+      ${specBlockHtml("Motor adatok", view.motorSpecs)}
+      ${specBlockHtml("Okmányok", view.documentSpecs)}
+      ${specBlockHtml("Abroncs", view.tireSpecs)}`;
+  const specsBlock = `<div class="hd-specs">
+      ${specsInner}
+      ${
+        perks.length
+          ? `<section class="hd-spec-block hd-spec-block--perks"><h2 class="hd-spec-block__title">További előnyök</h2>${perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}</section>`
+          : ""
+      }
+    </div>`;
+  const galleryBlock = `<div class="hd-gallery">
         <div class="hd-stage">
           ${first ? `<button type="button" class="hd-stage-open" data-hd-open aria-label="Kép nagyítása"><img data-hd-main src="${escapeHtml(first)}" alt="" /></button>` : ""}
           ${
@@ -612,7 +626,16 @@ function render(view, listing, related = []) {
             : ""
         }
         ${highlightHtml(highlights)}
-      </div>
+      </div>`;
+
+  root.innerHTML = `
+    <div class="hd-hero">
+      ${
+        view.vertical === "piac"
+          ? `<div class="hd-main">${galleryBlock}
+      ${specsBlock}</div>`
+          : galleryBlock
+      }
       ${
         images.length
           ? `<dialog class="hd-lb" data-hd-lb>
@@ -755,22 +778,7 @@ function render(view, listing, related = []) {
       </aside>
     </div>
 
-    <div class="hd-specs">
-      ${
-        view.vertical === "piac"
-          ? `${view.isAllas ? "" : specBlockHtml("Piactér adatok", view.vehicleSpecs)}
-      ${specBlockHtml(view.isAllas ? "Állás részletei" : "Tulajdonságok", view.allasSpecs)}`
-          : `${specBlockHtml("Jármű adatok", view.vehicleSpecs)}
-      ${specBlockHtml("Motor adatok", view.motorSpecs)}
-      ${specBlockHtml("Okmányok", view.documentSpecs)}
-      ${specBlockHtml("Abroncs", view.tireSpecs)}`
-      }
-      ${
-        perks.length
-          ? `<section class="hd-spec-block hd-spec-block--perks"><h2 class="hd-spec-block__title">További előnyök</h2>${perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}</section>`
-          : ""
-      }
-    </div>
+    ${view.vertical === "piac" ? "" : specsBlock}
 
     ${
       equipmentGroups.length

@@ -62,7 +62,7 @@
   aspect-ratio: 1;
   max-width: 72px;
   margin: 0 auto;
-  padding: 8px;
+  padding: 0;
   border: 1px solid var(--hub-border, #d8dde6);
   border-radius: 14px;
   background: #fff;
@@ -73,14 +73,20 @@
 
 .piac-top-icon__box svg,
 .piac-top-icon__box .piac-top-icon__img {
-  width: 78%;
-  height: 78%;
-  max-width: 44px;
-  max-height: 44px;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
   display: block;
-  margin: 0 auto;
-  object-fit: contain;
+  margin: 0;
+  object-fit: cover;
   object-position: center;
+}
+
+.piac-top-icon__box svg {
+  padding: 10%;
+  box-sizing: border-box;
+  object-fit: contain;
 }
 
 .piac-top-icon:hover .piac-top-icon__box {

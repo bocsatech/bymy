@@ -1,5 +1,5 @@
 /**
- * Piactér feladás: kategóriamenük (piac-catalog) + cím / szándék / ingyen.
+ * Piactér feladás: mentett kategóriafa (piac-catalog) — fő → al → levél + szándék.
  */
 let catalogPromise = null;
 
@@ -54,10 +54,12 @@ export function shortPiacTopLabel(slugOrLabel) {
 }
 
 export function topSlugFromPiacPath(path) {
-  return String(path || "")
-    .split("/")
-    .map((s) => s.trim())
-    .filter(Boolean)[0] || "";
+  return (
+    String(path || "")
+      .split("/")
+      .map((s) => s.trim())
+      .filter(Boolean)[0] || ""
+  );
 }
 
 function removePiacFormFields(form) {
@@ -74,15 +76,32 @@ function syncTitleToHidden(form) {
   field.dataset.userEdited = "1";
 }
 
+function setHidden(form, name, value) {
+  const el = form.elements.namedItem(name);
+  const field = el instanceof RadioNodeList ? el[0] : el;
+  if (field) field.value = value;
+}
+
 function syncAlkategoria(form, pathSlugs) {
+  const top = pathSlugs[0] || "";
   const leaf = pathSlugs.filter(Boolean).at(-1) || "";
-  for (const name of ["hirdetes_alkategoria", "jarmu_kategoria"]) {
-    const el = form.elements.namedItem(name);
-    const field = el instanceof RadioNodeList ? el[0] : el;
-    if (field) field.value = leaf;
-  }
+  /* Wheel / picker: fő kategória; piac_path: teljes út. */
+  setHidden(form, "hirdetes_vertical", "piac");
+  setHidden(form, "hirdetes_alkategoria", leaf || top);
+  setHidden(form, "jarmu_kategoria", leaf || top);
   const pathEl = form.querySelector("#piac_path");
   if (pathEl) pathEl.value = pathSlugs.filter(Boolean).join("/");
+
+  const label = shortPiacTopLabel(top) || "Piactér";
+  try {
+    window.__bymyCategoryPicker?.syncWizardContext?.({
+      vertical: "piac",
+      subtype: top,
+      label,
+    });
+  } catch {
+    /* ignore */
+  }
 }
 
 function nodeComplete(node) {
@@ -123,6 +142,21 @@ function renderCol(col, items, selectedSlug, onPick) {
     list.appendChild(btn);
   }
   col.appendChild(list);
+}
+
+function renderTopRow(row, tops, selectedSlug, onPick) {
+  if (!row) return;
+  row.innerHTML = "";
+  for (const item of tops) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "piac-top-item" + (item.slug === selectedSlug ? " is-active" : "");
+    btn.setAttribute("aria-pressed", item.slug === selectedSlug ? "true" : "false");
+    btn.dataset.slug = item.slug;
+    btn.innerHTML = `<span class="piac-top-item__label">${item._short || item.label}</span>`;
+    btn.addEventListener("click", () => onPick(item));
+    row.appendChild(btn);
+  }
 }
 
 function resolvePathFromPreset(tops, presetSub, storedPath) {
@@ -171,7 +205,6 @@ export async function ensurePiacFormFields(form) {
     String(last.hirdetes_alkategoria || last.jarmu_kategoria || "").trim();
   const storedPath = readField(form, "piac_path") || String(last.piac_path || "").trim();
   let path = resolvePathFromPreset(tops, presetSub, storedPath);
-  const topKey = path[0] || "";
 
   const existing = form.querySelector("#piac-fields");
   const seedTitle =
@@ -190,7 +223,7 @@ export async function ensurePiacFormFields(form) {
     readField(form, "piac_ingyen") === "1" ||
     String(last.piac_ingyen || "") === "1";
 
-  if (existing?.dataset.ready === "1" && existing.dataset.topSlug === topKey) {
+  if (existing?.dataset.ready === "1" && existing.dataset.catalogV === String(catalog.version || "2")) {
     const titleEl = existing.querySelector("#piac_cim");
     if (titleEl && seedTitle && titleEl.value !== seedTitle) {
       titleEl.value = seedTitle;
@@ -203,33 +236,35 @@ export async function ensurePiacFormFields(form) {
     const pathEl = existing.querySelector("#piac_path");
     const currentPath = String(pathEl?.value || "").trim();
     const wantPath = path.filter(Boolean).join("/");
-    if (wantPath && currentPath !== wantPath) {
-      delete existing.dataset.ready;
-    } else {
+    if (wantPath && currentPath !== wantPath && typeof existing._piacRepaint === "function") {
+      existing._piacRepaint(path);
       existing._piacTops = tops;
       return existing;
     }
+    existing._piacTops = tops;
+    return existing;
   }
 
   existing?.remove();
 
-  const hasTop = Boolean(topKey);
   const root = document.createElement("div");
   root.id = "piac-fields";
   root.className = "piac-fields";
   root.setAttribute("data-piac-only", "1");
   root.innerHTML = `
-    <div class="piac-fields__head" ${hasTop ? "" : "hidden"}>
-      <h3 class="piac-fields__title">Alkategória</h3>
-      <p class="piac-fields__hint">A fő kategóriát fent a „Kategória” mezőben választod — itt az alkategóriát.</p>
+    <div class="piac-fields__head">
+      <h3 class="piac-fields__title">Kategória</h3>
+      <p class="piac-fields__hint">Válassz fő kategóriát, majd az alkategóriát a mentett piactér menüből.</p>
     </div>
-    <p class="piac-fields__pick-top" ${hasTop ? "hidden" : ""}>Először válassz kategóriát fent (Állás, Divat, Otthon…).</p>
-    <div class="piac-cat-menus" aria-label="Piactér alkategóriák" ${hasTop ? "" : "hidden"}>
+    <div class="piac-top-row" aria-label="Fő kategóriák"></div>
+    <div class="piac-cat-menus" aria-label="Piactér alkategóriák">
       <div class="piac-cat-col" data-level="1" hidden></div>
       <div class="piac-cat-col" data-level="2" hidden></div>
+      <div class="piac-cat-col piac-cat-col--intent" data-level="intent" hidden></div>
     </div>
+    <p class="piac-fields__path" aria-live="polite"></p>
     <input type="hidden" id="piac_path" name="piac_path" value="" />
-    <div class="piac-intent" role="group" aria-label="Szándék">
+    <div class="piac-intent" role="group" aria-label="Szándék" hidden>
       <span class="piac-intent__label">Szándék <span class="req">*</span></span>
       <div class="piac-intent__opts">
         ${intents
@@ -260,12 +295,45 @@ export async function ensurePiacFormFields(form) {
 
   host.prepend(root);
 
+  const topRow = root.querySelector(".piac-top-row");
   const col1 = root.querySelector('[data-level="1"]');
   const col2 = root.querySelector('[data-level="2"]');
-  const status = document.createElement("p");
-  status.className = "piac-fields__path";
-  status.setAttribute("aria-live", "polite");
-  root.querySelector(".piac-cat-menus")?.after(status);
+  const colIntent = root.querySelector('[data-level="intent"]');
+  const status = root.querySelector(".piac-fields__path");
+  const intentBar = root.querySelector(".piac-intent");
+
+  function paintIntentColumn(complete) {
+    if (!colIntent) return;
+    if (!complete) {
+      colIntent.hidden = true;
+      colIntent.innerHTML = "";
+      if (intentBar) intentBar.hidden = false;
+      return;
+    }
+    intentBar && (intentBar.hidden = true);
+    colIntent.hidden = false;
+    const list = document.createElement("div");
+    list.className = "piac-cat-list";
+    list.setAttribute("role", "listbox");
+    const current =
+      root.querySelector('input[name="piac_intent"]:checked')?.value || seedIntent || "kinal";
+    for (const it of intents) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "piac-cat-item" + (it.slug === current ? " is-active" : "");
+      btn.setAttribute("role", "option");
+      btn.setAttribute("aria-selected", it.slug === current ? "true" : "false");
+      btn.textContent = it.label;
+      btn.addEventListener("click", () => {
+        const radio = root.querySelector(`input[name="piac_intent"][value="${it.slug}"]`);
+        if (radio) radio.checked = true;
+        paint();
+      });
+      list.appendChild(btn);
+    }
+    colIntent.innerHTML = "";
+    colIntent.appendChild(list);
+  }
 
   function paint() {
     const top = tops.find((t) => t.slug === path[0]) || null;
@@ -275,6 +343,10 @@ export async function ensurePiacFormFields(form) {
       ? []
       : (mid?.children || []).map((n) => ({ ...n, _short: n.label }));
 
+    renderTopRow(topRow, tops, path[0] || "", (item) => {
+      path = [item.slug];
+      paint();
+    });
     renderCol(col1, l2, path[1] || "", (item) => {
       path = [path[0], item.slug];
       paint();
@@ -284,6 +356,9 @@ export async function ensurePiacFormFields(form) {
       paint();
     });
 
+    const complete = isCompletePath(tops, path);
+    paintIntentColumn(complete);
+
     syncAlkategoria(form, path);
     const labels = [];
     if (top) labels.push(shortPiacTopLabel(top.slug) || top.label);
@@ -292,9 +367,19 @@ export async function ensurePiacFormFields(form) {
       const leaf = l3.find((n) => n.slug === path[2]);
       if (leaf) labels.push(leaf.label);
     }
-    status.textContent = labels.length ? labels.join(" › ") : "";
-    status.hidden = !labels.length;
+    const intentVal = root.querySelector('input[name="piac_intent"]:checked')?.value || "";
+    const intentLabel = intents.find((i) => i.slug === intentVal)?.label || "";
+    if (complete && intentLabel) labels.push(intentLabel);
+    if (status) {
+      status.textContent = labels.length ? labels.join(" › ") : "Válassz kategóriát a menüből.";
+      status.classList.toggle("is-empty", !path[0]);
+    }
   }
+
+  root._piacRepaint = (nextPath) => {
+    path = Array.isArray(nextPath) ? nextPath.slice(0, 3) : path;
+    paint();
+  };
 
   paint();
   syncTitleToHidden(form);
@@ -321,7 +406,7 @@ export async function ensurePiacFormFields(form) {
   });
   if (seedFree) free?.dispatchEvent(new Event("change"));
 
-  root.dataset.topSlug = topKey;
+  root.dataset.catalogV = String(catalog.version || "2");
   root.dataset.ready = "1";
   root._piacTops = tops;
   return root;
@@ -436,7 +521,7 @@ export function validatePiacForm(form) {
     .filter(Boolean);
   const tops = form.querySelector("#piac-fields")?._piacTops || [];
   if (!path.length || (tops.length && !isCompletePath(tops, path))) {
-    alert("Válassz teljes piactér kategóriát (fő + alkategória).");
+    alert("Válassz teljes piactér kategóriát a menüből (fő + alkategória).");
     return false;
   }
   if (!vals.piac_intent) {

@@ -20,17 +20,6 @@
   color: var(--hub-muted, #6b7280);
 }
 
-.piac-fields__pick-top {
-  margin: 0 0 1rem;
-  padding: 0.85rem 1rem;
-  border: 1px dashed var(--hub-border, #c5ccd6);
-  border-radius: 12px;
-  background: #f8fafc;
-  color: var(--hub-muted, #6b7280);
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
 .piac-fields__path {
   margin: 0 0 1rem;
   font-size: 0.9rem;
@@ -38,16 +27,61 @@
   color: #0f766e;
 }
 
+.piac-fields__path.is-empty {
+  color: var(--hub-muted, #6b7280);
+  font-weight: 600;
+}
+
+.piac-top-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 0.85rem;
+}
+
+.piac-top-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0.45rem 0.35rem;
+  border: 1px solid var(--hub-border, #d8dde6);
+  border-radius: 12px;
+  background: var(--hub-surface, #fff);
+  color: var(--hub-text, #111827);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+}
+
+.piac-top-item:hover {
+  border-color: #0f766e;
+  background: #f0fdfa;
+}
+
+.piac-top-item.is-active {
+  border-color: #0f766e;
+  background: #0f766e;
+  color: #fff;
+}
+
+.piac-top-item__label {
+  display: block;
+}
+
 .piac-cat-menus {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin: 0 0 1.1rem;
+  margin: 0 0 0.75rem;
 }
 
 .piac-cat-col {
   min-height: 160px;
-  max-height: 280px;
+  max-height: 320px;
   overflow: auto;
   border: 1px solid var(--hub-border, #d8dde6);
   border-radius: 12px;
@@ -56,6 +90,14 @@
 
 .piac-cat-col[hidden] {
   display: none !important;
+}
+
+.piac-cat-menus:has(.piac-cat-col--intent[hidden]):has([data-level="2"][hidden]) {
+  grid-template-columns: 1fr;
+}
+
+.piac-cat-menus:has(.piac-cat-col--intent[hidden]):not(:has([data-level="2"][hidden])) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .piac-cat-list {
@@ -95,6 +137,10 @@
   align-items: center;
   gap: 0.65rem 1rem;
   margin: 0 0 1rem;
+}
+
+.piac-intent[hidden] {
+  display: none !important;
 }
 
 .piac-intent__label {
@@ -183,15 +229,31 @@ body.ad-vertical-piac #ad-form .piac-hide-vehicle {
   display: none !important;
 }
 
+@media (max-width: 960px) {
+  .piac-top-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 800px) {
-  .piac-cat-menus {
+  .piac-top-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .piac-cat-menus,
+  .piac-cat-menus:has(.piac-cat-col--intent[hidden]):not(:has([data-level="2"][hidden])),
+  .piac-cat-menus:has(.piac-cat-col--intent[hidden]):has([data-level="2"][hidden]) {
     grid-template-columns: 1fr;
   }
 
   .piac-cat-col {
     min-height: 0;
-    max-height: 200px;
+    max-height: 220px;
   }
+}
+
+html[data-theme="dark"] .piac-top-item:hover {
+  background: rgba(15, 118, 110, 0.2);
 }
 
 html[data-theme="dark"] .piac-cat-item:hover {

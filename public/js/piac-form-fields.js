@@ -6,7 +6,7 @@ import {
   readPiacPropValues,
   validatePiacPropForm,
 } from "./piac-prop-fields.js?v=f90c102c10";
-import { openPiacCategoryDrum } from "./piac-category-drum.js?v=70368b0cdc";
+import { openPiacCategoryDrum } from "./piac-category-drum.js?v=c96b480763";
 
 let catalogPromise = null;
 

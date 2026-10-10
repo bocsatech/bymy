@@ -5,13 +5,13 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=6c1aeac308";
-import { createAdForm } from "./form-core.js?v=e471879219";
-import { initPriceMarketHint } from "./price-market-hint.js?v=f212f1d75b";
+import { createAdForm } from "./form-core.js?v=4f41ac297f";
+import { initPriceMarketHint } from "./price-market-hint.js?v=391fef60f7";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { initPhoneLanguages } from "./phone-lang-ui.js?v=bc55c36aef";
-import { initCategoryPicker } from "./category-picker.js?v=a7c3f91e40";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=f8c1a2d503";
+import { initCategoryPicker } from "./category-picker.js?v=82bdf6eb29";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=cbdce3801f";
 import {
   requireAuthForPage,
   getAuthUser,

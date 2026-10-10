@@ -1004,49 +1004,73 @@ body.hub-page--feed .hf-rail.piac-rail--allas {
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: nowrap !important;
-  gap: 10px !important;
+  gap: 12px !important;
   overflow-x: visible !important;
   overflow-y: visible !important;
   scroll-snap-type: none !important;
+  width: 100% !important;
+  max-width: 760px !important;
+  box-sizing: border-box !important;
 }
 
-body.hub-page--feed .hf-rail.piac-rail--allas > .hf-card--allas,
+body.hub-page--feed .hf-rail.piac-rail--allas > .hf-card.hf-card--listing.hf-card--allas,
+body.hub-page--feed .hf-card.hf-card--listing.hf-card--allas,
 body.hub-page--feed .hf-card--allas {
   --hf-card-w: 100%;
+  position: relative !important;
   flex: 0 0 auto !important;
+  flex-basis: auto !important;
   width: 100% !important;
   max-width: 100% !important;
   display: flex !important;
   flex-direction: row !important;
-  align-items: stretch !important;
-  gap: 0.85rem !important;
-  padding: 0.75rem 0.85rem !important;
-  border: 1px solid #e2dfd9;
-  border-radius: 12px;
-  background: #fff;
-  box-sizing: border-box !important;
-  text-decoration: none;
-  color: inherit;
-}
-
-body.hub-page--feed .hf-card--allas .hf-card-media--allas {
-  position: relative !important;
-  flex: 0 0 88px !important;
-  width: 88px !important;
-  height: 88px !important;
-  aspect-ratio: 1 / 1 !important;
+  align-items: flex-start !important;
+  gap: 0 !important;
+  padding: 0.9rem 0.95rem !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-main {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 1rem !important;
+  min-width: 0 !important;
+  padding-right: 2.6rem !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+body.hub-page--feed .hf-card.hf-card--listing.hf-card--allas .hf-card-media.hf-card-media--allas,
+body.hub-page--feed .hf-card--allas .hf-card-media--allas {
+  position: relative !important;
+  flex: 0 0 92px !important;
+  width: 92px !important;
+  height: 92px !important;
+  min-width: 92px !important;
+  aspect-ratio: 1 / 1 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
   overflow: hidden !important;
-  background: #f3f4f6 !important;
-  align-self: center;
+  background: #fff !important;
+  align-self: center !important;
+  margin: 0 !important;
 }
 
 body.hub-page--feed .hf-card--allas .hf-card-media--allas.is-empty {
-  background:
-    linear-gradient(145deg, #eef2ff 0%, #e5e7eb 100%);
+  background: linear-gradient(145deg, #f3f4f6 0%, #e5e7eb 100%) !important;
 }
 
+body.hub-page--feed .hf-card.hf-card--listing.hf-card--allas .hf-card-media--allas img,
+body.hub-page--feed .hf-card.hf-card--listing.hf-card--allas .hf-card-media-img,
 body.hub-page--feed .hf-card--allas .hf-card-media--allas img,
 body.hub-page--feed .hf-card--allas .hf-card-media-img {
   position: absolute !important;
@@ -1055,7 +1079,7 @@ body.hub-page--feed .hf-card--allas .hf-card-media-img {
   height: 100% !important;
   object-fit: contain !important;
   object-position: center !important;
-  padding: 0.35rem !important;
+  padding: 0.4rem !important;
   box-sizing: border-box !important;
   transform: none !important;
 }
@@ -1066,21 +1090,23 @@ body.hub-page--feed .hf-card--allas .hf-card-allas-body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.28rem;
-  padding: 0.1rem 0;
+  gap: 0.32rem;
+  padding: 0.05rem 0;
 }
 
+body.hub-page--feed .hf-card.hf-card--listing.hf-card--allas .hf-card-label,
 body.hub-page--feed .hf-card--allas .hf-card-label {
   margin: 0 !important;
   padding: 0 !important;
-  font-size: 1.02rem !important;
-  font-weight: 800 !important;
-  line-height: 1.25 !important;
-  color: #111 !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  color: #1f2937 !important;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-align: left !important;
 }
 
 body.hub-page--feed .hf-card--allas .hf-card-allas-badges {
@@ -1092,13 +1118,14 @@ body.hub-page--feed .hf-card--allas .hf-card-allas-badges {
 body.hub-page--feed .hf-card--allas .hf-card-allas-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.18rem 0.55rem;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
   background: #2563eb;
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 700;
   line-height: 1.2;
+  letter-spacing: 0.01em;
 }
 
 body.hub-page--feed .hf-card--allas .hf-card-allas-badge--kiemelt {
@@ -1107,22 +1134,64 @@ body.hub-page--feed .hf-card--allas .hf-card-allas-badge--kiemelt {
 }
 
 body.hub-page--feed .hf-card--allas .hf-card-allas-company {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: #111;
-  line-height: 1.25;
-}
-
-body.hub-page--feed .hf-card--allas .hf-card-allas-meta {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: #6b7280;
   line-height: 1.3;
 }
 
+body.hub-page--feed .hf-card--allas .hf-card-allas-meta {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6b7280;
+  line-height: 1.35;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-fav {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  width: 2.15rem;
+  height: 2.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1.5px solid #93c5fd;
+  border-radius: 8px;
+  background: #fff;
+  color: #60a5fa;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-fav svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: block;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-fav.is-on {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-allas-fav.is-on svg {
+  fill: #2563eb;
+}
+
+body.hub-page--feed .hf-card--allas .hf-card-sub,
+body.hub-page--feed .hf-card--allas .hf-card-price,
+body.hub-page--feed .hf-card--allas .hf-card-specs,
+body.hub-page--feed .hf-card--allas .listing-featured-under-photo {
+  display: none !important;
+}
+
 html[data-theme="dark"] body.hub-page--feed .hf-card--allas {
-  background: #0f172a;
-  border-color: #334155;
+  background: #0f172a !important;
+  border-color: #334155 !important;
 }
 
 html[data-theme="dark"] body.hub-page--feed .hf-card--allas .hf-card-label,
@@ -1139,14 +1208,27 @@ html[data-theme="dark"] body.hub-page--feed .hf-card--allas .hf-card-media--alla
   border-color: #334155 !important;
 }
 
+html[data-theme="dark"] body.hub-page--feed .hf-card--allas .hf-card-allas-fav {
+  background: #0f172a;
+  border-color: #60a5fa;
+  color: #93c5fd;
+}
+
+html[data-theme="dark"] body.hub-page--feed .hf-card--allas .hf-card-allas-fav.is-on {
+  background: #1e3a5f;
+  border-color: #60a5fa;
+  color: #93c5fd;
+}
+
 @media (min-width: 801px) {
   body.hub-page--feed .hf-rail.piac-rail--allas {
-    max-width: 720px;
+    max-width: 760px;
   }
 
   body.hub-page--feed .hf-card--allas .hf-card-media--allas {
     flex-basis: 104px !important;
     width: 104px !important;
     height: 104px !important;
+    min-width: 104px !important;
   }
 }

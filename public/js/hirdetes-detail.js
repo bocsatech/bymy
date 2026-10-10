@@ -12,7 +12,7 @@ import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
 import { startConversation } from "./messages-api.js?v=5cf6493dc9";
 import { openListingMessage } from "./start-listing-message.js?v=14f24ce31a";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=289f64e75c";
-import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=1911f0cb28";
+import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=7fe28dc00b";
 import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=67ac871172";
 import { qrBlockHtml, withQrSource } from "./qr-display.js?v=d72223d7cd";
 

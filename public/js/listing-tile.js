@@ -1,14 +1,21 @@
 import { formatListingDisplayTitle } from "./listing-card.js?v=3e8a4a3fe2";
-import { listingDetailHref } from "./listing-return.js?v=1911f0cb28";
+import { listingDetailHref } from "./listing-return.js?v=7fe28dc00b";
 import { createListingFeaturedUnderPhotoStrip } from "./listing-featured-decor.js?v=e831c3517c";
 import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import { listCardImageUrl, applyListingImgSrcset } from "./image-variants.js?v=82833209fb";
+import { getAuthUser } from "./site-auth.js?v=20aa3f41c9";
+import {
+  getParkplatz,
+  addParkplatzItem,
+  removeParkplatzItem,
+} from "./fok-data.js?v=289f64e75c";
 
 export { listCardImageUrl } from "./image-variants.js?v=82833209fb";
 
 const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_POWER = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M12 13 16 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 6v1.5M5.5 10.5 6.6 11.2M18.5 10.5 17.4 11.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+const ICON_ALLAS_STAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3.4 14.7 9l6.1.9-4.4 4.3 1 6.1L12 17.4 6.6 20.3l1-6.1L3.2 9.9 9.3 9 12 3.4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>`;
 
 function isImportStubTitle(value) {
   return /importált autó\s*\(\d{5,}\)/i.test(String(value ?? "").trim());
@@ -261,11 +268,11 @@ function createAllasBrickCard(
   const preview = item.preview ?? {};
   const showKiemelt = featured || listingShowsKiemeltDecor(item, configuredFeaturedIds);
   const showTop = promoTopAjanlatActive(item);
-  const link = document.createElement("a");
-  link.className = `${className} hf-card--allas${showKiemelt ? " hf-card--featured" : ""}`.trim();
-  link.href = listingDetailHref(item.id);
-  link.dataset.listingId = String(item.id);
-  link.setAttribute("role", "listitem");
+  const detailHref = listingDetailHref(item.id);
+  const card = document.createElement("article");
+  card.className = `${className} hf-card--allas${showKiemelt ? " hf-card--featured" : ""}`.trim();
+  card.dataset.listingId = String(item.id);
+  card.setAttribute("role", "listitem");
 
   const title = listingTileTitle(item);
   const company = listingAllasCompany(item);
@@ -275,6 +282,10 @@ function createAllasBrickCard(
   const wage = listingTilePrice(item);
   const imageUrl = listCardImageUrl(preview.imageUrl || item.fo_kep || "");
   const isNew = listingIsNew(item);
+
+  const main = document.createElement("a");
+  main.className = "hf-card-allas-main";
+  main.href = detailHref;
 
   const media = document.createElement("span");
   media.className = "hf-card-media hf-card-media--allas";
@@ -317,6 +328,12 @@ function createAllasBrickCard(
       k.textContent = "Kiemelt";
       badges.appendChild(k);
     }
+    if (showTop && !showKiemelt) {
+      const t = document.createElement("span");
+      t.className = "hf-card-allas-badge hf-card-allas-badge--kiemelt";
+      t.textContent = "Top ajánlat";
+      badges.appendChild(t);
+    }
     body.appendChild(badges);
   }
 
@@ -327,7 +344,8 @@ function createAllasBrickCard(
     body.appendChild(co);
   }
 
-  const metaBits = [date, [jobtype, city].filter(Boolean).join(", ")].filter(Boolean);
+  const placeBits = [jobtype, city].filter(Boolean).join(", ");
+  const metaBits = [date, placeBits].filter(Boolean);
   if (wage) metaBits.push(wage);
   if (metaBits.length) {
     const meta = document.createElement("span");
@@ -336,8 +354,46 @@ function createAllasBrickCard(
     body.appendChild(meta);
   }
 
-  link.append(media, body);
-  return link;
+  main.append(media, body);
+
+  const email = getAuthUser()?.email;
+  const favOn = Boolean(email && getParkplatz(email).some((row) => String(row.id) === String(item.id)));
+  const fav = document.createElement("button");
+  fav.type = "button";
+  fav.className = `hf-card-allas-fav${favOn ? " is-on" : ""}`;
+  fav.setAttribute("aria-label", favOn ? "Eltávolítás a kedvencekből" : "Kedvencekhez adás");
+  fav.setAttribute("aria-pressed", favOn ? "true" : "false");
+  fav.innerHTML = ICON_ALLAS_STAR;
+  fav.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const userEmail = getAuthUser()?.email;
+    if (!userEmail) {
+      window.location.href = `/belepes.html?next=${encodeURIComponent(`${location.pathname}${location.search}`)}`;
+      return;
+    }
+    const on = fav.classList.contains("is-on");
+    if (on) {
+      removeParkplatzItem(userEmail, item.id);
+      fav.classList.remove("is-on");
+      fav.setAttribute("aria-pressed", "false");
+      fav.setAttribute("aria-label", "Kedvencekhez adás");
+    } else {
+      addParkplatzItem(userEmail, {
+        id: String(item.id),
+        title,
+        price: wage || "",
+        url: detailHref,
+        imageUrl: imageUrl || "",
+      });
+      fav.classList.add("is-on");
+      fav.setAttribute("aria-pressed", "true");
+      fav.setAttribute("aria-label", "Eltávolítás a kedvencekből");
+    }
+  });
+
+  card.append(main, fav);
+  return card;
 }
 
 export function createListingTileCard(

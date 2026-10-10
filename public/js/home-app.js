@@ -1,5 +1,5 @@
 import { fetchListings, fetchListingsPage, fetchRelatedListingsPage } from "./db-client.js?v=6c1aeac308";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=6c1c878a2c";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=6731dff938";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import {
   emptyFilters,
@@ -33,10 +33,10 @@ import {
   shouldRestoreVehicleSearch,
   peekMapOpenOnReturn,
   consumeMapOpenOnReturn,
-} from "./listing-return.js?v=1911f0cb28";
+} from "./listing-return.js?v=7fe28dc00b";
 import { normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=76bf95d774";
-import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=5a56aa025c";
+import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=68ece5266f";
 
 /** Map module is optional — only loaded when the user clicks the map button. */
 let closeSearchResultsMapFn = null;
@@ -1329,7 +1329,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=b4b7a4b145")
+      mapModulePromise = import("./search-results-map.js?v=affde1ac28")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

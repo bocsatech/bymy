@@ -2,7 +2,7 @@ import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFrom
 import { renderListingCells } from "./cells-view.js?v=8237c0fee4";
 import { createListingCard, formatListingDisplayTitle } from "./listing-card.js?v=3e8a4a3fe2";
 import { getAuthUser } from "./site-auth.js?v=20aa3f41c9";
-import { listingDetailHref, rememberListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
+import { listingDetailHref, rememberListingOpen, restoreListingReturn } from "./listing-return.js?v=7fe28dc00b";
 
 const listEl = document.getElementById("listings-list");
 const detailEl = document.getElementById("listings-detail");

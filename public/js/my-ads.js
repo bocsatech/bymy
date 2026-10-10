@@ -13,7 +13,7 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=1a522e09d6";
 import { compressListingPhotos, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=4e3ffaa60f";
-import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=7fe28dc00b";
 import {
   promoKiemeltActive,
   promoTopAjanlatActive,

@@ -2,8 +2,8 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=6ccc12364e";
-import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
+} from "./listing-tile.js?v=57b4ae576b";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=7fe28dc00b";
 import {
   TILE_PAGE_INITIAL,
   TILE_PAGE_MORE,

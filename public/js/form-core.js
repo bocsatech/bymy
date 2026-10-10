@@ -25,15 +25,15 @@ import {
   syncPiacFormVisibility,
   readPiacFormValues,
   validatePiacForm,
-} from "./piac-form-fields.js?v=5188b01717";
-import { syncPiacPropFields } from "./piac-prop-fields.js?v=c01ab6ddfc";
+} from "./piac-form-fields.js?v=1a4859321f";
+import { syncPiacPropFields } from "./piac-prop-fields.js?v=f90c102c10";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=1a522e09d6";
 import { openListingPhotoEditor } from "./listing-photo-edit.js?v=985755542f";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=49adc435c0";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=f8c1a2d503";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=cbdce3801f";
 import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=dc720507fb";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=30e4feeab0";
 import { bindAdFormKeyboardGuard } from "./ad-form-keyboard-guard.js?v=e753f1b604";

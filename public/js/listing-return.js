@@ -297,6 +297,7 @@ export function bindListingOpen(root = document) {
   }
   root.addEventListener("click", (event) => {
     if (event.target.closest(".home-grid-card-save")) return;
+    if (event.target.closest(".hf-card-allas-fav")) return;
     if (event.target.closest(".home-grid-card-photo-nav")) return;
     if (event.target.closest(".home-grid-card-photo-hit")) return;
     const el = event.target.closest("[data-listing-id]");

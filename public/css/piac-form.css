@@ -7,6 +7,10 @@
 }
 
 .piac-fields__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
   margin: 0 0 0.65rem;
 }
 
@@ -15,6 +19,38 @@
   font-size: 1.15rem;
   font-weight: 800;
   color: #111827;
+}
+
+.piac-intent-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.piac-intent-toggle__btn {
+  min-height: 36px;
+  padding: 0.4rem 0.95rem;
+  border: 1px solid #c7d2e0;
+  border-radius: 10px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.piac-intent-toggle__btn:hover {
+  border-color: #93c5fd;
+  background: #f8fafc;
+}
+
+.piac-intent-toggle__btn.is-active {
+  border-color: #22c55e;
+  background: #22c55e;
+  color: #fff;
 }
 
 .piac-fields__path {
@@ -114,10 +150,10 @@
   color: #111827;
 }
 
-/* Alkategória + levél + szándék oszlopok */
+/* Alkategória + levél oszlopok (Kínál/Keres a fejlécben, nem menünként) */
 .piac-drill {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: start;
   margin: 0 0 0.5rem;
@@ -134,12 +170,8 @@
   display: none !important;
 }
 
-.piac-drill:has(.piac-sub-col--intent[hidden]):has([data-level="2"][hidden]) {
+.piac-drill:has([data-level="2"][hidden]) {
   grid-template-columns: minmax(0, 22rem);
-}
-
-.piac-drill:has(.piac-sub-col--intent[hidden]):not(:has([data-level="2"][hidden])) {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .piac-sub-btn {
@@ -261,11 +293,35 @@ body.ad-vertical-piac #ad-form-desk-shell [data-desk-acc="alap"] .step-panel[dat
     min-height: 84px;
   }
 
+  .piac-fields__head {
+    gap: 0.5rem;
+  }
+
+  .piac-intent-toggle {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .piac-intent-toggle__btn {
+    flex: 1 1 0;
+  }
+
   .piac-drill,
-  .piac-drill:has(.piac-sub-col--intent[hidden]):not(:has([data-level="2"][hidden])),
-  .piac-drill:has(.piac-sub-col--intent[hidden]):has([data-level="2"][hidden]) {
+  .piac-drill:has([data-level="2"][hidden]) {
     grid-template-columns: 1fr;
   }
+}
+
+html[data-theme="dark"] .piac-intent-toggle__btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .piac-intent-toggle__btn.is-active {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
 }
 
 html[data-theme="dark"] .piac-sub-btn {

@@ -891,11 +891,42 @@ export function initCategoryPicker({
     showPicker();
   }
 
+  function restoreSelection(selection, { formData = null } = {}) {
+    if (!selection?.vertical) return;
+    writeStored(selection);
+    setHiddenFields(selection);
+    if (selection.vertical === "piac" && formData && typeof formData === "object") {
+      const path = String(formData.piac_path || "")
+        .split("/")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const leaf = path.at(-1) || "";
+      const alk = String(formData.hirdetes_alkategoria || leaf || selection.subtype || "").trim();
+      const alkEl = document.getElementById("hirdetes_alkategoria");
+      const jarmuEl = document.getElementById("jarmu_kategoria");
+      const vertEl = document.getElementById("hirdetes_vertical");
+      if (vertEl) vertEl.value = "piac";
+      if (alkEl && alk) alkEl.value = alk;
+      if (jarmuEl && alk) jarmuEl.value = alk;
+      let pathEl = document.getElementById("piac_path");
+      if (!pathEl && path.length) {
+        pathEl = document.createElement("input");
+        pathEl.type = "hidden";
+        pathEl.id = "piac_path";
+        pathEl.name = "piac_path";
+        document.getElementById("ad-form")?.appendChild(pathEl);
+      }
+      if (pathEl && path.length) pathEl.value = path.join("/");
+    }
+    syncWizardContext(selection);
+  }
+
   pickerApi = {
     reset: showPicker,
     resetUi: resetCategoryPickerUi,
     getSelection: () => readStored(),
     syncWizardContext,
+    restoreSelection,
     lockCategoryChange,
   };
   window.__bymyCategoryPicker = pickerApi;

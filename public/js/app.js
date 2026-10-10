@@ -5,13 +5,13 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=6c1aeac308";
-import { createAdForm } from "./form-core.js?v=ac8f9555c4";
+import { createAdForm } from "./form-core.js?v=d4e8b1c902";
 import { initPriceMarketHint } from "./price-market-hint.js?v=ee49eb1a56";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { initPhoneLanguages } from "./phone-lang-ui.js?v=bc55c36aef";
-import { initCategoryPicker } from "./category-picker.js?v=438d4f30db";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=e804b6177a";
+import { initCategoryPicker } from "./category-picker.js?v=a7c3f91e40";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=f8c1a2d503";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -198,14 +198,24 @@ function registerAbandonPhotoCleanup() {
 function showWizardShell() {
   document.getElementById("category-picker-shell")?.setAttribute("hidden", "");
   document.getElementById("ad-wizard-shell")?.removeAttribute("hidden");
+  const vertical = String(
+    adForm?.elements.namedItem("hirdetes_vertical")?.value ??
+      categoryPicker?.getSelection?.()?.vertical ??
+      ""
+  )
+    .trim()
+    .toLowerCase();
   const subtype =
     adForm?.elements.namedItem("hirdetes_alkategoria")?.value ??
     adForm?.elements.namedItem("jarmu_kategoria")?.value ??
     categoryPicker?.getSelection?.()?.subtype ??
     "";
   const stepsBar = document.getElementById("wizard-steps-bar");
-  if (isDeskVehicleSubtype(subtype)) stepsBar?.setAttribute("hidden", "");
-  else stepsBar?.removeAttribute("hidden");
+  if (isDeskVehicleSubtype(subtype) || vertical === "piac" || vertical === "ingatlan") {
+    stepsBar?.setAttribute("hidden", "");
+  } else {
+    stepsBar?.removeAttribute("hidden");
+  }
   applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
   scrollAdFormPageTop();
 }
@@ -276,7 +286,10 @@ function ensureFormReady() {
     onCatalogReady: async (catalog) => {
       if (!pendingEditForm) return;
       const catSel = categorySelectionFromForm(pendingEditForm);
-      if (catSel) categoryPicker?.syncWizardContext?.(catSel);
+      if (catSel) {
+        categoryPicker?.restoreSelection?.(catSel, { formData: pendingEditForm });
+        if (!categoryPicker?.restoreSelection) categoryPicker?.syncWizardContext?.(catSel);
+      }
       formApi?.applyFormData?.(pendingEditForm, { fromImport: true });
       if (pendingEditForm.gyartmany) {
         await applyImportedVehicleToSelects({
@@ -386,11 +399,21 @@ if (editing) {
       el.value = Array.isArray(value) ? JSON.stringify(value) : String(value);
     }
     const catSel = categorySelectionFromForm(pendingEditForm);
-    if (catSel) categoryPicker?.syncWizardContext?.(catSel);
+    if (catSel) {
+      categoryPicker?.restoreSelection?.(catSel, { formData: pendingEditForm });
+      if (!categoryPicker?.restoreSelection) categoryPicker?.syncWizardContext?.(catSel);
+    }
     showWizardShell();
     setStoredListingId(editId);
+    /* Vertikál / path a piactér UI előtt — sync ne üres kategóriával fusson. */
+    const vertEl = adForm.elements.namedItem("hirdetes_vertical");
+    const vertField = vertEl instanceof RadioNodeList ? vertEl[0] : vertEl;
+    if (vertField && pendingEditForm.hirdetes_vertical) {
+      vertField.value = String(pendingEditForm.hirdetes_vertical);
+    }
     api?.applyFormData?.(pendingEditForm, { fromImport: true });
-    syncPhotoUrlsFromListing(listing);    window.dispatchEvent(new Event("ad-form-layout-refresh"));
+    syncPhotoUrlsFromListing(listing);
+    window.dispatchEvent(new Event("ad-form-layout-refresh"));
     applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     const published = String(listing.status || "") === "feladott";
     const isImmo = String(listing.form?.hirdetes_vertical || "").toLowerCase() === "ingatlan";

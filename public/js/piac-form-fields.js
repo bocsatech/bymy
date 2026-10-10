@@ -165,8 +165,11 @@ function resolvePathFromPreset(tops, presetSub, storedPath) {
     .split("/")
     .map((s) => s.trim())
     .filter(Boolean);
-  if (fromStored.length && tops.some((t) => t.slug === fromStored[0])) {
-    return fromStored.slice(0, 3);
+  /* Mentett path mindig elsőbbséget kap — üres katalógus / race esetén se vesszen el. */
+  if (fromStored.length) {
+    if (!tops?.length || tops.some((t) => t.slug === fromStored[0])) {
+      return fromStored.slice(0, 3);
+    }
   }
   const sub = String(presetSub || "").trim();
   if (!sub) return [];

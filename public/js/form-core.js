@@ -25,14 +25,15 @@ import {
   syncPiacFormVisibility,
   readPiacFormValues,
   validatePiacForm,
-} from "./piac-form-fields.js?v=2bd36cb45b";
+} from "./piac-form-fields.js?v=91c4e8a2b0";
+import { syncPiacPropFields } from "./piac-prop-fields.js?v=0376d09067";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=1a522e09d6";
 import { openListingPhotoEditor } from "./listing-photo-edit.js?v=985755542f";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=49adc435c0";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=e804b6177a";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=f8c1a2d503";
 import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=dc720507fb";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=30e4feeab0";
 import { bindAdFormKeyboardGuard } from "./ad-form-keyboard-guard.js?v=e753f1b604";
@@ -1294,7 +1295,30 @@ function applyFormData(data, { fromImport = false } = {}) {
   if (String(payload.hirdetes_vertical || "").trim().toLowerCase() === "piac") {
     const root = form.querySelector("#piac-fields");
     if (root) delete root.dataset.ready;
-    void syncPiacFormVisibility(form);
+    const pathParts = String(payload.piac_path || "")
+      .split("/")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 3);
+    const restorePiac = async () => {
+      await syncPiacFormVisibility(form);
+      const piacRoot = form.querySelector("#piac-fields");
+      if (pathParts.length && typeof piacRoot?._piacRepaint === "function") {
+        piacRoot._piacRepaint(pathParts);
+      }
+      const pathEl = form.querySelector("#piac_path");
+      if (pathEl && pathParts.length) pathEl.value = pathParts.join("/");
+      const titleEl = form.querySelector("#piac_cim");
+      const title = String(payload.piac_cim || payload.hirdetes_cime || "").trim();
+      if (titleEl && title) titleEl.value = title;
+      const intent = String(payload.piac_intent || "").trim();
+      if (intent) {
+        const radio = form.querySelector(`input[name="piac_intent"][value="${intent}"]`);
+        if (radio) radio.checked = true;
+      }
+      await syncPiacPropFields(form);
+    };
+    void restorePiac();
   }
   if (mode === "import") {
     options.onApplied?.(payload);

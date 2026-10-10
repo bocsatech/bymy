@@ -454,7 +454,10 @@ function applyRelated(view, related) {
   const items = Array.isArray(related) ? related : [];
   const total = items.length + 1;
   const label = `Kereskedés többi hirdetései ${total}`;
-  const aside = root.querySelector(".hd-side") || root.querySelector("aside");
+  const aside =
+    root.querySelector(".hd-side--contact") ||
+    root.querySelector(".hd-side") ||
+    root.querySelector("aside");
   let link =
     aside?.querySelector("[data-hd-related-link]") ||
     aside?.querySelector('a[href="#hd-related"]');
@@ -671,7 +674,8 @@ function render(view, listing, related = []) {
       </dialog>`
           : ""
       }
-      <aside class="hd-side">
+      ${view.vertical === "piac" ? `<div class="hd-side-stack">` : ""}
+      <aside class="hd-side${view.vertical === "piac" ? " hd-side--info" : ""}">
         <div class="hd-side-head">
           ${
             view.vertical === "piac" && headline.isAllas
@@ -707,6 +711,12 @@ function render(view, listing, related = []) {
           ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
         </div>`
         }
+      ${
+        view.vertical === "piac"
+          ? `</aside>
+      <aside class="hd-side hd-side--contact">`
+          : ""
+      }
         <div class="hd-seller-card">
           ${sellerAvatarHtml(view)}
           <div class="hd-seller-meta">
@@ -782,6 +792,7 @@ function render(view, listing, related = []) {
             : ""
         }
       </aside>
+      ${view.vertical === "piac" ? `</div>` : ""}
     </div>
 
     ${view.vertical === "piac" ? "" : specsBlock}
@@ -1104,10 +1115,12 @@ function bindUi(view, listing) {
             navBtn.rel = "noopener";
             navBtn.innerHTML = `${ICON.pin} Navigáció`;
             const tools = root.querySelector(".hd-side-actions");
-            const phoneBtn = root.querySelector(".hd-side [data-hd-phone]");
+            const contact =
+              root.querySelector(".hd-side--contact") || root.querySelector(".hd-side");
+            const phoneBtn = contact?.querySelector("[data-hd-phone]");
             if (phoneBtn) phoneBtn.after(navBtn);
             else if (tools) tools.after(navBtn);
-            else root.querySelector(".hd-side")?.appendChild(navBtn);
+            else contact?.appendChild(navBtn);
           }
           if (navBtn && href) navBtn.href = href;
         }

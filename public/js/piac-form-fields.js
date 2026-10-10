@@ -39,15 +39,6 @@ function shortTopLabel(label) {
   return s;
 }
 
-function findNode(nodes, slug) {
-  for (const node of nodes || []) {
-    if (node.slug === slug) return node;
-    const hit = findNode(node.children, slug);
-    if (hit) return hit;
-  }
-  return null;
-}
-
 function syncTitleToHidden(form) {
   const visible = form.querySelector("#piac_cim");
   const hidden = form.elements.namedItem("hirdetes_cime");
@@ -89,17 +80,28 @@ function renderCol(col, items, selectedSlug, onPick) {
   col.appendChild(list);
 }
 
+function resolvePathFromPreset(tops, presetSub) {
+  const sub = String(presetSub || "").trim();
+  if (!sub) return [];
+  if (tops.some((t) => t.slug === sub)) return [sub];
+  for (const top of tops) {
+    for (const mid of top.children || []) {
+      if (mid.slug === sub) return [top.slug, mid.slug];
+      if ((mid.children || []).some((leaf) => leaf.slug === sub)) {
+        return [top.slug, mid.slug, sub];
+      }
+    }
+  }
+  return [];
+}
+
 export async function ensurePiacFormFields(form) {
   if (!form) return null;
-  const existing = form.querySelector("#piac-fields");
-  if (existing?.dataset.ready === "1") return existing;
-
   const host =
     form.querySelector('.step-panel[data-step="1"] .card > .card-body') ||
     form.querySelector('.step-panel[data-step="1"]');
   if (!host) return null;
 
-  existing?.remove();
   const catalog = await loadCatalog();
   const tops = (catalog.categories || []).map((node) => ({
     ...node,
@@ -111,40 +113,31 @@ export async function ensurePiacFormFields(form) {
   ];
 
   const presetSub = String(form.elements.namedItem("hirdetes_alkategoria")?.value || "").trim();
-  let path = [];
-  if (presetSub && tops.some((t) => t.slug === presetSub)) {
-    path = [presetSub];
-  } else if (presetSub) {
-    for (const top of tops) {
-      const hit = findNode(top.children, presetSub);
-      if (hit) {
-        path = [top.slug, presetSub];
-        const mid = (top.children || []).find((c) => c.slug === presetSub || findNode(c.children, presetSub));
-        if (mid && mid.slug !== presetSub) path = [top.slug, mid.slug, presetSub];
-        else if (mid) path = [top.slug, mid.slug];
-        break;
-      }
-      for (const mid of top.children || []) {
-        if ((mid.children || []).some((leaf) => leaf.slug === presetSub)) {
-          path = [top.slug, mid.slug, presetSub];
-          break;
-        }
-      }
-      if (path.length) break;
-    }
+  let path = resolvePathFromPreset(tops, presetSub);
+  const topKey = path[0] || "";
+
+  const existing = form.querySelector("#piac-fields");
+  if (existing?.dataset.ready === "1" && existing.dataset.topSlug === topKey) {
+    return existing;
   }
 
+  const prevTitle = existing?.querySelector("#piac_cim")?.value || "";
+  const prevIntent = existing?.querySelector('input[name="piac_intent"]:checked')?.value || "";
+  const prevFree = Boolean(existing?.querySelector("#piac_ingyen")?.checked);
+  existing?.remove();
+
+  const hasTop = Boolean(topKey);
   const root = document.createElement("div");
   root.id = "piac-fields";
   root.className = "piac-fields";
   root.setAttribute("data-piac-only", "1");
   root.innerHTML = `
-    <div class="piac-fields__head">
-      <h3 class="piac-fields__title">Kategória</h3>
-      <p class="piac-fields__hint">Válassz fő- és alkategóriát a piactéren.</p>
+    <div class="piac-fields__head" ${hasTop ? "" : "hidden"}>
+      <h3 class="piac-fields__title">Alkategória</h3>
+      <p class="piac-fields__hint">A fő kategóriát fent a „Kategória” mezőben választod.</p>
     </div>
-    <div class="piac-cat-menus" aria-label="Piactér kategóriák">
-      <div class="piac-cat-col" data-level="0"></div>
+    <p class="piac-fields__pick-top" ${hasTop ? "hidden" : ""}>Először válassz kategóriát fent (Állás, Divat, Otthon…).</p>
+    <div class="piac-cat-menus" aria-label="Piactér alkategóriák" ${hasTop ? "" : "hidden"}>
       <div class="piac-cat-col" data-level="1" hidden></div>
       <div class="piac-cat-col" data-level="2" hidden></div>
     </div>
@@ -154,9 +147,11 @@ export async function ensurePiacFormFields(form) {
       <div class="piac-intent__opts">
         ${intents
           .map(
-            (it, i) => `
+            (it) => `
           <label class="piac-intent__opt">
-            <input type="radio" name="piac_intent" value="${it.slug}" ${i === 0 ? "checked" : ""} />
+            <input type="radio" name="piac_intent" value="${it.slug}" ${
+              (prevIntent || "kinal") === it.slug ? "checked" : ""
+            } />
             <span>${it.label}</span>
           </label>`
           )
@@ -165,12 +160,12 @@ export async function ensurePiacFormFields(form) {
     </div>
     <div class="piac-field">
       <label for="piac_cim">Hirdetés neve <span class="req">*</span></label>
-      <input id="piac_cim" name="piac_cim" type="text" maxlength="70" minlength="12" autocomplete="off" placeholder="pl. iPhone 13, 128 GB, jó állapot" />
+      <input id="piac_cim" name="piac_cim" type="text" maxlength="70" minlength="12" autocomplete="off" placeholder="pl. iPhone 13, 128 GB, jó állapot" value="${String(prevTitle || "").replace(/"/g, "&quot;")}" />
       <p class="piac-field__hint">12–70 karakter</p>
     </div>
     <div class="piac-field piac-field--row">
       <label class="piac-free">
-        <input type="checkbox" id="piac_ingyen" name="piac_ingyen" value="1" />
+        <input type="checkbox" id="piac_ingyen" name="piac_ingyen" value="1" ${prevFree ? "checked" : ""} />
         <span>Ingyen elvihető</span>
       </label>
     </div>
@@ -178,7 +173,6 @@ export async function ensurePiacFormFields(form) {
 
   host.prepend(root);
 
-  const col0 = root.querySelector('[data-level="0"]');
   const col1 = root.querySelector('[data-level="1"]');
   const col2 = root.querySelector('[data-level="2"]');
 
@@ -188,10 +182,6 @@ export async function ensurePiacFormFields(form) {
     const l2 = top ? top.children || [] : [];
     const l3 = mid ? mid.children || [] : [];
 
-    renderCol(col0, tops, path[0] || "", (item) => {
-      path = [item.slug];
-      paint();
-    });
     renderCol(col1, l2, path[1] || "", (item) => {
       path = [path[0], item.slug];
       paint();
@@ -205,6 +195,7 @@ export async function ensurePiacFormFields(form) {
   }
 
   paint();
+  syncTitleToHidden(form);
 
   const title = root.querySelector("#piac_cim");
   title?.addEventListener("input", () => syncTitleToHidden(form));
@@ -226,7 +217,9 @@ export async function ensurePiacFormFields(form) {
       if (field.value === "0") field.value = "";
     }
   });
+  if (prevFree) free?.dispatchEvent(new Event("change"));
 
+  root.dataset.topSlug = topKey;
   root.dataset.ready = "1";
   return root;
 }

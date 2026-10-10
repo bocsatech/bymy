@@ -27,6 +27,39 @@ function wizardCatLabel(catId) {
   return WIZARD_CATEGORY_OPTIONS.find((opt) => opt.id === catId)?.label || "Válassz kategóriát";
 }
 
+function shortPiacWizardLabel(label) {
+  const s = String(label || "").trim();
+  if (s.startsWith("Állás")) return "Állás";
+  if (s.startsWith("Otthon")) return "Otthon, háztartás";
+  if (s.startsWith("Műszaki")) return "Műszaki, elektronika";
+  if (s.startsWith("Szabadidő")) return "Szabadidő, sport";
+  if (s.startsWith("Divat")) return "Divat, ruházat";
+  if (s.startsWith("Üzlet")) return "Üzlet, szolgáltatás";
+  if (s.startsWith("Baba")) return "Baba-mama";
+  return s;
+}
+
+/** A feladási „Kategória” kerék: csak az aktuális vertical saját opciói. */
+function wizardOptionsForSelection(selection = readStored()) {
+  const vertical = String(selection?.vertical || "").trim().toLowerCase();
+  if (vertical === "piac") {
+    return WIZARD_CATEGORY_OPTIONS.filter((opt) => opt.vertical === "piac").map((opt) => ({
+      ...opt,
+      label: shortPiacWizardLabel(opt.label),
+    }));
+  }
+  if (vertical === "ingatlan") {
+    return WIZARD_CATEGORY_OPTIONS.filter((opt) => opt.vertical === "ingatlan");
+  }
+  if (vertical === "teher") {
+    return WIZARD_CATEGORY_OPTIONS.filter((opt) => opt.vertical === "teher");
+  }
+  if (vertical === "auto") {
+    return WIZARD_CATEGORY_OPTIONS.filter((opt) => opt.vertical === "auto");
+  }
+  return WIZARD_CATEGORY_OPTIONS.filter((opt) => opt.vertical !== "piac");
+}
+
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;
 
@@ -271,13 +304,13 @@ function setWizardCatTriggerLabel(wrap, catId) {
 function syncWizardContext(selection) {
   const contextBar = document.getElementById("wizard-context-bar");
   const wrap = document.getElementById("wizard-category-wheel-wrap");
-  if (!selection?.label) {
+  if (!selection?.vertical && !selection?.label) {
     contextBar?.setAttribute("hidden", "");
     return;
   }
   contextBar?.removeAttribute("hidden");
   const catId = currentWizardCategoryId(selection);
-  if (wrap && catId) setWizardCatTriggerLabel(wrap, catId);
+  if (wrap) setWizardCatTriggerLabel(wrap, catId);
 }
 
 export function clearImmoAdWizardBoot() {
@@ -443,6 +476,7 @@ export function initCategoryPicker({
   function openWizardCatPortal(wrap, trigger) {
     closeWizardCatPortal();
     const currentId = currentWizardCategoryId();
+    const options = wizardOptionsForSelection(readStored());
 
     const root = document.createElement("div");
     root.className = "wizard-cat-portal";
@@ -458,12 +492,18 @@ export function initCategoryPicker({
       </div>`;
 
     const scrollEl = root.querySelector(".wizard-cat-portal__scroll");
-    scrollEl.innerHTML = WIZARD_CATEGORY_OPTIONS.map(
-      (opt) =>
-        `<button type="button" class="wizard-cat-portal__item" data-value="${escapeHtml(opt.id)}">` +
-        `<img class="wizard-cat-portal__thumb" src="${escapeHtml(opt.image)}" alt="" width="32" height="32" decoding="async" />` +
-        `<span class="wizard-cat-portal__text">${escapeHtml(opt.label)}</span></button>`
-    ).join("");
+    scrollEl.innerHTML = options
+      .map((opt) => {
+        const thumb = opt.image
+          ? `<img class="wizard-cat-portal__thumb" src="${escapeHtml(opt.image)}" alt="" width="32" height="32" decoding="async" />`
+          : `<span class="wizard-cat-portal__thumb wizard-cat-portal__thumb--icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.2 11.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8L4 7.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.5 7.5V6.2A3.5 3.5 0 0 1 12 2.7a3.5 3.5 0 0 1 3.5 3.5v1.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>`;
+        return (
+          `<button type="button" class="wizard-cat-portal__item" data-value="${escapeHtml(opt.id)}">` +
+          thumb +
+          `<span class="wizard-cat-portal__text">${escapeHtml(opt.label)}</span></button>`
+        );
+      })
+      .join("");
 
     root.querySelector(".wizard-cat-portal__backdrop")?.addEventListener("click", () => closeWizardCatPortal());
     root.querySelector(".wizard-cat-portal__done")?.addEventListener("click", () => {

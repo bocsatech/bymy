@@ -20,9 +20,20 @@
   color: var(--hub-muted, #6b7280);
 }
 
+.piac-fields__pick-top {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px dashed var(--hub-border, #c5ccd6);
+  border-radius: 12px;
+  background: #f8fafc;
+  color: var(--hub-muted, #6b7280);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
 .piac-cat-menus {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin: 0 0 1.1rem;
 }

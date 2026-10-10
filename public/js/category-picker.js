@@ -134,7 +134,7 @@ const WIZARD_CATEGORY_OPTIONS = [
   {
     id: "allas",
     label: "Állás",
-    image: "",
+    image: "/images/categories/piac-allas.png",
     vertical: "piac",
     subtype: "allas",
   },

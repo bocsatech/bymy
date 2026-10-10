@@ -95,7 +95,14 @@ function highlightSpecsFromView(view) {
     return [
       { key: "condition", label: "Állapot", value: specValue(view.vehicleSpecs, "Állapot") || specValue(view.allasSpecs, "Állapot") },
       { key: "generic", label: "Munkakör", value: specValue(view.allasSpecs, "Munkakör") },
-      { key: "color", label: "Ár", value: view.isAllas ? "" : specValue(view.vehicleSpecs, "Vételár") || (view.price && view.price !== "—" ? view.price : "") },
+      {
+        key: "color",
+        label: "Ár",
+        value:
+          specValue(view.vehicleSpecs, "Ár") ||
+          specValue(view.vehicleSpecs, "Vételár") ||
+          (view.price && view.price !== "—" ? view.price : ""),
+      },
       { key: "area", label: "Település", value: specValue(view.vehicleSpecs, "Település") },
     ].filter((row) => row.value);
   }
@@ -699,17 +706,21 @@ function render(view, listing, related = []) {
           }
         </div>
         ${
-          view.vertical === "piac" && (view.isAllas || !view.price || view.price === "—")
-            ? view.isAllas
-              ? `<p class="hd-price-note">Nincs vételár — jelentkezés üzenetben</p>`
-              : ""
-            : `<div class="hd-price-box">
+          (() => {
+            const hasPrice = Boolean(view.hasPrice || (view.price && view.price !== "—" && String(view.price).trim()));
+            if (view.vertical === "piac" && !hasPrice) {
+              return view.isAllas
+                ? `<p class="hd-price-note">Nincs vételár — jelentkezés üzenetben</p>`
+                : "";
+            }
+            return `<div class="hd-price-box">
           <div class="hd-price-row">
             <p class="hd-price${view.price === "Ingyen elvihető" ? " hd-price--free" : ""}">${escapeHtml(view.price || "—")}</p>
             ${view.vertical === "piac" ? "" : priceMarketRatingHtml(view)}
           </div>
           ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
-        </div>`
+        </div>`;
+          })()
         }
       ${
         view.vertical === "piac"

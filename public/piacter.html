@@ -69,6 +69,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=f14985a2ca" />
     <link rel="stylesheet" href="/css/site-desk-header.css?v=3c33acc7fa" />
+    <link rel="stylesheet" href="/css/piac-category-drum.css?v=367d0df070" />
     <style id="hf-tile-edge5">
       @media (max-width: 800px) {
         body.hub-page--feed {
@@ -286,46 +287,52 @@
         box-shadow: 0 0 0 2px #22c55e;
         background: #0f172a;
       }
-      .piac-subcats {
+      .piac-subcat-trigger {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.4rem 0.45rem;
-        margin: 0.15rem auto 0.35rem;
-        max-width: 920px;
-      }
-      .piac-subcats__link {
-        display: inline-flex;
         align-items: center;
-        min-height: 32px;
-        padding: 0.3rem 0.7rem;
-        border: 1px solid #c7d2e0;
-        border-radius: 999px;
+        gap: 0.55rem;
+        width: min(100%, 420px);
+        margin: 0.35rem auto 0.55rem;
+        padding: 0.7rem 0.9rem;
+        border: 1.5px solid #111;
+        border-radius: 10px;
         background: #fff;
-        color: #111827;
-        font-size: 0.82rem;
-        font-weight: 650;
-        text-decoration: none;
+        color: #111;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        box-sizing: border-box;
+      }
+      .piac-subcat-trigger__label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #6b7280;
+        flex: 0 0 auto;
+      }
+      .piac-subcat-trigger__value {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #6b7280;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-      .piac-subcats__link:hover {
-        border-color: #93c5fd;
-        background: #f8fafc;
+      .piac-subcat-trigger.has-value .piac-subcat-trigger__value {
+        color: #111;
       }
-      .piac-subcats__link.is-active {
-        border-color: #22c55e;
-        background: #22c55e;
-        color: #fff;
+      .piac-subcat-trigger__chev {
+        color: #6b7280;
+        font-size: 1.1rem;
       }
-      [data-theme="dark"] .piac-subcats__link {
+      [data-theme="dark"] .piac-subcat-trigger {
         background: #0f172a;
-        border-color: #334155;
+        border-color: #94a3b8;
         color: #f1f5f9;
       }
-      [data-theme="dark"] .piac-subcats__link.is-active {
-        border-color: #22c55e;
-        background: #22c55e;
-        color: #fff;
+      [data-theme="dark"] .piac-subcat-trigger.has-value .piac-subcat-trigger__value {
+        color: #f1f5f9;
       }
       .piac-rail {
         min-height: 148px;
@@ -577,7 +584,7 @@
     </nav>
 
     <script src="/js/hub-rail-drag.js?v=f9476114f4" defer></script>
-    <script src="/js/piacter-hub.js?v=b6a4ea5033" type="module"></script>
+    <script src="/js/piacter-hub.js?v=cfa34b376f" type="module"></script>
     <script src="/js/nav-counts.js?v=7613897d1d" type="module"></script>
     <script src="/js/theme.js?v=4fe8a2261f" type="module"></script>
     <script src="/js/site-auth.js?v=20aa3f41c9" type="module"></script>

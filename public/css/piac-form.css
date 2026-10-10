@@ -171,57 +171,54 @@
   color: #111827;
 }
 
-/* Alkategória + levél oszlopok (Kínál/Keres a fejlécben, nem menünként) */
-.piac-drill {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  align-items: start;
-  margin: 0 0 0.5rem;
-}
-
-.piac-sub-col {
+/* Alkategória — dobkerék trigger (fő kategória ikonsor alatt) */
+.piac-subcat-trigger {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.piac-sub-col[hidden] {
-  display: none !important;
-}
-
-.piac-drill:has([data-level="2"][hidden]) {
-  grid-template-columns: minmax(0, 22rem);
-}
-
-.piac-sub-btn {
-  display: block;
+  align-items: center;
+  gap: 0.55rem;
   width: 100%;
-  text-align: left;
-  min-height: 44px;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid #c7d2e0;
+  max-width: 28rem;
+  margin: 0 0 0.65rem;
+  padding: 0.75rem 0.95rem;
+  border: 1.5px solid #111;
   border-radius: 10px;
   background: #fff;
-  color: #111827;
+  color: #111;
   font: inherit;
-  font-size: 0.95rem;
-  font-weight: 650;
-  line-height: 1.25;
+  text-align: left;
   cursor: pointer;
   box-sizing: border-box;
 }
 
-.piac-sub-btn:hover {
-  border-color: #93c5fd;
-  background: #eff6ff;
+.piac-subcat-trigger[hidden] {
+  display: none !important;
 }
 
-.piac-sub-btn.is-active {
-  border-color: #22c55e;
-  background: #22c55e;
-  color: #fff;
+.piac-subcat-trigger__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b7280;
+  flex: 0 0 auto;
+}
+
+.piac-subcat-trigger__value {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.piac-subcat-trigger.has-value .piac-subcat-trigger__value {
+  color: #0f172a;
+}
+
+.piac-subcat-trigger__chev {
+  color: #6b7280;
+  font-size: 1.15rem;
 }
 
 .piac-intent-radios {
@@ -445,11 +442,6 @@ body.ad-vertical-piac #ad-form-desk-shell [data-desk-acc="alap"] .step-panel[dat
 
   .piac-intent-toggle__btn {
     flex: 1 1 0;
-  }
-
-  .piac-drill,
-  .piac-drill:has([data-level="2"][hidden]) {
-    grid-template-columns: 1fr;
   }
 
   .piac-fields__title-row {

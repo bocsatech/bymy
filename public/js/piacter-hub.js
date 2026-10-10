@@ -22,6 +22,7 @@ import {
   TILE_PAGE_MORE,
   fetchTilePagesUntil,
 } from "./listing-tile-pager.js?v=248671f94e";
+import { openPiacCategoryDrum } from "./piac-category-drum.js?v=70368b0cdc";
 
 const LATEST_WANT = 9;
 const FEATURED_WANT = 9;
@@ -178,19 +179,54 @@ function subSlugFromCat(cat) {
     .filter(Boolean)[1] || "";
 }
 
+function catPathLabel(tops, catPath) {
+  const parts = String(catPath || "")
+    .split("/")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!parts.length) return "";
+  const labels = [];
+  let nodes = tops;
+  for (const slug of parts) {
+    const node = (nodes || []).find((n) => n.slug === slug);
+    if (!node) break;
+    labels.push(node.label || slug);
+    nodes = node.children || [];
+  }
+  return labels.slice(1).join(" › ") || "Összes";
+}
+
+function openBrowseCategoryDrum(tops, topSlug, initialCat) {
+  const topNode = tops.find((t) => t.slug === topSlug);
+  if (!topNode) {
+    window.location.href = `/piacter.html?cat=${encodeURIComponent(topSlug)}`;
+    return;
+  }
+  const initialPath = String(initialCat || topSlug)
+    .split("/")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  openPiacCategoryDrum({
+    topNode,
+    initialPath,
+    includeAllOption: true,
+    title: "Alkategória",
+    onDone: (path) => {
+      const next = (path || []).filter(Boolean).join("/") || topSlug;
+      window.location.href = `/piacter.html?cat=${encodeURIComponent(next)}`;
+    },
+  });
+}
+
 async function renderCategoryMenus() {
   const nav = el("piac-cats");
   if (!nav) return;
   const catalog = await loadPiacCatalog();
   const tops = (catalog?.categories || []).filter((n) => n?.slug && !EXCLUDED_TOPS.has(n.slug));
-  if (!tops.length) {
-    bindCategoryMenus();
-    return;
-  }
+  if (!tops.length) return;
 
   const activeCat = readCatFilter();
   const activeTop = topSlugFromCat(activeCat);
-  const activeSub = subSlugFromCat(activeCat);
 
   nav.innerHTML = tops
     .map((top) => {
@@ -208,46 +244,43 @@ async function renderCategoryMenus() {
     })
     .join("");
 
-  let subNav = el("piac-subcats");
+  el("piac-subcats")?.remove();
+
+  let subTrigger = el("piac-subcat-trigger");
   const activeNode = tops.find((t) => t.slug === activeTop) || null;
-  const subs = activeNode?.children || [];
-  if (!subs.length || !activeTop) {
-    subNav?.remove();
-    bindCategoryMenus();
-    return;
+  if (activeTop && (activeNode?.children || []).length) {
+    if (!subTrigger) {
+      subTrigger = document.createElement("button");
+      subTrigger.type = "button";
+      subTrigger.id = "piac-subcat-trigger";
+      subTrigger.className = "piac-subcat-trigger";
+      nav.insertAdjacentElement("afterend", subTrigger);
+    }
+    const deeper = Boolean(subSlugFromCat(activeCat));
+    subTrigger.hidden = false;
+    subTrigger.innerHTML = `<span class="piac-subcat-trigger__label">Alkategória</span><span class="piac-subcat-trigger__value">${catPathLabel(
+      tops,
+      activeCat
+    )}</span><span class="piac-subcat-trigger__chev" aria-hidden="true">›</span>`;
+    subTrigger.classList.toggle("has-value", deeper);
+    subTrigger.onclick = () => openBrowseCategoryDrum(tops, activeTop, activeCat);
+  } else {
+    subTrigger?.remove();
   }
 
-  if (!subNav) {
-    subNav = document.createElement("nav");
-    subNav.id = "piac-subcats";
-    subNav.className = "piac-subcats";
-    subNav.setAttribute("aria-label", "Alkategóriák");
-    nav.insertAdjacentElement("afterend", subNav);
-  }
-
-  subNav.innerHTML = [
-    `<a class="piac-subcats__link${!activeSub ? " is-active" : ""}" href="/piacter.html?cat=${encodeURIComponent(activeTop)}" data-piac-sub="">Összes</a>`,
-    ...subs.map((sub) => {
-      const path = `${activeTop}/${sub.slug}`;
-      const on = activeSub === sub.slug ? " is-active" : "";
-      return `<a class="piac-subcats__link${on}" href="/piacter.html?cat=${encodeURIComponent(path)}" data-piac-sub="${sub.slug}">${sub.label}</a>`;
-    }),
-  ].join("");
-
-  bindCategoryMenus();
-}
-
-function bindCategoryMenus() {
-  const cat = readCatFilter();
-  const top = topSlugFromCat(cat);
-  const sub = subSlugFromCat(cat);
-  document.querySelectorAll("[data-piac-cat]").forEach((link) => {
-    const slug = String(link.getAttribute("data-piac-cat") || "").trim();
-    link.classList.toggle("is-active", Boolean(top) && slug === top);
-  });
-  document.querySelectorAll("[data-piac-sub]").forEach((link) => {
-    const slug = String(link.getAttribute("data-piac-sub") || "").trim();
-    link.classList.toggle("is-active", slug ? slug === sub : !sub);
+  nav.querySelectorAll("[data-piac-cat]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const slug = String(link.getAttribute("data-piac-cat") || "").trim();
+      if (!slug) return;
+      event.preventDefault();
+      const topNode = tops.find((t) => t.slug === slug);
+      if (!(topNode?.children || []).length) {
+        window.location.href = `/piacter.html?cat=${encodeURIComponent(slug)}`;
+        return;
+      }
+      const initial = topSlugFromCat(activeCat) === slug ? activeCat : slug;
+      openBrowseCategoryDrum(tops, slug, initial);
+    });
   });
 }
 

@@ -1,11 +1,12 @@
 /**
- * Piactér feladás: mentett kategóriafa — ikonsor + alkategória lista (ref. Jófogás).
+ * Piactér feladás: fő kategória ikonsor + alkategória dobkerék.
  */
 import {
   syncPiacPropFields,
   readPiacPropValues,
   validatePiacPropForm,
 } from "./piac-prop-fields.js?v=f90c102c10";
+import { openPiacCategoryDrum } from "./piac-category-drum.js?v=70368b0cdc";
 
 let catalogPromise = null;
 
@@ -528,7 +529,9 @@ export async function ensurePiacFormFields(form) {
   if (
     existing?.dataset.ready === "1" &&
     existing.dataset.catalogV === String(catalog.version || "2") &&
-    existing.querySelector(".piac-intent-toggle")
+    existing.querySelector(".piac-intent-toggle") &&
+    existing.querySelector("#piac-form-subcat-trigger") &&
+    !existing.querySelector(".piac-drill")
   ) {
     placePiacRoot(form, existing);
     const titleEl = existing.querySelector("#piac_cim");
@@ -575,10 +578,11 @@ export async function ensurePiacFormFields(form) {
       </div>
     </div>
     <div class="piac-top-icons" role="listbox" aria-label="Fő kategóriák"></div>
-    <div class="piac-drill" aria-label="Alkategóriák">
-      <div class="piac-sub-col" data-level="1" hidden></div>
-      <div class="piac-sub-col" data-level="2" hidden></div>
-    </div>
+    <button type="button" class="piac-subcat-trigger" id="piac-form-subcat-trigger" hidden>
+      <span class="piac-subcat-trigger__label">Alkategória</span>
+      <span class="piac-subcat-trigger__value">Válassz…</span>
+      <span class="piac-subcat-trigger__chev" aria-hidden="true">›</span>
+    </button>
     <p class="piac-fields__path" aria-live="polite"></p>
     <input type="hidden" id="piac_path" name="piac_path" value="" />
     <div class="piac-intent-radios" hidden aria-hidden="true">
@@ -609,10 +613,30 @@ export async function ensurePiacFormFields(form) {
   placePiacRoot(form, root);
 
   const topRow = root.querySelector(".piac-top-icons");
-  const col1 = root.querySelector('[data-level="1"]');
-  const col2 = root.querySelector('[data-level="2"]');
+  const subTrigger = root.querySelector("#piac-form-subcat-trigger");
   const status = root.querySelector(".piac-fields__path");
   const intentToggle = root.querySelector(".piac-intent-toggle");
+
+  function openFormCategoryDrum(topSlug) {
+    const topNode = tops.find((t) => t.slug === topSlug);
+    if (!topNode) return;
+    const kids = topNode.children || [];
+    if (!kids.length) {
+      path = [topSlug];
+      paint();
+      return;
+    }
+    openPiacCategoryDrum({
+      topNode,
+      initialPath: path[0] === topSlug ? path : [topSlug],
+      includeAllOption: false,
+      title: "Alkategória",
+      onDone: (next) => {
+        path = Array.isArray(next) ? next.slice(0, 3) : [topSlug];
+        paint();
+      },
+    });
+  }
 
   function syncIntentToggle() {
     const current =
@@ -635,23 +659,28 @@ export async function ensurePiacFormFields(form) {
   function paint() {
     const top = tops.find((t) => t.slug === path[0]) || null;
     const mid = top ? (top.children || []).find((c) => c.slug === path[1]) || null : null;
-    const l2 = (top?.children || []).map((n) => ({ slug: n.slug, label: n.label, node: n }));
-    const l3 = nodeComplete(mid)
-      ? []
-      : (mid?.children || []).map((n) => ({ slug: n.slug, label: n.label }));
+    const leaf =
+      mid && path[2]
+        ? (mid.children || []).find((c) => c.slug === path[2]) || null
+        : null;
 
     renderTopIcons(topRow, tops, path[0] || "", (item) => {
       path = [item.slug];
       paint();
+      openFormCategoryDrum(item.slug);
     });
-    renderButtonList(col1, l2, path[1] || "", (item) => {
-      path = [path[0], item.slug];
-      paint();
-    });
-    renderButtonList(col2, l3, path[2] || "", (item) => {
-      path = [path[0], path[1], item.slug];
-      paint();
-    });
+
+    const hasSubs = Boolean((top?.children || []).length);
+    if (subTrigger) {
+      subTrigger.hidden = !hasSubs;
+      const valueEl = subTrigger.querySelector(".piac-subcat-trigger__value");
+      const bits = [];
+      if (mid) bits.push(mid.label || mid.slug);
+      if (leaf) bits.push(leaf.label || leaf.slug);
+      if (valueEl) valueEl.textContent = bits.length ? bits.join(" › ") : "Válassz…";
+      subTrigger.classList.toggle("has-value", bits.length > 0);
+      subTrigger.onclick = () => openFormCategoryDrum(path[0] || top?.slug);
+    }
 
     syncAlkategoria(form, path);
     syncIntentToggle();
@@ -664,10 +693,7 @@ export async function ensurePiacFormFields(form) {
     if (intentLabel) labels.push(intentLabel);
     if (top) labels.push(top.label);
     if (mid) labels.push(mid.label);
-    if (path[2]) {
-      const leaf = l3.find((n) => n.slug === path[2]);
-      if (leaf) labels.push(leaf.label);
-    }
+    if (leaf) labels.push(leaf.label);
     if (status) {
       status.textContent = labels.length > 1 || path[0] ? labels.join(" › ") : "Válassz kategóriát a menüből.";
       status.classList.toggle("is-empty", !path[0]);

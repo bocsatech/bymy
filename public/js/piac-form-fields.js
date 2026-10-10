@@ -34,7 +34,7 @@ const PIAC_TOP_ICONS = {
   "szabadido-sport":
     '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="14" cy="30" r="7" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="34" cy="30" r="7" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M20 28l6-12h8l4 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   "divat-ruhazat":
-    '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 12l8 4 8-4 6 6-4 4v18H14V22l-4-4 6-6z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg>',
+    '<img class="piac-top-icon__img" src="/images/categories/piac-divat.png" alt="" width="48" height="44" decoding="async" />',
   "uzlet-szolgaltatas":
     '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 34l16-16 6 6-16 16H14v-6z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M28 16l4-4 6 6-4 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
   "baba-mama":

@@ -162,7 +162,7 @@ const WIZARD_CATEGORY_OPTIONS = [
   {
     id: "divat-ruhazat",
     label: "Divat, ruházat",
-    image: "",
+    image: "/images/categories/piac-divat.png",
     vertical: "piac",
     subtype: "divat-ruhazat",
   },

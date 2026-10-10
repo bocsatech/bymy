@@ -1145,6 +1145,15 @@ body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-s
     max-width: none;
   }
 
+  /* Piactér: szélesebb bal menüoszlop, középső jobbra — tippek oszlop nincs. */
+  body.site-app.ad-form-desk-active.ad-vertical-piac[data-site-page="hirdetesfeladas"] #ad-form.ad-form--piac.ad-form-desk-layout,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--piac.ad-form-desk-layout {
+    --ad-filter-w: 460px;
+    --ad-tips-w: 0px;
+    grid-template-columns: minmax(380px, 460px) minmax(0, 1fr);
+    gap: 28px;
+  }
+
   body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell {
     grid-column: 1;
     grid-row: 1;
@@ -1153,14 +1162,17 @@ body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-s
     max-height: none;
   }
 
-  /* Ingatlan: a keskeny bal sáv ne takaródjon a grid közép/jobb oszlopa alá (kattintás a Típus stb. mezőkre). */
-  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--ingatlan.ad-form-desk-layout .ad-form-desk-shell {
+  /* Ingatlan / piactér: a bal sáv ne takaródjon a középső oszlop alá. */
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--ingatlan.ad-form-desk-layout .ad-form-desk-shell,
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout .ad-form-desk-shell {
     position: relative;
     z-index: 40;
   }
 
   body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-center-col,
-  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-tips-col {
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-tips-col,
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #ad-desk-center-col,
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #ad-desk-tips-col {
     z-index: 1;
     /* Üres / átfedő területek ne fogják el a bal oldali mezők kattintásait. */
     pointer-events: none;
@@ -1192,8 +1204,35 @@ body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-s
     label,
     summary,
     [role="button"]
+  ),
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #ad-desk-center-col :is(
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    label,
+    summary,
+    [role="button"],
+    [role="listbox"],
+    [role="option"],
+    .photo-upload-bar,
+    #photo-grid,
+    .ad-desk-guide-frame__img
   ) {
     pointer-events: auto;
+  }
+
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #ad-desk-tips-col {
+    display: none !important;
+  }
+
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #ad-desk-center-col {
+    grid-column: 2;
+  }
+
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form--piac.ad-form-desk-layout #footer-actions {
+    grid-column: 1;
   }
 
   body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout #ad-desk-center-col {

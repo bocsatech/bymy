@@ -176,7 +176,7 @@ const WIZARD_CATEGORY_OPTIONS = [
   {
     id: "baba-mama",
     label: "Baba-mama",
-    image: "",
+    image: "/images/categories/piac-baba.png",
     vertical: "piac",
     subtype: "baba-mama",
   },

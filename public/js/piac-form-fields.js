@@ -38,7 +38,7 @@ const PIAC_TOP_ICONS = {
   "uzlet-szolgaltatas":
     '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 34l16-16 6 6-16 16H14v-6z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M28 16l4-4 6 6-4 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
   "baba-mama":
-    '<svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="28" rx="12" ry="10" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="24" cy="16" r="5" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="20" cy="27" r="1.6" fill="currentColor"/><circle cx="28" cy="27" r="1.6" fill="currentColor"/><path d="M20 32c1.2 1.5 6.8 1.5 8 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    '<img class="piac-top-icon__img" src="/images/categories/piac-baba.png" alt="" width="48" height="44" decoding="async" />',
 };
 
 function readVertical(form) {

@@ -680,7 +680,28 @@ function syncLeirasInPhotoPanel(form) {
   leirasWrap.style.removeProperty("display");
 }
 
+function relocatePiacFieldsTop(form) {
+  const piac = form?.querySelector("#piac-fields");
+  if (!piac || !isPiacAdForm(form)) return;
+  if (!isDeskWide()) {
+    piac.classList.remove("piac-fields--desk-top");
+    const panel = form.querySelector('.step-panel[data-step="1"]');
+    if (panel && (piac.parentElement !== panel || panel.firstElementChild !== piac)) {
+      panel.insertBefore(piac, panel.firstChild);
+    }
+    return;
+  }
+  piac.classList.add("piac-fields--desk-top");
+  const shell = form.querySelector("#ad-form-desk-shell");
+  const center = form.querySelector("#ad-desk-center-col");
+  const anchor = shell || center || form.firstElementChild;
+  if (anchor && piac !== anchor && piac.nextElementSibling !== anchor) {
+    form.insertBefore(piac, anchor);
+  }
+}
+
 function relocatePiacAllasAbovePhotos(form) {
+  relocatePiacFieldsTop(form);
   const props =
     form?.querySelector("#piac-prop-fields") || form?.querySelector("#piac-allas-fields");
   if (!props) return;
@@ -759,14 +780,10 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   syncIngatlanDeskAccordions(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
-  /* Piactér menü: desk mount után is a step-1 tetején maradjon. */
+  /* Piactér menü: desk-en az űrlap tetején, teljes szélességben. */
   if (isPiacAdForm(form)) {
     stripPiacGuideFrame(form);
-    const piac = form.querySelector("#piac-fields");
-    const panel = form.querySelector('.step-panel[data-step="1"]');
-    if (piac && panel && panel.firstElementChild !== piac) {
-      panel.insertBefore(piac, panel.firstChild);
-    }
+    relocatePiacFieldsTop(form);
   }
 
   const preserved =

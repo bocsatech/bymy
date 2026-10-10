@@ -54,7 +54,7 @@
 }
 
 .piac-fields__path {
-  margin: 0.65rem 0 1rem;
+  margin: 0.65rem 0 0.85rem;
   font-size: 0.9rem;
   font-weight: 650;
   color: #111827;
@@ -63,6 +63,35 @@
 .piac-fields__path.is-empty {
   color: var(--hub-muted, #6b7280);
   font-weight: 600;
+}
+
+/* Cím + Ingyen elvihető egymás mellett */
+.piac-fields__title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem 1.25rem;
+  align-items: end;
+  margin: 0 0 0.35rem;
+}
+
+.piac-fields__title-row .piac-field {
+  margin: 0;
+}
+
+.piac-fields__title-row .piac-field--free {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding-bottom: 1.35rem; /* a cím hint sorával egy vonalban */
+}
+
+.piac-fields--desk-top {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem 0.65rem;
+  border: 1px solid var(--hub-border, #e5e7eb);
+  border-radius: 14px;
+  background: #fff;
+  box-sizing: border-box;
 }
 
 /* Fő kategóriák — saját lekerekített képbox + címke */
@@ -429,6 +458,16 @@ body.ad-vertical-piac #ad-form-desk-shell [data-desk-acc="alap"] .step-panel[dat
   .piac-drill,
   .piac-drill:has([data-level="2"][hidden]) {
     grid-template-columns: 1fr;
+  }
+
+  .piac-fields__title-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .piac-fields__title-row .piac-field--free {
+    min-height: 0;
+    padding-bottom: 0;
   }
 }
 

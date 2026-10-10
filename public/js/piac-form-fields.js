@@ -216,7 +216,30 @@ function renderTopIcons(row, tops, selectedSlug, onPick) {
   }
 }
 
+function isPiacDeskTop() {
+  return (
+    typeof document !== "undefined" &&
+    document.body.classList.contains("ad-form-desk-active") &&
+    typeof window !== "undefined" &&
+    window.matchMedia("(min-width: 901px)").matches
+  );
+}
+
 function placePiacRoot(form, root) {
+  if (!form || !root) return false;
+  /* Desk: teljes szélességű sáv az űrlap tetején (nem a bal accordionban). */
+  if (isPiacDeskTop()) {
+    const shell = form.querySelector("#ad-form-desk-shell");
+    const anchor = shell || form.querySelector("#ad-desk-center-col") || form.firstElementChild;
+    root.classList.add("piac-fields--desk-top");
+    if (anchor && root.nextElementSibling !== anchor && root !== anchor) {
+      form.insertBefore(root, anchor);
+    } else if (!root.parentElement) {
+      form.prepend(root);
+    }
+    return true;
+  }
+  root.classList.remove("piac-fields--desk-top");
   const panel = form.querySelector('.step-panel[data-step="1"]');
   if (!panel) return false;
   if (root.parentElement !== panel || panel.firstElementChild !== root) {
@@ -331,16 +354,18 @@ export async function ensurePiacFormFields(form) {
         )
         .join("")}
     </div>
-    <div class="piac-field">
-      <label for="piac_cim">Hirdetés neve <span class="req">*</span></label>
-      <input id="piac_cim" name="piac_cim" type="text" maxlength="70" minlength="12" autocomplete="off" placeholder="pl. iPhone 13, 128 GB, jó állapot" value="${String(seedTitle || "").replace(/"/g, "&quot;")}" />
-      <p class="piac-field__hint">12–70 karakter</p>
-    </div>
-    <div class="piac-field piac-field--row">
-      <label class="piac-free">
-        <input type="checkbox" id="piac_ingyen" name="piac_ingyen" value="1" ${seedFree ? "checked" : ""} />
-        <span>Ingyen elvihető</span>
-      </label>
+    <div class="piac-fields__title-row">
+      <div class="piac-field piac-field--title">
+        <label for="piac_cim">Hirdetés neve <span class="req">*</span></label>
+        <input id="piac_cim" name="piac_cim" type="text" maxlength="70" minlength="12" autocomplete="off" placeholder="pl. iPhone 13, 128 GB, jó állapot" value="${String(seedTitle || "").replace(/"/g, "&quot;")}" />
+        <p class="piac-field__hint">12–70 karakter</p>
+      </div>
+      <div class="piac-field piac-field--free">
+        <label class="piac-free">
+          <input type="checkbox" id="piac_ingyen" name="piac_ingyen" value="1" ${seedFree ? "checked" : ""} />
+          <span>Ingyen elvihető</span>
+        </label>
+      </div>
     </div>
   `;
 

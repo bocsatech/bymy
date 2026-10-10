@@ -14,14 +14,14 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
-  color: #c2410c;
+  color: #111827;
 }
 
 .piac-fields__path {
   margin: 0.65rem 0 1rem;
   font-size: 0.9rem;
   font-weight: 650;
-  color: #0f766e;
+  color: #111827;
 }
 
 .piac-fields__path.is-empty {
@@ -101,7 +101,7 @@
 }
 
 .piac-top-icon.is-active .piac-top-icon__label {
-  color: #15803d;
+  color: #111827;
 }
 
 .piac-top-icon__label {
@@ -111,7 +111,7 @@
   line-height: 1.15;
   text-align: center;
   max-width: 100%;
-  color: #1f2937;
+  color: #111827;
 }
 
 /* Alkategória + levél + szándék oszlopok */
@@ -151,7 +151,7 @@
   border: 1px solid #c7d2e0;
   border-radius: 10px;
   background: #fff;
-  color: #1d4ed8;
+  color: #111827;
   font: inherit;
   font-size: 0.95rem;
   font-weight: 650;
@@ -265,7 +265,7 @@ body.ad-vertical-piac #ad-form-desk-shell [data-desk-acc="alap"] .step-panel[dat
 html[data-theme="dark"] .piac-sub-btn {
   background: #0f172a;
   border-color: #334155;
-  color: #93c5fd;
+  color: #f1f5f9;
 }
 
 html[data-theme="dark"] .piac-sub-btn.is-active {
@@ -286,6 +286,12 @@ html[data-theme="dark"] .piac-top-icon.is-active .piac-top-icon__box {
   box-shadow: 0 0 0 2px #22c55e;
 }
 
+html[data-theme="dark"] .piac-top-icon__label,
+html[data-theme="dark"] .piac-top-icon.is-active .piac-top-icon__label,
+html[data-theme="dark"] .piac-fields__path {
+  color: #f1f5f9;
+}
+
 html[data-theme="dark"] .piac-fields__title {
-  color: #fb923c;
+  color: #f1f5f9;
 }

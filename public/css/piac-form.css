@@ -508,3 +508,137 @@ html[data-theme="dark"] .piac-fields__path {
 html[data-theme="dark"] .piac-fields__title {
   color: #f1f5f9;
 }
+
+/* Állás — Bruttó bér (JF: összeg Ft / hó|hét|nap|óra + bérigény) */
+.ad-form--piac-allas .piac-field--free {
+  display: none !important;
+}
+
+.suffix-field.piac-allas-wage-suffix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.4rem 0.5rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.suffix-field.piac-allas-wage-suffix > #vetelar {
+  flex: 1 1 7rem;
+  min-width: 6rem;
+}
+
+.suffix-field.piac-allas-wage-suffix > span:not(.piac-allas-wage__slash):not(.price-market-hint):not(.price-market-label) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75rem;
+  background: #eef1f5;
+  color: #4b5563;
+  font-weight: 650;
+  border-radius: 0 8px 8px 0;
+}
+
+.piac-allas-wage__slash {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.15rem;
+  color: #9ca3af;
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: transparent !important;
+}
+
+.piac-allas-wage__dims {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.piac-allas-wage__dim {
+  min-width: 3.1rem;
+  min-height: 42px;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d4ed8;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.piac-allas-wage__dim:hover {
+  background: #eff6ff;
+}
+
+.piac-allas-wage__dim.is-active {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #fff;
+}
+
+.piac-allas-wage__alt {
+  grid-column: 1 / -1;
+  margin: 0.35rem 0 0;
+}
+
+.piac-allas-wage__or-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+}
+
+.piac-allas-wage__vagy {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.piac-allas-wage__check {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+}
+
+.piac-allas-wage__check input {
+  margin-top: 0.2rem;
+}
+
+.piac-allas-wage__note {
+  margin: 0.55rem 0 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.piac-allas-helyszin-head {
+  margin: 0.5rem 0 0.65rem;
+}
+
+html[data-theme="dark"] .piac-allas-wage__dim {
+  background: #0f172a;
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+html[data-theme="dark"] .piac-allas-wage__dim.is-active {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #fff;
+}
+
+html[data-theme="dark"] .piac-allas-wage__check,
+html[data-theme="dark"] .piac-allas-helyszin-head {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .suffix-field.piac-allas-wage-suffix > span:not(.piac-allas-wage__slash):not(.price-market-hint):not(.price-market-label) {
+  background: #1e293b;
+  color: #cbd5e1;
+}

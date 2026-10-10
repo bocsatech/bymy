@@ -97,11 +97,252 @@ export function topSlugFromPiacPath(path) {
   );
 }
 
+const ALLAS_WAGE_DIMS = [
+  { slug: "hó", label: "hó" },
+  { slug: "hét", label: "hét" },
+  { slug: "nap", label: "nap" },
+  { slug: "óra", label: "óra" },
+];
+
+function readPiacPathTop(form) {
+  const fromField = readField(form, "piac_path");
+  const fromDom = String(form?.querySelector?.("#piac_path")?.value || "").trim();
+  return topSlugFromPiacPath(fromField || fromDom);
+}
+
+function isAllasCategory(form) {
+  return readPiacPathTop(form) === "allas";
+}
+
+function vetelarFieldOf(form) {
+  const el = form?.elements?.namedItem("vetelar");
+  return el instanceof RadioNodeList ? el[0] : el;
+}
+
+function syncAllasWageUi(form) {
+  if (!form) return;
+  const allas = isAllasCategory(form);
+  form.classList.toggle("ad-form--piac-allas", allas);
+
+  const freeWrap = form.querySelector(".piac-field--free");
+  if (freeWrap) {
+    freeWrap.hidden = allas;
+    if (allas) {
+      const freeEl = freeWrap.querySelector("#piac_ingyen");
+      if (freeEl) freeEl.checked = false;
+    }
+  }
+
+  const vetelarField = vetelarFieldOf(form);
+  if (!vetelarField) return;
+  const priceCard =
+    vetelarField.closest(".labeled-field, .ad-layout-item, .suffix-field")?.closest(".card") ||
+    vetelarField.closest(".card");
+  const cardHead = priceCard?.querySelector(".card-head");
+  const priceLabel = form.querySelector('label[for="vetelar"]');
+  const suffix = vetelarField.closest(".suffix-field");
+
+  if (!allas) {
+    form.querySelectorAll(".piac-allas-wage-extra").forEach((el) => el.remove());
+    if (cardHead?.dataset?.piacWageHeadSaved) {
+      cardHead.textContent = cardHead.dataset.piacWageHeadSaved;
+      delete cardHead.dataset.piacWageHeadSaved;
+    }
+    if (priceLabel) {
+      priceLabel.hidden = false;
+      priceLabel.removeAttribute("hidden");
+      if (priceLabel.dataset.piacLabelSaved) {
+        priceLabel.innerHTML = priceLabel.dataset.piacLabelSaved.includes("Ár:")
+          ? 'Ár: <span class="req">*</span>'
+          : priceLabel.dataset.piacLabelSaved;
+      }
+    }
+    suffix?.classList.remove("piac-allas-wage-suffix");
+    return;
+  }
+
+  if (cardHead && !cardHead.dataset.piacWageHeadSaved) {
+    cardHead.dataset.piacWageHeadSaved = cardHead.textContent || "Ár";
+  }
+  if (cardHead) cardHead.textContent = "Bruttó bér";
+  if (priceLabel) {
+    priceLabel.hidden = true;
+    priceLabel.setAttribute("hidden", "");
+  }
+  suffix?.classList.add("piac-allas-wage-suffix");
+
+  const last = form._bymyLastFormData && typeof form._bymyLastFormData === "object" ? form._bymyLastFormData : {};
+  const seedDim =
+    String(form.querySelector("#piac_price_dimension")?.value || last.piac_price_dimension || "hó").trim() || "hó";
+  const seedWageAsk =
+    Boolean(form.querySelector("#piac_wo_wage_demands")?.checked) ||
+    readField(form, "piac_wo_wage_demands") === "1" ||
+    String(last.piac_wo_wage_demands || "") === "1";
+
+  let dimsHost = suffix?.querySelector(".piac-allas-wage__dims");
+  if (suffix && !dimsHost) {
+    const slash = document.createElement("span");
+    slash.className = "piac-allas-wage__slash piac-allas-wage-extra";
+    slash.setAttribute("aria-hidden", "true");
+    slash.textContent = "/";
+    dimsHost = document.createElement("div");
+    dimsHost.className = "piac-allas-wage__dims piac-allas-wage-extra";
+    dimsHost.setAttribute("role", "group");
+    dimsHost.setAttribute("aria-label", "Bér időegység");
+    dimsHost.innerHTML = `
+      <input type="hidden" id="piac_price_dimension" name="piac_price_dimension" value="${seedDim.replace(/"/g, "&quot;")}" />
+      ${ALLAS_WAGE_DIMS.map(
+        (d) =>
+          `<button type="button" class="piac-allas-wage__dim${
+            seedDim === d.slug ? " is-active" : ""
+          }" data-piac-wage-dim="${d.slug}">${d.label}</button>`
+      ).join("")}
+    `;
+    const ftSpan = [...suffix.children].find(
+      (el) => el.tagName === "SPAN" && /^Ft$/i.test(String(el.textContent || "").trim())
+    );
+    if (ftSpan) {
+      ftSpan.insertAdjacentElement("afterend", slash);
+      slash.insertAdjacentElement("afterend", dimsHost);
+    } else {
+      suffix.append(slash, dimsHost);
+    }
+  } else if (dimsHost) {
+    const hidden = dimsHost.querySelector("#piac_price_dimension");
+    if (hidden && !hidden.value) hidden.value = seedDim;
+    dimsHost.querySelectorAll("[data-piac-wage-dim]").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.getAttribute("data-piac-wage-dim") === (hidden?.value || seedDim));
+    });
+  }
+
+  let alt = priceCard?.querySelector(".piac-allas-wage__alt");
+  if (priceCard && !alt) {
+    alt = document.createElement("div");
+    alt.className = "piac-allas-wage__alt piac-allas-wage-extra";
+    alt.innerHTML = `
+      <div class="piac-allas-wage__or-row">
+        <span class="piac-allas-wage__vagy">vagy</span>
+        <label class="piac-allas-wage__check">
+          <input type="checkbox" id="piac_wo_wage_demands" name="piac_wo_wage_demands" value="1" ${
+            seedWageAsk ? "checked" : ""
+          } />
+          <span>A jelentkező adja meg a bérigényét.<span class="req">*</span></span>
+        </label>
+      </div>
+      <p class="piac-allas-wage__note">* Az egyik paraméter kiválasztása kötelező.</p>
+    `;
+    const body = priceCard.querySelector(".card-body") || priceCard;
+    const after = suffix?.parentElement === body ? suffix : body.lastElementChild;
+    if (after) after.insertAdjacentElement("afterend", alt);
+    else body.appendChild(alt);
+  }
+
+  const dimHidden = form.querySelector("#piac_price_dimension");
+  const dimGroup = form.querySelector(".piac-allas-wage__dims");
+  if (dimGroup && dimGroup.dataset.bound !== "1") {
+    dimGroup.dataset.bound = "1";
+    dimGroup.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-piac-wage-dim]");
+      if (!btn || !dimGroup.contains(btn)) return;
+      const slug = btn.getAttribute("data-piac-wage-dim") || "hó";
+      if (dimHidden) dimHidden.value = slug;
+      dimGroup.querySelectorAll("[data-piac-wage-dim]").forEach((el) => {
+        el.classList.toggle("is-active", el === btn);
+      });
+      if (!form._bymyLastFormData || typeof form._bymyLastFormData !== "object") {
+        form._bymyLastFormData = {};
+      }
+      form._bymyLastFormData.piac_price_dimension = slug;
+    });
+  }
+
+  const wageAskEl = form.querySelector("#piac_wo_wage_demands");
+  const applyWageAsk = (checked, trusted) => {
+    if (!vetelarField) return;
+    if (!form._bymyLastFormData || typeof form._bymyLastFormData !== "object") {
+      form._bymyLastFormData = {};
+    }
+    form._bymyLastFormData.piac_wo_wage_demands = checked ? "1" : "";
+    if (checked) {
+      vetelarField.dataset.wasRequired = vetelarField.required ? "1" : "0";
+      vetelarField.required = false;
+      vetelarField.removeAttribute("required");
+      const digits = String(vetelarField.dataset.kmDigits || vetelarField.value || "").replace(/\D/g, "");
+      if (digits && digits !== "0") vetelarField.dataset.piacPriceBeforeWageAsk = digits;
+      if (trusted || !digits || digits === "0") {
+        vetelarField.value = "";
+        if (vetelarField.dataset) vetelarField.dataset.kmDigits = "";
+      }
+    } else {
+      if (vetelarField.dataset.wasRequired === "1") {
+        vetelarField.required = true;
+        vetelarField.setAttribute("required", "");
+      }
+      const restore = String(vetelarField.dataset.piacPriceBeforeWageAsk || "").replace(/\D/g, "");
+      if (!String(vetelarField.value || "").trim() && restore) {
+        vetelarField.value = restore;
+        if (vetelarField.dataset) vetelarField.dataset.kmDigits = restore;
+      }
+    }
+  };
+
+  if (wageAskEl && wageAskEl.dataset.bound !== "1") {
+    wageAskEl.dataset.bound = "1";
+    wageAskEl.addEventListener("change", (event) => applyWageAsk(wageAskEl.checked, event.isTrusted));
+  }
+  if (wageAskEl) applyWageAsk(wageAskEl.checked, false);
+
+  if (vetelarField.dataset.piacWageRememberBound !== "1") {
+    vetelarField.dataset.piacWageRememberBound = "1";
+    const onPrice = () => {
+      if (!isAllasCategory(form)) return;
+      const digits = String(vetelarField.dataset.kmDigits || vetelarField.value || "").replace(/\D/g, "");
+      if (!digits || digits === "0") return;
+      const ask = form.querySelector("#piac_wo_wage_demands");
+      if (ask?.checked) {
+        ask.checked = false;
+        applyWageAsk(false, false);
+      }
+      if (!form._bymyLastFormData || typeof form._bymyLastFormData !== "object") {
+        form._bymyLastFormData = {};
+      }
+      form._bymyLastFormData.vetelar = digits;
+      form._bymyLastFormData.piac_wo_wage_demands = "";
+    };
+    vetelarField.addEventListener("input", onPrice);
+    vetelarField.addEventListener("change", onPrice);
+  }
+
+  /* Helyszín cím az irányítószám blokk fölé (JF állás). */
+  const locSlot = form.querySelector("#ad-megtalalhato-slot");
+  if (locSlot && !locSlot.querySelector(".piac-allas-helyszin-head")) {
+    const head = document.createElement("div");
+    head.className = "card-head piac-allas-helyszin-head piac-allas-wage-extra";
+    head.textContent = "Helyszín";
+    locSlot.insertAdjacentElement("afterbegin", head);
+  }
+}
+
 function removePiacFormFields(form) {
   form?.querySelector("#piac-fields")?.remove();
   form
     ?.querySelectorAll("#piac-allas-fields, #piac-prop-fields, .piac-prop-fields, [data-piac-props]")
     .forEach((el) => el.remove());
+  form?.querySelectorAll(".piac-allas-wage-extra").forEach((el) => el.remove());
+  form?.classList.remove("ad-form--piac-allas");
+  const vetelarField = vetelarFieldOf(form);
+  const priceCard = vetelarField?.closest(".card");
+  const cardHead = priceCard?.querySelector(".card-head");
+  if (cardHead?.dataset?.piacWageHeadSaved) {
+    cardHead.textContent = cardHead.dataset.piacWageHeadSaved;
+    delete cardHead.dataset.piacWageHeadSaved;
+  }
+  const priceLabel = form?.querySelector('label[for="vetelar"]');
+  if (priceLabel) {
+    priceLabel.hidden = false;
+    priceLabel.removeAttribute("hidden");
+  }
+  vetelarField?.closest(".suffix-field")?.classList.remove("piac-allas-wage-suffix");
 }
 
 function syncTitleToHidden(form) {
@@ -308,6 +549,7 @@ export async function ensurePiacFormFields(form) {
       existing._piacRepaint(path);
     }
     existing._piacTops = tops;
+    syncAllasWageUi(form);
     void syncPiacPropFields(form);
     return existing;
   }
@@ -413,6 +655,7 @@ export async function ensurePiacFormFields(form) {
 
     syncAlkategoria(form, path);
     syncIntentToggle();
+    syncAllasWageUi(form);
     void syncPiacPropFields(form);
 
     const labels = [];
@@ -557,6 +800,7 @@ export async function syncPiacFormVisibility(form) {
     root.removeAttribute("hidden");
     root.style.removeProperty("display");
     placePiacRoot(form, root);
+    syncAllasWageUi(form);
     void syncPiacPropFields(form);
   }
 
@@ -641,6 +885,8 @@ export async function syncPiacFormVisibility(form) {
     }
   }
 
+  syncAllasWageUi(form);
+
   form.querySelectorAll(".step-panel[data-step='1'] .form-grid > .field-row").forEach((row) => {
     if (row.closest("#piac-fields")) return;
     row.hidden = true;
@@ -675,10 +921,14 @@ export function readPiacFormValues(form) {
   const free = Boolean(root.querySelector("#piac_ingyen")?.checked);
   const path = String(root.querySelector("#piac_path")?.value || "").trim();
   const title = String(root.querySelector("#piac_cim")?.value || "").trim();
+  const wageAsk = Boolean(form.querySelector("#piac_wo_wage_demands")?.checked);
+  const dim = String(form.querySelector("#piac_price_dimension")?.value || "").trim();
   return {
     piac_intent: intent,
     piac_path: path,
-    piac_ingyen: free ? "1" : "",
+    piac_ingyen: free && topSlugFromPiacPath(path) !== "allas" ? "1" : "",
+    piac_wo_wage_demands: wageAsk ? "1" : "",
+    piac_price_dimension: dim || (topSlugFromPiacPath(path) === "allas" ? "hó" : ""),
     hirdetes_cime: title,
     ...readPiacPropValues(form),
   };
@@ -705,6 +955,17 @@ export function validatePiacForm(form) {
   if (!vals.piac_intent) {
     alert("Válaszd ki: Kínál vagy Keres.");
     return false;
+  }
+  if (path[0] === "allas") {
+    const wageAsk = Boolean(form.querySelector("#piac_wo_wage_demands")?.checked);
+    const vetelar = vetelarFieldOf(form);
+    const digits = String(vetelar?.dataset?.kmDigits || vetelar?.value || "").replace(/\D/g, "");
+    const hasWage = Boolean(digits && digits !== "0");
+    if (!wageAsk && !hasWage) {
+      alert("Add meg a bruttó bért, vagy jelöld be: a jelentkező adja meg a bérigényét.");
+      vetelar?.focus?.();
+      return false;
+    }
   }
   if (!validatePiacPropForm(form)) return false;
   return true;

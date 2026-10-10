@@ -709,7 +709,7 @@ function render(view, listing, related = []) {
             const hasPrice = Boolean(view.hasPrice || (view.price && view.price !== "—" && String(view.price).trim()));
             if (view.vertical === "piac" && !hasPrice) {
               return view.isAllas
-                ? `<p class="hd-price-note">Nincs vételár — jelentkezés üzenetben</p>`
+                ? `<p class="hd-price-note">Bérigény a jelentkezőtől — jelentkezés üzenetben</p>`
                 : "";
             }
             return `<div class="hd-price-box">

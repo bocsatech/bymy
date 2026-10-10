@@ -25,7 +25,7 @@ import {
   syncPiacFormVisibility,
   readPiacFormValues,
   validatePiacForm,
-} from "./piac-form-fields.js?v=e471879219";
+} from "./piac-form-fields.js?v=5188b01717";
 import { syncPiacPropFields } from "./piac-prop-fields.js?v=c01ab6ddfc";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
@@ -1157,21 +1157,26 @@ function collectFormData() {
   if (isPiacAd()) {
     Object.assign(data, readPiacFormValues(form));
     /* Lépésközi mentés full replace — üres collect ne törölje a piactér props / meta értékeket.
-       piac_ingyen szándékos üres (pipa le) — ne hozza vissza a last-ból. */
+       piac_ingyen / piac_wo_wage_demands szándékos üres (pipa le) — ne hozza vissza a last-ból. */
     for (const [key, raw] of Object.entries(last)) {
-      if (key === "piac_ingyen") continue;
-      if (!/^(piac_prop_|allas_|piac_path|piac_intent|piac_cim)/.test(key)) continue;
+      if (key === "piac_ingyen" || key === "piac_wo_wage_demands") continue;
+      if (!/^(piac_prop_|allas_|piac_path|piac_intent|piac_cim|piac_price_dimension)/.test(key)) continue;
       const cur = String(data[key] ?? "").trim();
       const prev = String(raw ?? "").trim();
       if (!cur && prev) data[key] = prev;
     }
-    if (!String(data.vetelar || "").trim() && vetelarLast) data.vetelar = vetelarLast;
-    /* Ha van ár, ne maradjon „Ingyen elvihető”. */
+    const wageAskNow = String(data.piac_wo_wage_demands || "") === "1";
+    if (!wageAskNow && !String(data.vetelar || "").trim() && vetelarLast) data.vetelar = vetelarLast;
+    if (wageAskNow) data.vetelar = "";
+    /* Ha van ár, ne maradjon „Ingyen elvihető” / bérigény-pipa. */
     const priceNum = Number(String(data.vetelar || "").replace(/\D/g, "")) || 0;
     if (priceNum > 0) {
       data.piac_ingyen = "";
+      data.piac_wo_wage_demands = "";
       const freeEl = form.querySelector("#piac_ingyen");
       if (freeEl?.checked) freeEl.checked = false;
+      const wageEl = form.querySelector("#piac_wo_wage_demands");
+      if (wageEl?.checked) wageEl.checked = false;
     }
   }
 
@@ -1454,7 +1459,10 @@ function validateStep(step) {
       ? ["allapot", "ingatlan_uzletag"]
       : ["gyartasi_ev", "gyartmany", "modell", "kivitel", "allapot", "okmany_jelleg", "km"];
   const techRequired = isIngatlan || isPiac ? [] : ["uzemanyag"];
-  const freePiac = isPiac && Boolean(form.querySelector("#piac_ingyen")?.checked);
+  const freePiac =
+    isPiac &&
+    (Boolean(form.querySelector("#piac_ingyen")?.checked) ||
+      Boolean(form.querySelector("#piac_wo_wage_demands")?.checked));
   const adRequired = freePiac
     ? ["iranyitoszam", "telepules", "telefon1_korzet", "telefon1_szam"]
     : ["vetelar", "iranyitoszam", "telepules", "telefon1_korzet", "telefon1_szam"];

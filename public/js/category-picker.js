@@ -372,6 +372,18 @@ export function initCategoryPicker({
   if (!root) return null;
 
   if (root.dataset.pickerBound === "1") {
+    /* Boot már elindította a wizardot a régi callbackkel — az app.js handlerrel újrakötjük. */
+    const wiz = document.getElementById("ad-wizard-shell");
+    if (wiz && !wiz.hasAttribute("hidden") && typeof pickerHandlers.onVehicleSelected === "function") {
+      const sel = readStored() || selectionFromUrl();
+      queueMicrotask(() => {
+        try {
+          pickerHandlers.onVehicleSelected?.(sel);
+        } catch (error) {
+          console.error("Űrlap indítás hiba:", error);
+        }
+      });
+    }
     return pickerApi;
   }
   root.dataset.pickerBound = "1";

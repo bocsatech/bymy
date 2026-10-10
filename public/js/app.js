@@ -5,13 +5,13 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=6c1aeac308";
-import { createAdForm } from "./form-core.js?v=a9023def4c";
+import { createAdForm } from "./form-core.js?v=f8dafc54e4";
 import { initPriceMarketHint } from "./price-market-hint.js?v=ee49eb1a56";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { initPhoneLanguages } from "./phone-lang-ui.js?v=bc55c36aef";
-import { initCategoryPicker } from "./category-picker.js?v=fc7d9295ce";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=f0e9bc8890";
+import { initCategoryPicker } from "./category-picker.js?v=438d4f30db";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=767ab7b749";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -301,6 +301,32 @@ function ensureFormReady() {
   return formApi;
 }
 
+function activateWizardForm() {
+  const wizard = document.getElementById("ad-wizard-shell");
+  if (!wizard || wizard.hasAttribute("hidden")) return null;
+  try {
+    const api = ensureFormReady();
+    const selVertical = categoryPicker?.getSelection?.()?.vertical;
+    if (!editing && selVertical !== "ingatlan" && selVertical !== "piac") api?.resetForm?.({ fresh: true });
+    api?.markTouched?.();
+    const sel = categoryPicker?.getSelection?.();
+    if (sel) categoryPicker?.syncWizardContext?.(sel);
+    api?.syncKisteherFields?.();
+    phoneLanguages?.syncLanguages?.();
+    tireSizes?.syncRearTires?.();
+    applyListingAddressFromProfileSync(adForm);
+    applyListingAddressFromProfile(adForm).catch(() => {});
+    window.dispatchEvent(new Event("ad-form-sync-location"));
+    window.dispatchEvent(new Event("ad-form-layout-refresh"));
+    applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
+    scrollAdFormPageTop();
+    return api;
+  } catch (error) {
+    console.error("Űrlap indítás hiba:", error);
+    return null;
+  }
+}
+
 const categoryPicker = initCategoryPicker({
   requireLogin: async () => {
     const user = getAuthUser();
@@ -311,29 +337,25 @@ const categoryPicker = initCategoryPicker({
     return false;
   },
   onVehicleSelected: () => {
-    try {
-      const api = ensureFormReady();
-      const selVertical = categoryPicker?.getSelection?.()?.vertical;
-      if (!editing && selVertical !== "ingatlan" && selVertical !== "piac") api?.resetForm?.({ fresh: true });
-      api?.markTouched?.();
-      const sel = categoryPicker?.getSelection?.();
-      if (sel) categoryPicker?.syncWizardContext?.(sel);
-      api?.syncKisteherFields?.();
-      phoneLanguages?.syncLanguages?.();
-      tireSizes?.syncRearTires?.();
-      applyListingAddressFromProfileSync(adForm);
-      applyListingAddressFromProfile(adForm).catch(() => {});
-      window.dispatchEvent(new Event("ad-form-sync-location"));
-      window.dispatchEvent(new Event("ad-form-layout-refresh"));
-      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
-      scrollAdFormPageTop();
-    } catch (error) {
-      console.error("Űrlap indítás hiba:", error);
-    }
+    activateWizardForm();
   },
   onReset: () => {
   },
 });
+
+/* start=1: a korai category-boot megnyitja a wizardot, mielőtt az app.js createAdForm-ot kötné. */
+window.addEventListener("bymy-category-selected", () => {
+  activateWizardForm();
+});
+activateWizardForm();
+if (
+  new URLSearchParams(window.location.search).get("start") === "1" ||
+  new URLSearchParams(window.location.search).get("continue") === "1"
+) {
+  queueMicrotask(() => activateWizardForm());
+  window.setTimeout(() => activateWizardForm(), 50);
+  window.setTimeout(() => activateWizardForm(), 250);
+}
 
 if (editing) {
   if (!(await authPromise)) {

@@ -31,6 +31,13 @@
   font-size: 0.95rem;
 }
 
+.piac-fields__path {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: #0f766e;
+}
+
 .piac-cat-menus {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

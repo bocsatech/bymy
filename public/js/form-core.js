@@ -25,7 +25,7 @@ import {
   syncPiacFormVisibility,
   readPiacFormValues,
   validatePiacForm,
-} from "./piac-form-fields.js?v=e40fdfbaac";
+} from "./piac-form-fields.js?v=5312afb1b6";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
@@ -143,6 +143,7 @@ export function createAdForm(options = {}) {
     "ingatlan_kategoria",
     "piac_path",
     "piac_intent",
+    "piac_ingyen",
     "csomag",
   ]);
 
@@ -1290,6 +1291,11 @@ function applyFormData(data, { fromImport = false } = {}) {
   syncFuelDependentFields();
   fitAllFormFields();
   loadExistingPhotos(data);
+  if (String(payload.hirdetes_vertical || "").trim().toLowerCase() === "piac") {
+    const root = form.querySelector("#piac-fields");
+    if (root) delete root.dataset.ready;
+    void syncPiacFormVisibility(form);
+  }
   if (mode === "import") {
     options.onApplied?.(payload);
   } else {

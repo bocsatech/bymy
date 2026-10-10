@@ -31,7 +31,7 @@ import {
 import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=8e0fd8f890";
 import { initMessagesUi } from "./messages-ui.js?v=f16a75c1c3";
 import { listConversations } from "./messages-api.js?v=5cf6493dc9";
-import { initMyAdsPanel } from "./my-ads.js?v=4ab2aa50cc";
+import { initMyAdsPanel } from "./my-ads.js?v=5476e7654c";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
@@ -47,7 +47,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=cdac1e6ebc";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
-import { renderPartnerManage } from "./partner-profile.js?v=0d72e99540";
+import { renderPartnerManage } from "./partner-profile.js?v=9d7ea9317a";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -55,6 +55,7 @@ const NOTIFY_KEY = "bymy-notify-prefs";
 const COMPANY_ACTIVITY_LABELS = {
   auto: "Autó",
   teherauto: "Teherautó",
+  piacter: "Piactér",
   ingatlan: "Ingatlan",
 };
 

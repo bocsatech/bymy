@@ -205,6 +205,44 @@
       [data-theme="dark"] .piac-search__submit:hover {
         background: #fff;
       }
+      .piac-cats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0.85rem 0 0;
+      }
+      .piac-cats__link {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid rgba(15, 118, 110, 0.28);
+        background: rgba(240, 253, 250, 0.9);
+        color: #0f766e;
+        font-size: 0.88rem;
+        font-weight: 650;
+        text-decoration: none;
+        line-height: 1.2;
+      }
+      .piac-cats__link:hover {
+        background: #ccfbf1;
+        border-color: #0f766e;
+      }
+      .piac-cats__link.is-active {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+      }
+      [data-theme="dark"] .piac-cats__link {
+        background: rgba(15, 118, 110, 0.18);
+        border-color: rgba(45, 212, 191, 0.35);
+        color: #5eead4;
+      }
+      [data-theme="dark"] .piac-cats__link.is-active {
+        background: #14b8a6;
+        border-color: #14b8a6;
+        color: #042f2e;
+      }
       .piac-rail {
         min-height: 148px;
       }
@@ -320,6 +358,15 @@
             </label>
             <button class="piac-search__submit" type="submit">Keresés</button>
           </form>
+          <nav class="piac-cats" id="piac-cats" aria-label="Piactér kategóriák">
+            <a class="piac-cats__link" href="/piacter.html?cat=allas" data-piac-cat="allas">Állás</a>
+            <a class="piac-cats__link" href="/piacter.html?cat=otthon-haztartas" data-piac-cat="otthon-haztartas">Otthon</a>
+            <a class="piac-cats__link" href="/piacter.html?cat=muszaki-elektronika" data-piac-cat="muszaki-elektronika">Műszaki</a>
+            <a class="piac-cats__link" href="/piacter.html?cat=szabadido-sport" data-piac-cat="szabadido-sport">Szabadidő</a>
+            <a class="piac-cats__link" href="/piacter.html?cat=divat-ruhazat" data-piac-cat="divat-ruhazat">Divat</a>
+            <a class="piac-cats__link" href="/piacter.html?cat=uzlet-szolgaltatas" data-piac-cat="uzlet-szolgaltatas">Üzlet</a>
+            <a class="piac-cats__link" href="/piacter.html?cat=baba-mama" data-piac-cat="baba-mama">Baba-mama</a>
+          </nav>
         </section>
       </div>
 
@@ -420,7 +467,7 @@
     </nav>
 
     <script src="/js/hub-rail-drag.js?v=f9476114f4" defer></script>
-    <script src="/js/piacter-hub.js?v=cfd2df017f" type="module"></script>
+    <script src="/js/piacter-hub.js?v=57dabff3ca" type="module"></script>
     <script src="/js/nav-counts.js?v=7613897d1d" type="module"></script>
     <script src="/js/theme.js?v=4fe8a2261f" type="module"></script>
     <script src="/js/site-auth.js?v=20aa3f41c9" type="module"></script>

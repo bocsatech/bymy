@@ -21,6 +21,8 @@ struct PostAdFormScreen: View {
     @State private var transmission = ""
     @State private var condition = ""
     @State private var title = ""
+    @State private var piacIntent = "kinal"
+    @State private var piacFree = false
     @State private var immoCategory = ""
     @State private var city = ""
     @State private var postalCode = ""
@@ -372,7 +374,7 @@ struct PostAdFormScreen: View {
                 .padding(.top, 14)
                 .padding(.bottom, 8)
 
-            fieldInline("Hirdetés neve", text: $title, placeholder: "pl. iPhone 13, 128 GB")
+            fieldInline("Hirdetés neve", text: $title, placeholder: "pl. iPhone 13, 128 GB, jó állapot")
             rowDivider
             HStack {
                 Text("Kategória")
@@ -386,7 +388,21 @@ struct PostAdFormScreen: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             rowDivider
-            fieldInline("Ár (Ft)", text: $price, placeholder: "25000", keyboard: .numberPad)
+            Picker("Szándék", selection: $piacIntent) {
+                Text("Kínál").tag("kinal")
+                Text("Keres").tag("keres")
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            rowDivider
+            Toggle("Ingyen elvihető", isOn: $piacFree)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+            if !piacFree {
+                rowDivider
+                fieldInline("Ár (Ft)", text: $price, placeholder: "25000", keyboard: .numberPad)
+            }
             rowDivider
             fieldInline("Irányítószám", text: $postalCode, placeholder: "1051", keyboard: .numberPad)
             rowDivider
@@ -623,6 +639,25 @@ struct PostAdFormScreen: View {
             var titleParts = [b, m].filter { !$0.isEmpty }
             if titleParts.isEmpty { titleParts = [category.label] }
             form["hirdetes_cime"] = "\(titleParts.joined(separator: " ")) (\(y))"
+        } else if isPiac {
+            let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard (12...70).contains(t.count) else {
+                throw FormError.missing("A hirdetés neve 12–70 karakter legyen.")
+            }
+            form["hirdetes_cime"] = t
+            form["piac_cim"] = t
+            form["piac_path"] = category.subtype
+            form["piac_intent"] = piacIntent
+            if piacFree {
+                form["piac_ingyen"] = "1"
+                form["vetelar"] = "0"
+            }
+            let c = city.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !c.isEmpty { form["telepules"] = c }
+            let p = postalCode.filter(\.isNumber)
+            if !p.isEmpty { form["iranyitoszam"] = p }
+            let s = street.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !s.isEmpty { form["megtekintesi_cim"] = s }
         } else {
             let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !t.isEmpty else { throw FormError.missing("Add meg a hirdetés címét.") }

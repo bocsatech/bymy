@@ -73,21 +73,52 @@ function sortByCreated(items) {
   });
 }
 
-function readSearchQuery() {
+function readParams() {
   try {
-    return String(new URLSearchParams(location.search).get("q") || "")
-      .trim()
-      .toLowerCase();
+    return new URLSearchParams(location.search);
   } catch {
-    return "";
+    return new URLSearchParams();
   }
+}
+
+function readSearchQuery() {
+  return String(readParams().get("q") || "")
+    .trim()
+    .toLowerCase();
+}
+
+function readCatFilter() {
+  return String(readParams().get("cat") || "")
+    .trim()
+    .toLowerCase();
+}
+
+function browseMode() {
+  const p = readParams();
+  if (String(p.get("q") || "").trim()) return "search";
+  if (String(p.get("cat") || "").trim()) return "cat";
+  if (p.get("kiemelt") === "1") return "featured";
+  if (p.get("nearby") === "1") return "nearby";
+  if (p.get("sort") === "newest") return "newest";
+  return "";
+}
+
+function matchesCat(item, cat) {
+  if (!cat) return true;
+  const form = item?.form ?? {};
+  const filter = item?.preview?.filter ?? {};
+  const path = String(form.piac_path || filter.piac_path || "").toLowerCase();
+  const alk = String(
+    form.hirdetes_alkategoria || filter.hirdetes_alkategoria || item?.hirdetes_alkategoria || ""
+  ).toLowerCase();
+  return path === cat || path.startsWith(`${cat}/`) || alk === cat || path.includes(`/${cat}`);
 }
 
 function bindSearchForm() {
   const form = el("piac-search-form");
   const input = el("piac-search-input");
   if (!form || !input) return;
-  const q = String(new URLSearchParams(location.search).get("q") || "").trim();
+  const q = String(readParams().get("q") || "").trim();
   if (q) input.value = q;
   form.addEventListener("submit", (event) => {
     const value = String(input.value || "").trim();
@@ -95,6 +126,14 @@ function bindSearchForm() {
       event.preventDefault();
       location.href = "/piacter.html";
     }
+  });
+}
+
+function bindCategoryMenus() {
+  const cat = readCatFilter();
+  document.querySelectorAll("[data-piac-cat]").forEach((link) => {
+    const slug = String(link.getAttribute("data-piac-cat") || "").trim();
+    link.classList.toggle("is-active", Boolean(cat) && slug === cat);
   });
 }
 
@@ -371,19 +410,34 @@ async function bootFeatured() {
   }
 }
 
-/* ── Szöveges keresés ── */
-async function bootSearchResults() {
+/* ── Találatok / összes (q, cat, sort, kiemelt, nearby) ── */
+async function bootBrowseResults() {
+  const mode = browseMode();
   const q = readSearchQuery();
+  const cat = readCatFilter();
   const SECTION = el("piac-search-section");
   const RAIL = el("piac-search-rail");
   const STATUS = el("piac-search-status");
   const EMPTY = el("piac-search-empty");
   const COUNT_EL = el("piac-search-count");
+  const TITLE = SECTION?.querySelector(".hf-title");
   if (!SECTION || !RAIL) return;
 
-  if (!q) {
+  if (!mode) {
     SECTION.hidden = true;
     return;
+  }
+
+  const titles = {
+    search: "Találatok",
+    cat: "Kategória",
+    featured: "Kiemelt hirdetések",
+    nearby: "Hirdetések a közelben",
+    newest: "Új hirdetések",
+  };
+  if (TITLE) {
+    const countHtml = TITLE.querySelector(".hf-count")?.outerHTML || "";
+    TITLE.innerHTML = `${titles[mode] || "Találatok"} ${countHtml}`;
   }
 
   SECTION.hidden = false;
@@ -392,32 +446,64 @@ async function bootSearchResults() {
     bindListingOpen(RAIL);
   }
   if (STATUS) {
-    STATUS.textContent = "Keresés…";
+    STATUS.textContent = "Betöltés…";
     STATUS.hidden = false;
   }
   setEmpty(EMPTY, false);
 
   try {
+    let postal = "";
+    let radiusKm = 30;
+    if (mode === "nearby") {
+      const profile = getAuthUser()?.profile ?? null;
+      ensureNearbyPrefsStored(profile);
+      ({ postal, radiusKm } = readNearbyPrefs(profile));
+    }
+
     const result = await fetchTilePagesUntil({
       vertical: VERTICAL,
-      wantCount: 40,
-      maxPages: 20,
-      filterBatch: async (batch) =>
-        (batch || [])
-          .filter((item) => matchesQuery(item, q))
-          .map(slimListingTile),
+      wantCount: mode === "newest" ? 60 : 48,
+      maxPages: 30,
+      filterBatch: async (batch) => {
+        let rows = batch || [];
+        if (mode === "search") rows = rows.filter((item) => matchesQuery(item, q));
+        if (mode === "cat") rows = rows.filter((item) => matchesCat(item, cat));
+        if (mode === "featured") rows = pickFeaturedListings(rows.map(slimListingTile), { limit: 48 });
+        else if (mode === "nearby") {
+          if (postal.length !== 4) return [];
+          rows = await filterNearbyPiacBatch(rows, postal, radiusKm);
+          rows = rows.map(({ __nearbyCity, ...rest }) => rest);
+        } else {
+          rows = rows.map(slimListingTile);
+        }
+        return rows;
+      },
     });
-    const items = sortByCreated(result.items);
+
+    let items = mode === "featured" ? result.items : sortByCreated(result.items);
+    if (mode === "newest") items = items.slice(0, 60);
+
     RAIL.innerHTML = "";
     setCount(COUNT_EL, items.length);
     if (!items.length) {
       setEmpty(EMPTY, true);
+      if (EMPTY) {
+        EMPTY.textContent =
+          mode === "nearby" && postal.length !== 4
+            ? "Állítsd be az irányítószámot a fiókban a közeli hirdetésekhez."
+            : "Nincs találat.";
+      }
       if (STATUS) STATUS.hidden = true;
       return;
     }
     setEmpty(EMPTY, false);
     items.forEach((item, index) => {
-      RAIL.appendChild(createListingTileCard(item, { eager: index < 4 }));
+      RAIL.appendChild(
+        createListingTileCard(item, {
+          featured: mode === "featured",
+          eager: index < 4,
+        })
+      );
     });
     if (STATUS) STATUS.hidden = true;
     restoreListingReturn();
@@ -426,7 +512,7 @@ async function bootSearchResults() {
     setCount(COUNT_EL, 0);
     setEmpty(EMPTY, true);
     if (STATUS) {
-      STATUS.textContent = "A keresés most nem elérhető.";
+      STATUS.textContent = "A lista most nem elérhető.";
       STATUS.hidden = false;
     }
   }
@@ -437,7 +523,20 @@ let bootGen = 0;
 async function bootRails() {
   const gen = ++bootGen;
   bindSearchForm();
-  void bootSearchResults();
+  bindCategoryMenus();
+  const mode = browseMode();
+  void bootBrowseResults();
+
+  /* Böngésző mód: a sínek helyett a találatok szekció a fő. */
+  if (mode) {
+    ["piac-latest-section", "piac-nearby-section", "piac-fav-section", "piac-featured-section"].forEach(
+      (id) => {
+        const node = el(id);
+        if (node) node.hidden = true;
+      }
+    );
+    return;
+  }
 
   const latest = ensureLatestRail();
   if (latest) await latest.start({ postal: "", radiusKm: 30 });

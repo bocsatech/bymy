@@ -88,6 +88,14 @@ function highlightSpecsFromView(view) {
     ];
     return rows.filter((row) => row.value);
   }
+  if (view.vertical === "piac") {
+    return [
+      { key: "generic", label: "Kategória", value: specValue(view.vehicleSpecs, "Kategória") },
+      { key: "condition", label: "Szándék", value: specValue(view.vehicleSpecs, "Szándék") },
+      { key: "color", label: "Ár", value: specValue(view.vehicleSpecs, "Vételár") || (view.price !== "—" ? view.price : "") },
+      { key: "area", label: "Település", value: specValue(view.vehicleSpecs, "Település") },
+    ].filter((row) => row.value);
+  }
   return [
     { key: "km", label: "Kilométeróra", value: view.km !== "—" ? view.km : "" },
     { key: "power", label: "Teljesítmény", value: view.power !== "—" ? view.power : "" },
@@ -113,6 +121,7 @@ function highlightSpecsFromView(view) {
 function promoBannerText(view) {
   if (view.vertical === "ingatlan") return "Ingatlan: Végre egyszerű";
   if (view.vertical === "teher") return "Teherautó: Végre egyszerű";
+  if (view.vertical === "piac") return "Piactér: Végre egyszerű";
   return "Autóvásárlás: Végre egyszerű";
 }
 
@@ -483,15 +492,19 @@ function listPageForVertical(vertical) {
   const v = String(vertical || "").trim().toLowerCase();
   if (v === "ingatlan") return "/ingatlan.html";
   if (v === "teher" || v === "teherauto") return "/teherauto.html";
+  if (v === "piac" || v === "piacter") return "/piacter.html";
   return "/auto.html";
 }
 
 function listingVerticalFromView(view) {
   const explicit = String(view?.vertical || "").trim().toLowerCase();
-  if (explicit === "teher" || explicit === "ingatlan" || explicit === "auto") return explicit;
+  if (explicit === "teher" || explicit === "ingatlan" || explicit === "auto" || explicit === "piac") {
+    return explicit;
+  }
   const href = String(view?.categoryHref || "");
   if (href.includes("ingatlan")) return "ingatlan";
   if (href.includes("teher")) return "teher";
+  if (href.includes("piacter")) return "piac";
   return "auto";
 }
 
@@ -696,10 +709,14 @@ function render(view, listing, related = []) {
     </div>
 
     <div class="hd-specs">
-      ${specBlockHtml("Jármű adatok", view.vehicleSpecs)}
+      ${
+        view.vertical === "piac"
+          ? specBlockHtml("Piactér adatok", view.vehicleSpecs)
+          : `${specBlockHtml("Jármű adatok", view.vehicleSpecs)}
       ${specBlockHtml("Motor adatok", view.motorSpecs)}
       ${specBlockHtml("Okmányok", view.documentSpecs)}
-      ${specBlockHtml("Abroncs", view.tireSpecs)}
+      ${specBlockHtml("Abroncs", view.tireSpecs)}`
+      }
       ${
         perks.length
           ? `<section class="hd-spec-block hd-spec-block--perks"><h2 class="hd-spec-block__title">További előnyök</h2>${perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}</section>`

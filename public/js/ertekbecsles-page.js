@@ -1,4 +1,4 @@
-import { createAdForm } from "./form-core.js?v=5aed2b9122";
+import { createAdForm } from "./form-core.js?v=d8520ca9d5";
 import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=49adc435c0";
 import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=f65e47f181";
 import { mountErtekDualRanges } from "./ertekbecsles-ev-range.js?v=be52d9ddb0";
@@ -92,7 +92,7 @@ try {
     storageKey: "ertekbecsles-draft",
     editing: true,
   });
-  await import("./form-layout-apply.js?v=fa2b689ea7");
+  await import("./form-layout-apply.js?v=99c7c3efa4");
   try {
     await mountAdFormBmPickers(form);
   } catch (pickerErr) {

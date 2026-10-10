@@ -94,10 +94,17 @@ function titleOf(item) {
   return `Hirdetés #${item.id}`;
 }
 
-function isImmo(item) {
+function listingVertical(item) {
   const f = item.preview?.filter || item.form || {};
-  const v = String(f.hirdetes_vertical ?? "").trim().toLowerCase();
-  return v === "ingatlan";
+  return String(f.hirdetes_vertical ?? "").trim().toLowerCase();
+}
+
+function isImmo(item) {
+  return listingVertical(item) === "ingatlan";
+}
+
+function isPiac(item) {
+  return listingVertical(item) === "piac";
 }
 
 function metaLine(item) {
@@ -109,6 +116,13 @@ function metaLine(item) {
   ).trim();
     const kat = String(form.ingatlan_tipus || f.ingatlan_tipus || form.tipus || "").trim();
     return [city, kat].filter(Boolean).join(" • ");
+  }
+  if (isPiac(item)) {
+    const city = String(form.telepules || f.telepules || "").trim();
+    const path = String(form.piac_path || f.piac_path || "").trim();
+    const intent = String(form.piac_intent || f.piac_intent || "").trim();
+    const intentLabel = intent === "keres" ? "Keres" : intent === "kinal" ? "Kínál" : "";
+    return [city, path.replace(/\//g, " › "), intentLabel].filter(Boolean).join(" • ");
   }
   const year = f.gyartasi_ev || "";
   const fuel = f.uzemanyag || "";

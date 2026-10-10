@@ -5,13 +5,13 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=6c1aeac308";
-import { createAdForm } from "./form-core.js?v=167d91371c";
+import { createAdForm } from "./form-core.js?v=d8520ca9d5";
 import { initPriceMarketHint } from "./price-market-hint.js?v=ee49eb1a56";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { initPhoneLanguages } from "./phone-lang-ui.js?v=bc55c36aef";
-import { initCategoryPicker } from "./category-picker.js?v=6fcf75f476";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=907444b89b";
+import { initCategoryPicker } from "./category-picker.js?v=ada2de634e";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=47bb21bf35";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -53,6 +53,33 @@ function categorySelectionFromForm(formData) {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+  if (vertical === "piac") {
+    const pathTop = String(formData?.piac_path ?? "")
+      .split("/")
+      .map((s) => s.trim())
+      .filter(Boolean)[0];
+    const top =
+      pathTop ||
+      (["allas", "otthon-haztartas", "muszaki-elektronika", "szabadido-sport", "divat-ruhazat", "uzlet-szolgaltatas", "baba-mama"].includes(
+        subtype
+      )
+        ? subtype
+        : "");
+    const labels = {
+      allas: "Állás",
+      "otthon-haztartas": "Otthon, háztartás",
+      "muszaki-elektronika": "Műszaki, elektronika",
+      "szabadido-sport": "Szabadidő, sport",
+      "divat-ruhazat": "Divat, ruházat",
+      "uzlet-szolgaltatas": "Üzlet, szolgáltatás",
+      "baba-mama": "Baba-mama",
+    };
+    return {
+      vertical: "piac",
+      subtype: top || subtype || "",
+      label: labels[top] || "Piactér",
+    };
+  }
   if (vertical === "ingatlan") {
     const id = immoTipus[0] || "";
     const labels = {
@@ -321,8 +348,13 @@ if (editing) {
     pendingEditForm = { ...listing.form };
     if (listing.fo_kep && !pendingEditForm.fo_kep) pendingEditForm.fo_kep = listing.fo_kep;
     if (!pendingEditForm.hirdetes_vertical) pendingEditForm.hirdetes_vertical = "auto";
-    if (!pendingEditForm.hirdetes_alkategoria) pendingEditForm.hirdetes_alkategoria = "szemelyauto";
-    if (!pendingEditForm.jarmu_kategoria) pendingEditForm.jarmu_kategoria = "szemelyauto";
+    if (
+      pendingEditForm.hirdetes_vertical !== "piac" &&
+      pendingEditForm.hirdetes_vertical !== "ingatlan"
+    ) {
+      if (!pendingEditForm.hirdetes_alkategoria) pendingEditForm.hirdetes_alkategoria = "szemelyauto";
+      if (!pendingEditForm.jarmu_kategoria) pendingEditForm.jarmu_kategoria = "szemelyauto";
+    }
     adForm._bymyLastFormData = pendingEditForm;
     for (const [key, value] of Object.entries(pendingEditForm)) {
       const el = adForm.elements.namedItem(key);

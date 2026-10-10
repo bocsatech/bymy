@@ -16,7 +16,12 @@ import { openListingPhotoEditor } from "./listing-photo-edit.js?v=985755542f";
 
 const pageRoot = () => document.getElementById("partner-root");
 
-const ACTIVITY_LABELS = { auto: "Autó", teherauto: "Teherautó", ingatlan: "Ingatlan" };
+const ACTIVITY_LABELS = {
+  auto: "Autó",
+  teherauto: "Teherautó",
+  piacter: "Piactér",
+  ingatlan: "Ingatlan",
+};
 
 function asIdList(value) {
   if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean);

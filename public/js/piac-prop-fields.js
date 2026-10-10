@@ -138,7 +138,21 @@ function optionHtml(options, selected = "") {
   ].join("");
 }
 
-function prevValueForProp(last, key) {
+function readDomPositionValue(root) {
+  const pos = root?.querySelector?.("select[name^='piac_prop_position_']");
+  return String(pos?.value || "").trim();
+}
+
+function firstLastPositionValue(last = {}) {
+  const munkakor = String(last.allas_munkakor || "").trim();
+  if (munkakor) return munkakor;
+  for (const [k, v] of Object.entries(last || {})) {
+    if (k.startsWith("piac_prop_position_") && String(v || "").trim()) return String(v).trim();
+  }
+  return "";
+}
+
+function prevValueForProp(last, key, root = null) {
   const direct = String(last[`piac_prop_${key}`] || last[key] || "").trim();
   if (direct) return direct;
   const aliases = {
@@ -153,13 +167,25 @@ function prevValueForProp(last, key) {
     if (v) return v;
   }
   if (isPositionParam(key)) {
-    const munkakor = String(last.allas_munkakor || "").trim();
-    if (munkakor) return munkakor;
-    for (const [k, v] of Object.entries(last || {})) {
-      if (k.startsWith("piac_prop_position_") && String(v || "").trim()) return String(v).trim();
-    }
+    /* Más position_* select / kulcsváltás után is őrizze a munkakört. */
+    const fromDom = readDomPositionValue(root);
+    if (fromDom) return fromDom;
+    return firstLastPositionValue(last);
   }
   return "";
+}
+
+function rememberPropValue(form, name, value) {
+  if (!form || !name) return;
+  const v = String(value || "").trim();
+  if (!form._bymyLastFormData || typeof form._bymyLastFormData !== "object") {
+    form._bymyLastFormData = {};
+  }
+  if (!v) return;
+  form._bymyLastFormData[name] = v;
+  if (/^piac_prop_position_/.test(name) || name === "allas_munkakor") {
+    form._bymyLastFormData.allas_munkakor = v;
+  }
 }
 
 function readPathParts(form) {
@@ -310,10 +336,16 @@ async function syncPiacPropFieldsOnce(form) {
 
   const last = form._bymyLastFormData && typeof form._bymyLastFormData === "object" ? form._bymyLastFormData : {};
   const prevValues = {};
+  const domPosition = readDomPositionValue(root);
   for (const key of selectable) {
     const el = root.querySelector(`[name="piac_prop_${key}"]`);
     if (el?.type === "checkbox") continue;
-    prevValues[key] = String(el?.value || "").trim() || prevValueForProp(last, key);
+    const fromEl = String(el?.value || "").trim();
+    if (isPositionParam(key)) {
+      prevValues[key] = fromEl || domPosition || prevValueForProp(last, key, root);
+    } else {
+      prevValues[key] = fromEl || prevValueForProp(last, key, root);
+    }
   }
   const prevDocs = [...root.querySelectorAll('input[name="piac_prop_job_documents"]:checked')].map((el) => el.value);
   const lastDocs = String(last.piac_prop_job_documents || last.allas_dokumentumok || "")
@@ -355,10 +387,14 @@ async function syncPiacPropFieldsOnce(form) {
     let options = fieldDefs[key]?.options || [];
     let required = Boolean(fieldDefs[key]?.required);
 
-    if (isPositionParam(key) && allas) {
+    if (isPositionParam(key)) {
       label = "Munkakör megnevezése";
-      options = resolveAllasMunkakorOptions(allas, sub);
+      options = allas ? resolveAllasMunkakorOptions(allas, sub) : ["Egyéb"];
       required = true;
+      /* Mentett munkakör mindig legyen a listában (pl. Egyéb / idegen címke). */
+      const wantPos = prevValues[key] || firstLastPositionValue(last);
+      if (wantPos && !options.some((o) => String(o) === wantPos)) options = [...options, wantPos];
+      if (wantPos) prevValues[key] = wantPos;
     }
 
     if (!options.length && fieldDefs[key]?.options?.length) {
@@ -407,8 +443,16 @@ async function syncPiacPropFieldsOnce(form) {
       opt.textContent = matched.value;
       el.appendChild(opt);
     }
-    if (matched.value) el.value = matched.value;
+    if (matched.value) {
+      el.value = matched.value;
+      rememberPropValue(form, el.name, matched.value);
+    }
   }
+  root.querySelectorAll("select[name^='piac_prop_']").forEach((el) => {
+    if (el.dataset.piacRememberBound === "1") return;
+    el.dataset.piacRememberBound = "1";
+    el.addEventListener("change", () => rememberPropValue(form, el.name, el.value));
+  });
   root.dataset.path = pathParts.join("/");
   root.dataset.ready = "1";
   return root;
@@ -431,27 +475,59 @@ export function syncPiacPropFields(form) {
 /** @deprecated use syncPiacPropFields */
 export const syncPiacAllasFields = syncPiacPropFields;
 
+function pickLastPropBag(last = {}) {
+  const out = {};
+  for (const [k, v] of Object.entries(last || {})) {
+    if (!(/^piac_prop_/.test(k) || /^allas_/.test(k))) continue;
+    const val = String(v ?? "").trim();
+    if (val) out[k] = val;
+  }
+  return out;
+}
+
 export function readPiacPropValues(form) {
+  const last = form?._bymyLastFormData && typeof form._bymyLastFormData === "object" ? form._bymyLastFormData : {};
   const root = form?.querySelector("#piac-prop-fields") || form?.querySelector("#piac-allas-fields");
-  if (!root) return {};
+  if (!root) return pickLastPropBag(last);
+
   const out = {};
   root.querySelectorAll("select[name^='piac_prop_']").forEach((el) => {
-    out[el.name] = el.value || "";
+    const v = String(el.value || "").trim();
+    if (v) {
+      out[el.name] = v;
+      return;
+    }
+    /* Üres select ne törölje a mentett munkakört / propsot mentéskor. */
+    const fallback = String(last[el.name] || "").trim();
+    if (fallback) {
+      out[el.name] = fallback;
+      return;
+    }
+    if (/^piac_prop_position_/.test(el.name)) {
+      const anyPos = firstLastPositionValue(last);
+      if (anyPos) out[el.name] = anyPos;
+    }
   });
   const docs = [...root.querySelectorAll('input[name="piac_prop_job_documents"]:checked')].map((el) => el.value);
   if (docs.length) out.piac_prop_job_documents = docs.join("|");
+  else if (last.piac_prop_job_documents) out.piac_prop_job_documents = last.piac_prop_job_documents;
 
   /* Back-compat állás keys */
   const pathTop = readPathParts(form)[0];
   if (pathTop === "allas") {
     const pos = root.querySelector("select[name^='piac_prop_position_']");
-    out.allas_munkakor = pos?.value || "";
-    out.allas_tapasztalat = out.piac_prop_carrier_level || "";
-    out.allas_vegzettseg = out.piac_prop_education || "";
-    out.allas_nyelv = out.piac_prop_language || "";
-    out.allas_foglalkoztatas = out.piac_prop_jobtype || "";
-    out.allas_kulfoldi_orszag = out.piac_prop_job_country || "";
-    out.allas_dokumentumok = out.piac_prop_job_documents || "";
+    const posVal =
+      String(pos?.value || "").trim() ||
+      (pos?.name ? String(out[pos.name] || "").trim() : "") ||
+      firstLastPositionValue(last);
+    if (pos?.name && posVal) out[pos.name] = posVal;
+    out.allas_munkakor = posVal;
+    out.allas_tapasztalat = out.piac_prop_carrier_level || last.allas_tapasztalat || "";
+    out.allas_vegzettseg = out.piac_prop_education || last.allas_vegzettseg || "";
+    out.allas_nyelv = out.piac_prop_language || last.allas_nyelv || "";
+    out.allas_foglalkoztatas = out.piac_prop_jobtype || last.allas_foglalkoztatas || "";
+    out.allas_kulfoldi_orszag = out.piac_prop_job_country || last.allas_kulfoldi_orszag || "";
+    out.allas_dokumentumok = out.piac_prop_job_documents || last.allas_dokumentumok || "";
   }
   return out;
 }

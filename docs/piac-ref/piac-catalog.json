@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "source": "docs/piac-ref (33 screenshots)",
+  "version": 2,
+  "source": "docs/piac-ref screenshots + jofogas.ai/form new_categories (excl. Ingatlan, Jármű)",
   "createdAt": "2026-10-10",
   "listing": {
     "intent": [
@@ -36,118 +36,128 @@
   },
   "categories": [
     {
-      "slug": "ingatlan",
-      "label": "Ingatlan",
-      "children": []
-    },
-    {
-      "slug": "jarmu",
-      "label": "Jármű",
-      "children": []
-    },
-    {
       "slug": "allas",
       "label": "Állásajánlatok, álláskeresés",
       "children": [
         {
           "slug": "adminisztracio-irodai-munka",
           "label": "Adminisztráció / irodai munka",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "bank-biztositas-tozsde",
           "label": "Bank / biztosítás / tőzsde",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "cegvezetes-menedzsment",
           "label": "Cégvezetés / menedzsment",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "egeszsegugy-szepseg",
           "label": "Egészségügy / szépség",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "epitoipar-ingatlan",
           "label": "Építőipar / ingatlan",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "ertekesites-kereskedelem",
           "label": "Értékesítés / kereskedelem",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "fizikai-munka-segedmunka",
           "label": "Fizikai munka / segédmunka",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "gyartas-termeles-mernok",
           "label": "Gyártás / termelés / mérnök",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "hr-munkaugy",
           "label": "HR / munkaügy",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "it-telekommunikacio",
           "label": "IT / telekommunikáció",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "jog-kozigazgatas",
           "label": "Jog / közigazgatás",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "kornyezet-mezogazdasag",
           "label": "Környezet / mezőgazdaság",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "marketing-media-muveszet",
           "label": "Marketing / média / művészet",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "oktatas-tudomany",
           "label": "Oktatás / tudomány",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "penzugy-szamvitel",
           "label": "Pénzügy / számvitel",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "szakmunka",
           "label": "Szakmunka",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "szallitas-logisztika",
           "label": "Szállítás / logisztika",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "szemely-es-vagyonvedelem",
           "label": "Személy- és vagyonvédelem",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "ugyfelszolgalat-telemarketing",
           "label": "Ügyfélszolgálat / telemarketing",
-          "children": []
+          "children": [],
+          "leafSkip": true
         },
         {
           "slug": "vendeglatas-idegenforgalom",
           "label": "Vendéglátás / idegenforgalom",
-          "children": []
+          "children": [],
+          "leafSkip": true
         }
       ]
     },
@@ -161,31 +171,38 @@
           "children": [
             {
               "slug": "agyak-matracok",
-              "label": "Ágyak, matracok"
+              "label": "Ágyak, matracok",
+              "children": []
             },
             {
               "slug": "fotelek-kanapek-ulogarniturak",
-              "label": "Fotelek, kanapék, ülőgarnitúrák"
+              "label": "Fotelek, kanapék, ülőgarnitúrák",
+              "children": []
             },
             {
               "slug": "szekrenyek-szekrenysorok-polcok",
-              "label": "Szekrények, szekrénysorok, polcok"
+              "label": "Szekrények, szekrénysorok, polcok",
+              "children": []
             },
             {
               "slug": "asztalok-szekek",
-              "label": "Asztalok, székek"
+              "label": "Asztalok, székek",
+              "children": []
             },
             {
               "slug": "konyhabutor",
-              "label": "Konyhabútor"
+              "label": "Konyhabútor",
+              "children": []
             },
             {
               "slug": "furdoszoba-butor",
-              "label": "Fürdőszoba bútor"
+              "label": "Fürdőszoba bútor",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -195,27 +212,33 @@
           "children": [
             {
               "slug": "lakastextil",
-              "label": "Lakástextil"
+              "label": "Lakástextil",
+              "children": []
             },
             {
               "slug": "disztargy-kep-festmeny",
-              "label": "Dísztárgy, kép, festmény"
+              "label": "Dísztárgy, kép, festmény",
+              "children": []
             },
             {
               "slug": "fuggony",
-              "label": "Függöny"
+              "label": "Függöny",
+              "children": []
             },
             {
               "slug": "szonyeg",
-              "label": "Szőnyeg"
+              "label": "Szőnyeg",
+              "children": []
             },
             {
               "slug": "agynemu",
-              "label": "Ágynemű"
+              "label": "Ágynemű",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -225,31 +248,38 @@
           "children": [
             {
               "slug": "allolampa",
-              "label": "Állólámpa"
+              "label": "Állólámpa",
+              "children": []
             },
             {
               "slug": "asztali-lampa",
-              "label": "Asztali lámpa"
+              "label": "Asztali lámpa",
+              "children": []
             },
             {
               "slug": "mennyezeti-vilagitas",
-              "label": "Mennyezeti világítás"
+              "label": "Mennyezeti világítás",
+              "children": []
             },
             {
               "slug": "falilampa",
-              "label": "Falilámpa"
+              "label": "Falilámpa",
+              "children": []
             },
             {
               "slug": "kulteri-vilagitas",
-              "label": "Kültéri világítás"
+              "label": "Kültéri világítás",
+              "children": []
             },
             {
               "slug": "diszvilagitas",
-              "label": "Díszvilágítás"
+              "label": "Díszvilágítás",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -259,31 +289,38 @@
           "children": [
             {
               "slug": "tal-edeny",
-              "label": "Tál, edény"
+              "label": "Tál, edény",
+              "children": []
             },
             {
               "slug": "pohar-bogre",
-              "label": "Pohár, bögre"
+              "label": "Pohár, bögre",
+              "children": []
             },
             {
               "slug": "etkeszlet-evoeszkoz",
-              "label": "Étkészlet, evőeszköz"
+              "label": "Étkészlet, evőeszköz",
+              "children": []
             },
             {
               "slug": "tarolas",
-              "label": "Tárolás"
+              "label": "Tárolás",
+              "children": []
             },
             {
               "slug": "furdoszobai-kiegeszito",
-              "label": "Fürdőszobai kiegészítő"
+              "label": "Fürdőszobai kiegészítő",
+              "children": []
             },
             {
               "slug": "tisztitoszerek",
-              "label": "Tisztítószerek"
+              "label": "Tisztítószerek",
+              "children": []
             },
             {
               "slug": "kellek-kiegeszito",
-              "label": "Kellék, kiegészítő"
+              "label": "Kellék, kiegészítő",
+              "children": []
             }
           ]
         },
@@ -293,38 +330,86 @@
           "children": [
             {
               "slug": "alapveto-elelmiszer",
-              "label": "Alapvető élelmiszer"
+              "label": "Alapvető élelmiszer",
+              "children": []
             },
             {
               "slug": "hus-hal",
-              "label": "Hús, hal"
+              "label": "Hús, hal",
+              "children": []
             },
             {
               "slug": "tejtermek",
-              "label": "Tejtermék"
+              "label": "Tejtermék",
+              "children": []
             },
             {
               "slug": "tojas",
-              "label": "Tojás"
+              "label": "Tojás",
+              "children": []
             },
             {
               "slug": "zoldseg-gyumolcs",
-              "label": "Zöldség, gyümölcs"
+              "label": "Zöldség, gyümölcs",
+              "children": []
             },
             {
               "slug": "alkoholmentes-ital",
-              "label": "Alkoholmentes ital"
+              "label": "Alkoholmentes ital",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
         {
           "slug": "haztartasi-kisgepek",
           "label": "Háztartási kisgépek",
-          "children": []
+          "children": [
+            {
+              "slug": "mikrohullamu-suto",
+              "label": "Mikrohullámú sütő",
+              "children": []
+            },
+            {
+              "slug": "kavefozo-teafozo",
+              "label": "Kávéfőző, teafőző",
+              "children": []
+            },
+            {
+              "slug": "vizforralo-vizszuro",
+              "label": "Vízforraló, vízszűrő",
+              "children": []
+            },
+            {
+              "slug": "mixer-turmixgep",
+              "label": "Mixer, turmixgép",
+              "children": []
+            },
+            {
+              "slug": "szendvicssuto-kenyerpirito",
+              "label": "Szendvicssütő, kenyérpirító",
+              "children": []
+            },
+            {
+              "slug": "takaritogep-porszivo",
+              "label": "Takarítógép, porszívó",
+              "children": []
+            },
+            {
+              "slug": "varrogep",
+              "label": "Varrógép",
+              "children": []
+            },
+            {
+              "slug": "egyeb",
+              "label": "Egyéb",
+              "children": []
+            }
+          ]
         },
         {
           "slug": "haztartasi-nagygepek",
@@ -332,35 +417,43 @@
           "children": [
             {
               "slug": "hutogep-fagyaszto",
-              "label": "Hűtőgép-fagyasztó"
+              "label": "Hűtőgép-fagyasztó",
+              "children": []
             },
             {
               "slug": "mosogatogep",
-              "label": "Mosogatógép"
+              "label": "Mosogatógép",
+              "children": []
             },
             {
               "slug": "mosogep",
-              "label": "Mosógép"
+              "label": "Mosógép",
+              "children": []
             },
             {
               "slug": "szaritogep",
-              "label": "Szárítógép"
+              "label": "Szárítógép",
+              "children": []
             },
             {
               "slug": "paraelszivo",
-              "label": "Páraelszívó"
+              "label": "Páraelszívó",
+              "children": []
             },
             {
               "slug": "suto-tuzhely",
-              "label": "Sütő, tűzhely"
+              "label": "Sütő, tűzhely",
+              "children": []
             },
             {
               "slug": "alkatreszek",
-              "label": "Alkatrészek"
+              "label": "Alkatrészek",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -369,32 +462,39 @@
           "label": "Épületgépészet, hűtés-fűtés",
           "children": [
             {
-              "slug": "klima-legkondicionalo",
-              "label": "Klíma, légkondicionáló"
+              "slug": "klima-mobil-klima",
+              "label": "Klíma, mobil klíma",
+              "children": []
             },
             {
-              "slug": "radiator-futopanel",
-              "label": "Radiátor, fűtőpanel"
+              "slug": "konvektor-futotest",
+              "label": "Konvektor, fűtőtest",
+              "children": []
             },
             {
-              "slug": "kandallo-kalyha",
-              "label": "Kandalló, kályha"
+              "slug": "kalyha-kandallo",
+              "label": "Kályha, kandalló",
+              "children": []
             },
             {
-              "slug": "kazan",
-              "label": "Kazán"
+              "slug": "kazan-bojler",
+              "label": "Kazán, bojler",
+              "children": []
             },
             {
-              "slug": "ventilator",
-              "label": "Ventilátor"
+              "slug": "hosugarzo-ventilator",
+              "label": "Hősugárzó, ventilátor",
+              "children": []
             },
             {
               "slug": "tuzifa",
-              "label": "Tűzifa"
+              "label": "Tűzifa",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -404,19 +504,23 @@
           "children": [
             {
               "slug": "barkacs-szerszam",
-              "label": "Barkács, szerszám"
+              "label": "Barkács, szerszám",
+              "children": []
             },
             {
               "slug": "kertiszerszam",
-              "label": "Kertiszerszám"
+              "label": "Kertiszerszám",
+              "children": []
             },
             {
               "slug": "kerti-kisgepek",
-              "label": "Kerti kisgépek"
+              "label": "Kerti kisgépek",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -426,23 +530,28 @@
           "children": [
             {
               "slug": "kerti-butor",
-              "label": "Kerti bútor"
+              "label": "Kerti bútor",
+              "children": []
             },
             {
               "slug": "grillek",
-              "label": "Grillek"
+              "label": "Grillek",
+              "children": []
             },
             {
               "slug": "medencek-kerti-to",
-              "label": "Medencék, kerti tó"
+              "label": "Medencék, kerti tó",
+              "children": []
             },
             {
               "slug": "viragtarto",
-              "label": "Virágtartó"
+              "label": "Virágtartó",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -452,27 +561,28 @@
           "children": [
             {
               "slug": "szobanoveny",
-              "label": "Szobanövény"
+              "label": "Szobanövény",
+              "children": []
             },
             {
-              "slug": "kerti-noveny",
-              "label": "Kerti növény"
-            },
-            {
-              "slug": "vetomag",
-              "label": "Vetőmag"
-            },
-            {
-              "slug": "tragya",
-              "label": "Trágya"
+              "slug": "vetomag-kulteri-noveny",
+              "label": "Vetőmag, kültéri növény",
+              "children": []
             },
             {
               "slug": "termeny-takarmany",
-              "label": "Termény, takarmány"
+              "label": "Termény, takarmány",
+              "children": []
+            },
+            {
+              "slug": "tragya-mutragya",
+              "label": "Trágya, műtrágya",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -481,36 +591,44 @@
           "label": "Építőanyag",
           "children": [
             {
-              "slug": "tegla-cserep-beton",
-              "label": "Tégla, cserép, beton"
+              "slug": "cserep",
+              "label": "Cserép",
+              "children": []
             },
             {
-              "slug": "faanyag",
-              "label": "Faanyag"
+              "slug": "burkolo-anyag-festek",
+              "label": "Burkoló anyag, festék",
+              "children": []
             },
             {
-              "slug": "szigeteloanyag",
-              "label": "Szigetelőanyag"
+              "slug": "szaniter",
+              "label": "Szaniter",
+              "children": []
             },
             {
-              "slug": "festek-lakk",
-              "label": "Festék, lakk"
-            },
-            {
-              "slug": "burkolat",
-              "label": "Burkolat"
-            },
-            {
-              "slug": "ablak-ajto",
-              "label": "Ablak, ajtó"
+              "slug": "fahaz-mobil-epulet",
+              "label": "Faház, mobil épület",
+              "children": []
             },
             {
               "slug": "kerites-kapu-korlat",
-              "label": "Kerítés, kapu, korlát"
+              "label": "Kerítés, kapu, korlát",
+              "children": []
             },
             {
-              "slug": "egyeb",
-              "label": "Egyéb"
+              "slug": "ajto-ablak",
+              "label": "Ajtó-ablak",
+              "children": []
+            },
+            {
+              "slug": "falazo-anyagok",
+              "label": "Falazó anyagok",
+              "children": []
+            },
+            {
+              "slug": "egyeb-epitoanyag",
+              "label": "Egyéb építőanyag",
+              "children": []
             }
           ]
         }
@@ -526,15 +644,18 @@
           "children": [
             {
               "slug": "mobiltelefon",
-              "label": "Mobiltelefon"
+              "label": "Mobiltelefon",
+              "children": []
             },
             {
               "slug": "tokok-es-kiegeszitok",
-              "label": "Tokok és kiegészítők"
+              "label": "Tokok és kiegészítők",
+              "children": []
             },
             {
               "slug": "vezetekes-telefon",
-              "label": "Vezetékes telefon"
+              "label": "Vezetékes telefon",
+              "children": []
             }
           ]
         },
@@ -544,31 +665,38 @@
           "children": [
             {
               "slug": "digitalis-fenykepezok",
-              "label": "Digitális fényképezők"
+              "label": "Digitális fényképezők",
+              "children": []
             },
             {
               "slug": "filmes-fenykepezok",
-              "label": "Filmes fényképezők"
+              "label": "Filmes fényképezők",
+              "children": []
             },
             {
               "slug": "videokamerak",
-              "label": "Videokamerák"
+              "label": "Videokamerák",
+              "children": []
             },
             {
               "slug": "vakuk-szurok-lencsek",
-              "label": "Vakuk, szűrők, lencsék"
+              "label": "Vakuk, szűrők, lencsék",
+              "children": []
             },
             {
               "slug": "objektivek",
-              "label": "Objektívek"
+              "label": "Objektívek",
+              "children": []
             },
             {
               "slug": "videokamera-tartozekok",
-              "label": "Videokamera tartozékok"
+              "label": "Videokamera tartozékok",
+              "children": []
             },
             {
               "slug": "egyeb-kiegeszitok",
-              "label": "Egyéb kiegészítők"
+              "label": "Egyéb kiegészítők",
+              "children": []
             }
           ]
         },
@@ -578,31 +706,38 @@
           "children": [
             {
               "slug": "dvd-es-video-lejatszo",
-              "label": "DVD és videó lejátszó"
+              "label": "DVD és videó lejátszó",
+              "children": []
             },
             {
               "slug": "discman-walkman-mp3-lejatszo",
-              "label": "Discman, walkman, mp3 lejátszó"
+              "label": "Discman, walkman, mp3 lejátszó",
+              "children": []
             },
             {
               "slug": "hifi-torony-mini-hifi",
-              "label": "Hifi torony, mini hifi"
+              "label": "Hifi torony, mini hifi",
+              "children": []
             },
             {
               "slug": "hazimozi-rendszer-erosito-hangfal",
-              "label": "Házimozi rendszer, erősítő, hangfal"
+              "label": "Házimozi rendszer, erősítő, hangfal",
+              "children": []
             },
             {
               "slug": "radio-lemezjatszo",
-              "label": "Rádió, lemezjátszó"
+              "label": "Rádió, lemezjátszó",
+              "children": []
             },
             {
               "slug": "fejhallgato-fulhallgato",
-              "label": "Fejhallgató, fülhallgató"
+              "label": "Fejhallgató, fülhallgató",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -612,19 +747,28 @@
           "children": [
             {
               "slug": "led-lcd",
-              "label": "Led-LCD"
+              "label": "Led-LCD",
+              "children": []
             },
             {
               "slug": "plazma",
-              "label": "Plazma"
+              "label": "Plazma",
+              "children": []
             },
             {
               "slug": "tv-kiegeszitok",
-              "label": "TV kiegészítők"
+              "label": "TV kiegészítők",
+              "children": []
+            },
+            {
+              "slug": "muholdas-eszkoz-antenna",
+              "label": "Műholdas eszköz, antenna",
+              "children": []
             },
             {
               "slug": "egyeb-tv",
-              "label": "Egyéb TV"
+              "label": "Egyéb TV",
+              "children": []
             }
           ]
         },
@@ -634,51 +778,63 @@
           "children": [
             {
               "slug": "videokartya",
-              "label": "Videókártya"
+              "label": "Videókártya",
+              "children": []
             },
             {
               "slug": "memoria",
-              "label": "Memória"
+              "label": "Memória",
+              "children": []
             },
             {
               "slug": "processzor-alaplap",
-              "label": "Processzor, alaplap"
+              "label": "Processzor, alaplap",
+              "children": []
             },
             {
               "slug": "optikai-meghajto",
-              "label": "Optikai meghajtó"
+              "label": "Optikai meghajtó",
+              "children": []
             },
             {
               "slug": "monitor",
-              "label": "Monitor"
+              "label": "Monitor",
+              "children": []
             },
             {
               "slug": "adattarolo-merevlemez",
-              "label": "Adattároló, merevlemez"
+              "label": "Adattároló, merevlemez",
+              "children": []
             },
             {
               "slug": "halozati-termek",
-              "label": "Hálózati termék"
+              "label": "Hálózati termék",
+              "children": []
             },
             {
               "slug": "alkatresz-kiegeszito",
-              "label": "Alkatrész, kiegészítő"
+              "label": "Alkatrész, kiegészítő",
+              "children": []
             },
             {
               "slug": "laptop-es-kiegeszitok",
-              "label": "Laptop és kiegészítők"
+              "label": "Laptop és kiegészítők",
+              "children": []
             },
             {
               "slug": "asztali-pc-es-kiegeszitok",
-              "label": "Asztali PC és kiegészítők"
+              "label": "Asztali PC és kiegészítők",
+              "children": []
             },
             {
               "slug": "tablet-e-book-olvaso-es-kiegeszitok",
-              "label": "Tablet, e-book olvasó és kiegészítők"
+              "label": "Tablet, e-book olvasó és kiegészítők",
+              "children": []
             },
             {
               "slug": "szoftver",
-              "label": "Szoftver"
+              "label": "Szoftver",
+              "children": []
             }
           ]
         },
@@ -688,35 +844,41 @@
           "children": [
             {
               "slug": "xbox-konzol-es-jatekok",
-              "label": "Xbox konzol és játékok"
+              "label": "Xbox konzol és játékok",
+              "children": []
             },
             {
               "slug": "playstation-konzol-es-jatekok",
-              "label": "Playstation konzol és játékok"
+              "label": "Playstation konzol és játékok",
+              "children": []
             },
             {
-              "slug": "nintendo",
-              "label": "Nintendo"
+              "slug": "nintendo-konzol-es-jatekok",
+              "label": "Nintendo konzol és játékok",
+              "children": []
             },
             {
               "slug": "pc-jatekok",
-              "label": "PC játékok"
+              "label": "PC játékok",
+              "children": []
             },
             {
-              "slug": "psp",
-              "label": "PSP"
+              "slug": "psp-es-jatekok",
+              "label": "PSP és játékok",
+              "children": []
             },
             {
-              "slug": "egyeb",
-              "label": "Egyéb"
+              "slug": "egyeb-jatekok-es-konzolok",
+              "label": "Egyéb játékok és konzolok",
+              "children": []
             }
           ]
         },
         {
           "slug": "muszaki-elektronikai-alkatreszek",
           "label": "Műszaki, elektronikai alkatrészek",
-          "leafSkip": true,
-          "children": []
+          "children": [],
+          "leafSkip": true
         }
       ]
     },
@@ -730,23 +892,28 @@
           "children": [
             {
               "slug": "felnott-kerekpar",
-              "label": "Felnőtt kerékpár"
+              "label": "Felnőtt kerékpár",
+              "children": []
             },
             {
               "slug": "gyermek-kerekpar",
-              "label": "Gyermek kerékpár"
+              "label": "Gyermek kerékpár",
+              "children": []
             },
             {
               "slug": "alkatresz-es-kiegeszitok",
-              "label": "Alkatrész és kiegészítők"
+              "label": "Alkatrész és kiegészítők",
+              "children": []
             },
             {
               "slug": "felnott-ruhazat",
-              "label": "Felnőtt ruházat"
+              "label": "Felnőtt ruházat",
+              "children": []
             },
             {
               "slug": "gyermek-kerekparos-ruhazat",
-              "label": "Gyermek kerékpáros ruházat"
+              "label": "Gyermek kerékpáros ruházat",
+              "children": []
             }
           ]
         },
@@ -756,59 +923,73 @@
           "children": [
             {
               "slug": "kutya",
-              "label": "Kutya"
+              "label": "Kutya",
+              "children": []
             },
             {
               "slug": "macska",
-              "label": "Macska"
+              "label": "Macska",
+              "children": []
             },
             {
               "slug": "kisallat",
-              "label": "Kisállat"
+              "label": "Kisállat",
+              "children": []
             },
             {
               "slug": "madar",
-              "label": "Madár"
+              "label": "Madár",
+              "children": []
             },
             {
-              "slug": "hullo",
-              "label": "Hüllő"
+              "slug": "hullo-es-keteltu",
+              "label": "Hüllő és kétéltű",
+              "children": []
             },
             {
               "slug": "hal",
-              "label": "Hal"
+              "label": "Hal",
+              "children": []
             },
             {
               "slug": "baromfi",
-              "label": "Baromfi"
+              "label": "Baromfi",
+              "children": []
             },
             {
               "slug": "lo",
-              "label": "Ló"
+              "label": "Ló",
+              "children": []
             },
             {
               "slug": "juh",
-              "label": "Juh"
+              "label": "Juh",
+              "children": []
             },
             {
               "slug": "szarvasmarha",
-              "label": "Szarvasmarha"
+              "label": "Szarvasmarha",
+              "children": []
             },
             {
               "slug": "kecske",
-              "label": "Kecske"
+              "label": "Kecske",
+              "children": []
             },
             {
               "slug": "sertes",
-              "label": "Sertés"
+              "label": "Sertés",
+              "children": []
             },
             {
-              "slug": "elveszett-megtalalt",
-              "label": "Elveszett, megtalált"
+              "slug": "elveszett-megtalalt-allatok",
+              "label": "Elveszett/megtalált állatok",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -818,31 +999,38 @@
           "children": [
             {
               "slug": "kutyaknak",
-              "label": "Kutyáknak"
+              "label": "Kutyáknak",
+              "children": []
             },
             {
               "slug": "macskaknak",
-              "label": "Macskáknak"
+              "label": "Macskáknak",
+              "children": []
             },
             {
               "slug": "kisallatoknak",
-              "label": "Kisállatoknak"
+              "label": "Kisállatoknak",
+              "children": []
             },
             {
               "slug": "madaraknak",
-              "label": "Madaraknak"
+              "label": "Madaraknak",
+              "children": []
             },
             {
               "slug": "hulloknek",
-              "label": "Hüllőknek"
+              "label": "Hüllőknek",
+              "children": []
             },
             {
               "slug": "halaknak",
-              "label": "Halaknak"
+              "label": "Halaknak",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -852,31 +1040,38 @@
           "children": [
             {
               "slug": "pengetos-hangszerek",
-              "label": "Pengetős hangszerek"
+              "label": "Pengetős hangszerek",
+              "children": []
             },
             {
               "slug": "utos-hangszerek",
-              "label": "Ütős hangszerek"
+              "label": "Ütős hangszerek",
+              "children": []
             },
             {
               "slug": "billentyus-hangszerek",
-              "label": "Billentyűs hangszerek"
+              "label": "Billentyűs hangszerek",
+              "children": []
             },
             {
               "slug": "fuvos-hangszerek",
-              "label": "Fúvós hangszerek"
+              "label": "Fúvós hangszerek",
+              "children": []
             },
             {
               "slug": "vonos-hangszerek",
-              "label": "Vonós hangszerek"
+              "label": "Vonós hangszerek",
+              "children": []
             },
             {
-              "slug": "kotta",
-              "label": "Kotta"
+              "slug": "kotta-kottatarto",
+              "label": "Kotta, kottatartó",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -886,47 +1081,58 @@
           "children": [
             {
               "slug": "konyv",
-              "label": "Könyv"
+              "label": "Könyv",
+              "children": []
             },
             {
               "slug": "ujsag-folyoirat-magazin",
-              "label": "Újság, folyóirat, magazin"
+              "label": "Újság, folyóirat, magazin",
+              "children": []
             },
             {
-              "slug": "tankonyv-nyelvkonyv",
-              "label": "Tankönyv, nyelvkönyv"
+              "slug": "tankonyv",
+              "label": "Tankönyv",
+              "children": []
+            },
+            {
+              "slug": "szepirodalom",
+              "label": "Szépirodalom",
+              "children": []
             },
             {
               "slug": "szakkonyv-kezikonyv",
-              "label": "Szakkönyv, kézikönyv"
+              "label": "Szakkönyv, kézikönyv",
+              "children": []
             },
             {
-              "slug": "irodalom-szepirodalom",
-              "label": "Irodalom, szépirodalom"
+              "slug": "ifjusagi-irodalom",
+              "label": "Ifjúsági irodalom",
+              "children": []
             },
             {
-              "slug": "gyermek-es-ifjusagi-konyv",
-              "label": "Gyermek- és ifjúsági könyv"
+              "slug": "gyermekkonyv",
+              "label": "Gyermekkönyv",
+              "children": []
             },
             {
-              "slug": "idegen-nyelvu-konyv",
-              "label": "Idegen nyelvű könyv"
+              "slug": "nyelvkonyv-szotar",
+              "label": "Nyelvkönyv, szótár",
+              "children": []
             },
             {
-              "slug": "antikvar-konyv",
-              "label": "Antikvár könyv"
+              "slug": "lexikon-enciklopedia",
+              "label": "Lexikon, enciklopédia",
+              "children": []
             },
             {
-              "slug": "e-konyv",
-              "label": "E-könyv"
-            },
-            {
-              "slug": "kepregeny",
-              "label": "Képregény"
+              "slug": "konyvcsomag",
+              "label": "Könyvcsomag",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -935,20 +1141,24 @@
           "label": "Zene, film",
           "children": [
             {
-              "slug": "vinil-cd-kazetta",
-              "label": "Vinil, CD, kazetta"
+              "slug": "bakelit-cd-kazetta",
+              "label": "Bakelit, CD, kazetta",
+              "children": []
             },
             {
               "slug": "blu-ray-dvd-es-vhs",
-              "label": "Blu-ray, DVD és VHS"
+              "label": "Blu-ray, DVD és VHS",
+              "children": []
             },
             {
               "slug": "diafilm",
-              "label": "Diafilm"
+              "label": "Diafilm",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -958,43 +1168,53 @@
           "children": [
             {
               "slug": "csapatsportok",
-              "label": "Csapatsportok"
+              "label": "Csapatsportok",
+              "children": []
+            },
+            {
+              "slug": "extrem-sportok",
+              "label": "Extrém sportok",
+              "children": []
             },
             {
               "slug": "fitneszgep",
-              "label": "Fitneszgép"
+              "label": "Fitneszgép",
+              "children": []
             },
             {
-              "slug": "horgaszat",
-              "label": "Horgászat"
+              "slug": "futas-joga",
+              "label": "Futás, jóga",
+              "children": []
             },
             {
               "slug": "tura-lovaglas",
-              "label": "Túra, lovaglás"
+              "label": "Túra, lovaglás",
+              "children": []
             },
             {
-              "slug": "teli-sport",
-              "label": "Téli sport"
+              "slug": "teli-sportok",
+              "label": "Téli sportok",
+              "children": []
             },
             {
-              "slug": "vizi-sport",
-              "label": "Vízi sport"
+              "slug": "utos-sportok",
+              "label": "Ütős sportok",
+              "children": []
             },
             {
-              "slug": "tenisz-squash-tollas",
-              "label": "Tenisz, squash, tollas"
+              "slug": "vizi-sportok",
+              "label": "Vízi sportok",
+              "children": []
             },
             {
-              "slug": "harcmuveszet",
-              "label": "Harcművészet"
-            },
-            {
-              "slug": "egyeb-sporteszkoz",
-              "label": "Egyéb sporteszköz"
+              "slug": "horgaszat",
+              "label": "Horgászat",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -1003,36 +1223,64 @@
           "label": "Játék",
           "children": [
             {
-              "slug": "puzzle",
-              "label": "Puzzle"
+              "slug": "puzzle-kirako",
+              "label": "Puzzle, kirakó",
+              "children": []
             },
             {
               "slug": "lego-epitojatek",
-              "label": "Lego, építőjáték"
+              "label": "Lego, építőjáték",
+              "children": []
             },
             {
-              "slug": "kreativ-jatek",
-              "label": "Kreatív játék"
+              "slug": "kreativ-fejleszto-jatek",
+              "label": "Kreatív, fejlesztő játék",
+              "children": []
+            },
+            {
+              "slug": "logikai-jatek",
+              "label": "Logikai játék",
+              "children": []
             },
             {
               "slug": "kisautok",
-              "label": "Kisautók"
-            },
-            {
-              "slug": "tarsasjatek",
-              "label": "Társasjáték"
+              "label": "Kisautók",
+              "children": []
             },
             {
               "slug": "jatekhangszer",
-              "label": "Játékhangszer"
+              "label": "Játékhangszer",
+              "children": []
             },
             {
-              "slug": "pluss-figura",
-              "label": "Plüss, figura"
+              "slug": "jatekfigura-pluss",
+              "label": "Játékfigura, plüss",
+              "children": []
+            },
+            {
+              "slug": "jelmez",
+              "label": "Jelmez",
+              "children": []
+            },
+            {
+              "slug": "gyermekjarmu",
+              "label": "Gyermekjármű",
+              "children": []
+            },
+            {
+              "slug": "tarsasjatek",
+              "label": "Társasjáték",
+              "children": []
+            },
+            {
+              "slug": "szabadteri-jatek",
+              "label": "Szabadtéri játék",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -1042,27 +1290,38 @@
           "children": [
             {
               "slug": "antik",
-              "label": "Antik"
+              "label": "Antik",
+              "children": []
             },
             {
               "slug": "festmeny",
-              "label": "Festmény"
-            },
-            {
-              "slug": "erme-numizmatika",
-              "label": "Érme, numizmatika"
-            },
-            {
-              "slug": "porcelan",
-              "label": "Porcelán"
+              "label": "Festmény",
+              "children": []
             },
             {
               "slug": "gyujtemenyek",
-              "label": "Gyűjtemények"
+              "label": "Gyűjtemények",
+              "children": []
+            },
+            {
+              "slug": "erme-penz-papirpenz",
+              "label": "Érme, pénz, papírpénz",
+              "children": []
+            },
+            {
+              "slug": "kinderfigurak",
+              "label": "Kinderfigurák",
+              "children": []
+            },
+            {
+              "slug": "porcelanok",
+              "label": "Porcelánok",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -1072,35 +1331,43 @@
           "children": [
             {
               "slug": "festeszet-rajz",
-              "label": "Festészet, rajz"
+              "label": "Festészet, rajz",
+              "children": []
             },
             {
               "slug": "iroszer-iskolaszerek",
-              "label": "Írószer, iskolaszerek"
+              "label": "Irószer, iskolaszerek",
+              "children": []
             },
             {
               "slug": "makettezes-modellezes",
-              "label": "Makettezés, modellezés"
+              "label": "Makettezés, modellezés",
+              "children": []
             },
             {
               "slug": "buveszkedes-zsonglorkodes",
-              "label": "Bűvészkedés, zsonglőrködés"
+              "label": "Bűvészkedés, zsonglőrködés",
+              "children": []
             },
             {
               "slug": "barkacsolas",
-              "label": "Barkácsolás"
+              "label": "Barkácsolás",
+              "children": []
             },
             {
               "slug": "varras-himzes",
-              "label": "Varrás, hímzés"
+              "label": "Varrás, hímzés",
+              "children": []
             },
             {
               "slug": "kotes-horgolas",
-              "label": "Kötés, horgolás"
+              "label": "Kötés, horgolás",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         },
@@ -1110,19 +1377,23 @@
           "children": [
             {
               "slug": "belfoldi-utazas",
-              "label": "Belföldi utazás"
+              "label": "Belföldi utazás",
+              "children": []
             },
             {
               "slug": "kulfoldi-utazas",
-              "label": "Külföldi utazás"
+              "label": "Külföldi utazás",
+              "children": []
             },
             {
               "slug": "repulo-vonat-buszjegy",
-              "label": "Repülő-, vonat-, buszjegy"
+              "label": "Repülő,- vonat,- buszjegy",
+              "children": []
             },
             {
               "slug": "udulesi-jog",
-              "label": "Üdülési jog"
+              "label": "Üdülési jog",
+              "children": []
             }
           ]
         },
@@ -1132,23 +1403,28 @@
           "children": [
             {
               "slug": "szinhaz-mozi",
-              "label": "Színház, mozi"
+              "label": "Színház, mozi",
+              "children": []
             },
             {
               "slug": "kiallitas",
-              "label": "Kiállítás"
+              "label": "Kiállítás",
+              "children": []
             },
             {
               "slug": "koncert",
-              "label": "Koncert"
+              "label": "Koncert",
+              "children": []
             },
             {
               "slug": "fesztival",
-              "label": "Fesztivál"
+              "label": "Fesztivál",
+              "children": []
             },
             {
               "slug": "egyeb",
-              "label": "Egyéb"
+              "label": "Egyéb",
+              "children": []
             }
           ]
         }
@@ -1157,47 +1433,655 @@
     {
       "slug": "divat-ruhazat",
       "label": "Divat, ruházat",
-      "children": []
+      "children": [
+        {
+          "slug": "noi-ruhazat-es-kiegeszitok",
+          "label": "Női ruházat és kiegészítők",
+          "children": [
+            {
+              "slug": "polo",
+              "label": "Póló",
+              "children": []
+            },
+            {
+              "slug": "puloverek",
+              "label": "Pulóverek",
+              "children": []
+            },
+            {
+              "slug": "ingek-bluzok",
+              "label": "Ingek/blúzok",
+              "children": []
+            },
+            {
+              "slug": "kabatok-mellenyek",
+              "label": "Kabátok/mellények",
+              "children": []
+            },
+            {
+              "slug": "nadragok",
+              "label": "Nadrágok",
+              "children": []
+            },
+            {
+              "slug": "ruhak-szoknyak",
+              "label": "Ruhák, szoknyák",
+              "children": []
+            },
+            {
+              "slug": "overalok",
+              "label": "Overálok",
+              "children": []
+            },
+            {
+              "slug": "fehernemuk",
+              "label": "Fehérneműk",
+              "children": []
+            },
+            {
+              "slug": "haloingek-pizsamak",
+              "label": "Hálóingek, pizsamák",
+              "children": []
+            },
+            {
+              "slug": "furdoruhak",
+              "label": "Fürdőruhák",
+              "children": []
+            },
+            {
+              "slug": "eskuvoi-ruhak-kiegeszitok",
+              "label": "Esküvői ruhák, kiegészítők",
+              "children": []
+            },
+            {
+              "slug": "cipok",
+              "label": "Cipők",
+              "children": []
+            },
+            {
+              "slug": "ekszerek",
+              "label": "Ékszerek",
+              "children": []
+            },
+            {
+              "slug": "karorak",
+              "label": "Karórák",
+              "children": []
+            },
+            {
+              "slug": "ovek-szemuvegek-napszemuvegek",
+              "label": "Övek, szemüvegek, napszemüvegek",
+              "children": []
+            },
+            {
+              "slug": "taskak-borondok",
+              "label": "Táskák, bőröndök",
+              "children": []
+            },
+            {
+              "slug": "sapkak-salak-kesztyuk",
+              "label": "Sapkák, sálak, kesztyűk",
+              "children": []
+            },
+            {
+              "slug": "sportruhazat",
+              "label": "Sportruházat",
+              "children": []
+            }
+          ]
+        },
+        {
+          "slug": "szepsegapolas-egeszseg",
+          "label": "Szépségápolás, egészség",
+          "children": [
+            {
+              "slug": "parfum",
+              "label": "Parfüm",
+              "children": []
+            },
+            {
+              "slug": "smink",
+              "label": "Smink",
+              "children": []
+            },
+            {
+              "slug": "testapolas",
+              "label": "Testápolás",
+              "children": []
+            },
+            {
+              "slug": "masszirozogepek",
+              "label": "Masszírozógépek",
+              "children": []
+            },
+            {
+              "slug": "hajapolas",
+              "label": "Hajápolás",
+              "children": []
+            },
+            {
+              "slug": "gyogyaszati-orvosi-segedeszkoz",
+              "label": "Gyógyászati, orvosi segédeszköz",
+              "children": []
+            }
+          ]
+        },
+        {
+          "slug": "ferfi-ruhazat-es-kiegeszitok",
+          "label": "Férfi ruházat és kiegészítők",
+          "children": [
+            {
+              "slug": "polok-trikok",
+              "label": "Pólók, trikók",
+              "children": []
+            },
+            {
+              "slug": "puloverek",
+              "label": "Pulóverek",
+              "children": []
+            },
+            {
+              "slug": "ingek",
+              "label": "Ingek",
+              "children": []
+            },
+            {
+              "slug": "kabatok-mellenyek",
+              "label": "Kabátok/mellények",
+              "children": []
+            },
+            {
+              "slug": "nadragok",
+              "label": "Nadrágok",
+              "children": []
+            },
+            {
+              "slug": "oltonyok",
+              "label": "Öltönyök",
+              "children": []
+            },
+            {
+              "slug": "overalok",
+              "label": "Overálok",
+              "children": []
+            },
+            {
+              "slug": "fehernemuk",
+              "label": "Fehérneműk",
+              "children": []
+            },
+            {
+              "slug": "pizsamak",
+              "label": "Pizsamák",
+              "children": []
+            },
+            {
+              "slug": "furdoruhak",
+              "label": "Fürdőruhák",
+              "children": []
+            },
+            {
+              "slug": "cipok",
+              "label": "Cipők",
+              "children": []
+            },
+            {
+              "slug": "ekszerek",
+              "label": "Ékszerek",
+              "children": []
+            },
+            {
+              "slug": "karorak",
+              "label": "Karórák",
+              "children": []
+            },
+            {
+              "slug": "ovek-szemuvegek-napszemuvegek",
+              "label": "Övek, szemüvegek, napszemüvegek",
+              "children": []
+            },
+            {
+              "slug": "taskak-borondok",
+              "label": "Táskák, bőröndök",
+              "children": []
+            },
+            {
+              "slug": "sapkak-salak-kesztyuk",
+              "label": "Sapkák, sálak, kesztyűk",
+              "children": []
+            },
+            {
+              "slug": "sportruhazat",
+              "label": "Sportruházat",
+              "children": []
+            }
+          ]
+        },
+        {
+          "slug": "gyerek-ruhazat-es-kiegeszitok",
+          "label": "Gyerek ruházat és kiegészítők",
+          "children": [
+            {
+              "slug": "polok",
+              "label": "Pólók",
+              "children": []
+            },
+            {
+              "slug": "puloverek",
+              "label": "Pulóverek",
+              "children": []
+            },
+            {
+              "slug": "ingek-bluzok",
+              "label": "Ingek/blúzok",
+              "children": []
+            },
+            {
+              "slug": "kabatok-mellenyek",
+              "label": "Kabátok/mellények",
+              "children": []
+            },
+            {
+              "slug": "nadragok",
+              "label": "Nadrágok",
+              "children": []
+            },
+            {
+              "slug": "ruhak-szoknyak",
+              "label": "Ruhák, szoknyák",
+              "children": []
+            },
+            {
+              "slug": "overalok-anorakok",
+              "label": "Overálok/anorákok",
+              "children": []
+            },
+            {
+              "slug": "zoknik-harisnyak-alsonemuk",
+              "label": "Zoknik, harisnyák, alsóneműk",
+              "children": []
+            },
+            {
+              "slug": "haloingek-pizsamak",
+              "label": "Hálóingek, pizsamák",
+              "children": []
+            },
+            {
+              "slug": "furdoruhak",
+              "label": "Fürdőruhák",
+              "children": []
+            },
+            {
+              "slug": "cipok",
+              "label": "Cipők",
+              "children": []
+            },
+            {
+              "slug": "ekszerek",
+              "label": "Ékszerek",
+              "children": []
+            },
+            {
+              "slug": "karorak",
+              "label": "Karórák",
+              "children": []
+            },
+            {
+              "slug": "ovek-szemuvegek-napszemuvegek",
+              "label": "Övek, szemüvegek, napszemüvegek",
+              "children": []
+            },
+            {
+              "slug": "taskak-borondok",
+              "label": "Táskák, bőröndök",
+              "children": []
+            },
+            {
+              "slug": "sapkak-salak-kesztyuk",
+              "label": "Sapkák, sálak, kesztyűk",
+              "children": []
+            },
+            {
+              "slug": "sportruhazat",
+              "label": "Sportruházat",
+              "children": []
+            }
+          ]
+        },
+        {
+          "slug": "ruhacsomag-balas-ruha",
+          "label": "Ruhacsomag, bálás ruha",
+          "children": [
+            {
+              "slug": "noi",
+              "label": "Női",
+              "children": []
+            },
+            {
+              "slug": "ferfi",
+              "label": "Férfi",
+              "children": []
+            },
+            {
+              "slug": "gyermek",
+              "label": "Gyermek",
+              "children": []
+            },
+            {
+              "slug": "vegyes",
+              "label": "Vegyes",
+              "children": []
+            }
+          ]
+        }
+      ]
     },
     {
       "slug": "uzlet-szolgaltatas",
       "label": "Üzlet, szolgáltatás",
-      "children": []
+      "children": [
+        {
+          "slug": "szolgaltatasok",
+          "label": "Szolgáltatások",
+          "children": [
+            {
+              "slug": "eletmod-egeszseg",
+              "label": "Életmód-egészség",
+              "children": []
+            },
+            {
+              "slug": "jarmu",
+              "label": "Jármű",
+              "children": []
+            },
+            {
+              "slug": "webszolgaltatas",
+              "label": "Webszolgáltatás",
+              "children": []
+            },
+            {
+              "slug": "javitas-szereles",
+              "label": "Javítás-szerelés",
+              "children": []
+            },
+            {
+              "slug": "gyermekfelugyelet-idosgondozas",
+              "label": "Gyermekfelügyelet, idősgondozás",
+              "children": []
+            },
+            {
+              "slug": "oktatas-forditas",
+              "label": "Oktatás-fordítás",
+              "children": []
+            },
+            {
+              "slug": "takaritas-hazvezetes",
+              "label": "Takarítás, házvezetés",
+              "children": []
+            },
+            {
+              "slug": "epitkezes",
+              "label": "Építkezés",
+              "children": []
+            },
+            {
+              "slug": "vendeglatas",
+              "label": "Vendéglátás",
+              "children": []
+            },
+            {
+              "slug": "uzlet-ceg",
+              "label": "Üzlet-Cég",
+              "children": []
+            },
+            {
+              "slug": "haziallat",
+              "label": "Háziállat",
+              "children": []
+            },
+            {
+              "slug": "mezogazdasag",
+              "label": "Mezőgazdaság",
+              "children": []
+            },
+            {
+              "slug": "szallitas-koltoztetes",
+              "label": "Szállítás, költöztetés",
+              "children": []
+            },
+            {
+              "slug": "egyeb",
+              "label": "Egyéb",
+              "children": []
+            }
+          ]
+        },
+        {
+          "slug": "irodafelszereles",
+          "label": "Irodafelszerelés",
+          "children": [
+            {
+              "slug": "nyomtato",
+              "label": "Nyomtató",
+              "children": []
+            },
+            {
+              "slug": "fax",
+              "label": "Fax",
+              "children": []
+            },
+            {
+              "slug": "szkenner",
+              "label": "Szkenner",
+              "children": []
+            },
+            {
+              "slug": "fenymasolo",
+              "label": "Fénymásoló",
+              "children": []
+            },
+            {
+              "slug": "multifunkcionalis-gepek",
+              "label": "Multifunkcionális gépek",
+              "children": []
+            },
+            {
+              "slug": "irodaszer",
+              "label": "Irodaszer",
+              "children": []
+            },
+            {
+              "slug": "egyeb",
+              "label": "Egyéb",
+              "children": []
+            }
+          ]
+        },
+        {
+          "slug": "gepek-berendezesek",
+          "label": "Gépek, berendezések",
+          "children": [
+            {
+              "slug": "epitkezes",
+              "label": "Építkezés",
+              "children": []
+            },
+            {
+              "slug": "vendeglatas",
+              "label": "Vendéglátás",
+              "children": []
+            },
+            {
+              "slug": "mezogazdasag",
+              "label": "Mezőgazdaság",
+              "children": []
+            },
+            {
+              "slug": "szepsegipar",
+              "label": "Szépségipar",
+              "children": []
+            },
+            {
+              "slug": "egyeb",
+              "label": "Egyéb",
+              "children": []
+            }
+          ]
+        }
+      ]
     },
     {
       "slug": "baba-mama",
       "label": "Baba-mama",
-      "children": []
+      "children": [
+        {
+          "slug": "babaruhazat",
+          "label": "Babaruházat",
+          "children": [
+            {
+              "slug": "babacipo",
+              "label": "Babacipő",
+              "children": []
+            },
+            {
+              "slug": "body-kombidressz",
+              "label": "Body, kombidressz",
+              "children": []
+            },
+            {
+              "slug": "kabat",
+              "label": "Kabát",
+              "children": []
+            },
+            {
+              "slug": "nadrag",
+              "label": "Nadrág",
+              "children": []
+            },
+            {
+              "slug": "overal-bundazsak",
+              "label": "Overál, bundazsák",
+              "children": []
+            },
+            {
+              "slug": "polo-felso",
+              "label": "Póló, felső",
+              "children": []
+            },
+            {
+              "slug": "pulover",
+              "label": "Pulóver",
+              "children": []
+            },
+            {
+              "slug": "rugdalozo-napozo",
+              "label": "Rugdalózó, napozó",
+              "children": []
+            },
+            {
+              "slug": "ruhacsomag",
+              "label": "Ruhacsomag",
+              "children": []
+            },
+            {
+              "slug": "zokni-harisnya-alsonemu",
+              "label": "Zokni, harisnya, alsónemű",
+              "children": []
+            },
+            {
+              "slug": "egyeb",
+              "label": "Egyéb",
+              "children": []
+            }
+          ]
+        },
+        {
+          "slug": "babajatek",
+          "label": "Babajáték",
+          "children": [],
+          "leafSkip": true
+        },
+        {
+          "slug": "babahordozo-babaules",
+          "label": "Babahordozó, babaülés",
+          "children": [],
+          "leafSkip": true
+        },
+        {
+          "slug": "bababutor-szobadekoracio",
+          "label": "Bababútor, szobadekoráció",
+          "children": [
+            {
+              "slug": "asztal-szek-etetoszek",
+              "label": "Asztal, szék, etetőszék",
+              "children": []
+            },
+            {
+              "slug": "babaszoba-dekoracio",
+              "label": "Babaszoba dekoráció",
+              "children": []
+            },
+            {
+              "slug": "kisagy-matrac-jaroka",
+              "label": "Kiságy, matrac, járóka",
+              "children": []
+            },
+            {
+              "slug": "szekreny-polc-pelenkazo",
+              "label": "Szekrény, polc, pelenkázó",
+              "children": []
+            },
+            {
+              "slug": "egyeb",
+              "label": "Egyéb",
+              "children": []
+            }
+          ]
+        },
+        {
+          "slug": "babakocsi",
+          "label": "Babakocsi",
+          "children": [],
+          "leafSkip": true
+        },
+        {
+          "slug": "babaapolas-biztonsag",
+          "label": "Babaápolás, biztonság",
+          "children": [],
+          "leafSkip": true
+        },
+        {
+          "slug": "kismama-ruhazat",
+          "label": "Kismama ruházat",
+          "children": [],
+          "leafSkip": true
+        },
+        {
+          "slug": "egyeb",
+          "label": "Egyéb",
+          "children": [],
+          "leafSkip": true
+        }
+      ]
     }
   ],
   "coverage": {
+    "excluded": [
+      "ingatlan",
+      "jarmu"
+    ],
     "complete": [
       "allas",
       "otthon-haztartas",
       "muszaki-elektronika",
-      "szabadido-sport"
-    ],
-    "pendingScreenshots": [
-      "ingatlan",
-      "jarmu",
+      "szabadido-sport",
       "divat-ruhazat",
       "uzlet-szolgaltatas",
       "baba-mama"
-    ],
-    "pendingLeaves": [
-      {
-        "parent": "otthon-haztartas",
-        "subcategory": "Háztartási kisgépek"
-      }
-    ],
-    "notes": [
-      "Állás: csak alkategóriák (nincs Kínál/Keres a képeken).",
-      "Néhány levél felirat részben UI-közelítő (épületgépészet, építőanyag, sporteszközök, növények)."
     ]
   },
   "stats": {
-    "topCategories": 9,
-    "withChildren": 4,
-    "leafCountApprox": 201
+    "topCategories": 7,
+    "nodeCount": 391
   }
 }

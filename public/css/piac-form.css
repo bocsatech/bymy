@@ -85,14 +85,6 @@
   padding-bottom: 1.35rem; /* a cím hint sorával egy vonalban */
 }
 
-.piac-fields--desk-top {
-  margin: 0 0 1rem;
-  padding: 0.85rem 1rem 0.65rem;
-  border: 1px solid var(--hub-border, #e5e7eb);
-  border-radius: 14px;
-  background: #fff;
-  box-sizing: border-box;
-}
 
 /* Fő kategóriák — saját lekerekített képbox + címke */
 .piac-top-icons {

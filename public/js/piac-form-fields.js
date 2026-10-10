@@ -216,32 +216,12 @@ function renderTopIcons(row, tops, selectedSlug, onPick) {
   }
 }
 
-function isPiacDeskTop() {
-  return (
-    typeof document !== "undefined" &&
-    document.body.classList.contains("ad-form-desk-active") &&
-    typeof window !== "undefined" &&
-    window.matchMedia("(min-width: 901px)").matches
-  );
-}
-
 function placePiacRoot(form, root) {
   if (!form || !root) return false;
-  /* Desk: teljes szélességű sáv az űrlap tetején (nem a bal accordionban). */
-  if (isPiacDeskTop()) {
-    const shell = form.querySelector("#ad-form-desk-shell");
-    const anchor = shell || form.querySelector("#ad-desk-center-col") || form.firstElementChild;
-    root.classList.add("piac-fields--desk-top");
-    if (anchor && root.nextElementSibling !== anchor && root !== anchor) {
-      form.insertBefore(root, anchor);
-    } else if (!root.parentElement) {
-      form.prepend(root);
-    }
-    return true;
-  }
   root.classList.remove("piac-fields--desk-top");
   const panel = form.querySelector('.step-panel[data-step="1"]');
   if (!panel) return false;
+  /* Mindig a bal oszlop (Alap) tetején — a képek mellett. */
   if (root.parentElement !== panel || panel.firstElementChild !== root) {
     panel.insertBefore(root, panel.firstChild);
   }

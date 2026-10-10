@@ -680,35 +680,41 @@ function syncLeirasInPhotoPanel(form) {
   leirasWrap.style.removeProperty("display");
 }
 
-function relocatePiacFieldsTop(form) {
+function pinPiacCategoryBesidePhotos(form) {
   const piac = form?.querySelector("#piac-fields");
   if (!piac || !isPiacAdForm(form)) return;
-  if (!isDeskWide()) {
-    piac.classList.remove("piac-fields--desk-top");
-    const panel = form.querySelector('.step-panel[data-step="1"]');
-    if (panel && (piac.parentElement !== panel || panel.firstElementChild !== piac)) {
-      panel.insertBefore(piac, panel.firstChild);
-    }
-    return;
+  piac.classList.remove("piac-fields--desk-top");
+  const panel = form.querySelector('.step-panel[data-step="1"]');
+  if (!panel) return;
+  if (piac.parentElement !== panel || panel.firstElementChild !== piac) {
+    panel.insertBefore(piac, panel.firstChild);
   }
-  piac.classList.add("piac-fields--desk-top");
-  const shell = form.querySelector("#ad-form-desk-shell");
-  const center = form.querySelector("#ad-desk-center-col");
-  const anchor = shell || center || form.firstElementChild;
-  if (anchor && piac !== anchor && piac.nextElementSibling !== anchor) {
-    form.insertBefore(piac, anchor);
+  /* Desk: Alap accordion mindig nyitva a tetején — kategória + képek egymás mellett. */
+  if (isDeskWide()) {
+    const alap = form.querySelector('#ad-form-desk-shell [data-desk-acc="alap"]');
+    if (alap && !alap.classList.contains("is-open")) {
+      openAccordion(form, "alap");
+    }
   }
 }
 
 function relocatePiacAllasAbovePhotos(form) {
-  relocatePiacFieldsTop(form);
+  pinPiacCategoryBesidePhotos(form);
   const props =
     form?.querySelector("#piac-prop-fields") || form?.querySelector("#piac-allas-fields");
   if (!props) return;
   const photosCard =
     form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"] .card--photos`) ||
     form.querySelector(".card--photos");
-  if (photosCard?.parentElement && props.nextElementSibling !== photosCard) {
+  if (!photosCard?.parentElement) return;
+  /* Desk: képek maradjanak fent a kategória mellett; tulajdonságok a képek alá. */
+  if (isDeskWide()) {
+    if (props.previousElementSibling !== photosCard) {
+      photosCard.insertAdjacentElement("afterend", props);
+    }
+    return;
+  }
+  if (props.nextElementSibling !== photosCard) {
     photosCard.insertAdjacentElement("beforebegin", props);
   }
 }
@@ -780,10 +786,10 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   syncIngatlanDeskAccordions(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
-  /* Piactér menü: desk-en az űrlap tetején, teljes szélességben. */
+  /* Piactér: kategória balra fent, képek jobbra fent — mindig. */
   if (isPiacAdForm(form)) {
     stripPiacGuideFrame(form);
-    relocatePiacFieldsTop(form);
+    pinPiacCategoryBesidePhotos(form);
   }
 
   const preserved =
